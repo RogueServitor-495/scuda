@@ -505,25 +505,36 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
   for (auto &function : functions)
     if (function.host_func == func)
       f = &function;
+  
+  printf("launch kernel:%s\n",f->name);
 
   if (f == nullptr || rpc_write(conn, &f->arg_count, sizeof(int)) < 0)
     return cudaErrorDevicesUnavailable;
 
+  printf("sending args to server...\n");
   for (int i = 0; i < f->arg_count; ++i) {
+    printf("sending arg: [%d/%d], arg size=%d ...\n",i,f->arg_count, f->arg_sizes[i]);
     if (rpc_write(conn, &f->arg_sizes[i], sizeof(int)) < 0 ||
-        rpc_write(conn, args[i], f->arg_sizes[i]) < 0)
-      return cudaErrorDevicesUnavailable;
+        rpc_write(conn, args[i], f->arg_sizes[i]) < 0){
+          printf("failed to send args to server...\n");
+          return cudaErrorDevicesUnavailable;
+        }
   }
-
+  printf("wait for response...\n");
   if (rpc_wait_for_response(conn) < 0) {
+    printf("failed to end write...\n");
     return cudaErrorDevicesUnavailable;
   }
+  printf("waiting for response...\n");
 
   if (rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
       rpc_read_end(conn) < 0)
     return cudaErrorDevicesUnavailable;
+  
+  printf("successfully received results...\n");
 
   memcpy_return = cuda_memcpy_unified_ptrs(conn, cudaMemcpyDeviceToHost);
+  printf("get return success?%d\n",memcpy_return==cudaSuccess);
   if (memcpy_return != cudaSuccess)
     return memcpy_return;
 
@@ -632,6 +643,7 @@ void parse_ptx_string(void *fatCubin, const char *ptx_string,
     }
 
     // add the function to the list
+    // printf("parse function [%s] successfully...\n",name);
     functions.push_back(Function{
         .name = name,
         .fat_cubin = fatCubin,
@@ -677,8 +689,10 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin) {
       entry = (__cudaFatCudaBinary2EntryRec *)(base + offset);
       offset += entry->binary + entry->binarySize;
 
-      if (!(entry->type & FATBIN_2_PTX))
+      if (!(entry->type & FATBIN_2_PTX)){
+        // printf("entry type = %p, is not ptx...\n",entry->type);
         continue;
+      }
 
       // if compress flag exists, we should decompress before parsing the ptx
       if (entry->flags & FATBIN_FLAG_COMPRESS) {
@@ -698,9 +712,10 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin) {
         // verify the decompressed output looks right; we should run
         // --no-compress with nvcc before running this decompression logic to
         // compare outputs.
-        for (int i = 0; i < text_data_size; i++)
-          std::cout << *(char *)((char *)text_data + i);
-        std::cout << std::endl;
+
+        // for (int i = 0; i < text_data_size; i++)
+        //   std::cout << *(char *)((char *)text_data + i);
+        // std::cout << std::endl;
 
         parse_ptx_string(fatCubin, (char *)text_data, text_data_size);
       } else {
@@ -1321,4 +1336,22 @@ cudaError_t cudaDeviceGetGraphMemAttribute(int device,
   if (maybe_copy_unified_arg(conn, (void *)value, cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   return return_value;
+}
+
+static void* (*real_dlopen)(const char* filename, int flag) = nullptr;
+
+extern "C" void* dlopen(const char* filename, int flag) {
+  if (!real_dlopen) {
+      real_dlopen = (void* (*)(const char*, int))dlsym(RTLD_NEXT, "dlopen");
+      if (!real_dlopen) {
+          fprintf(stderr, "[hook-dlopen] Error finding original dlopen!\n");
+          exit(1);
+      }
+  }
+
+  // 打印出每次加载的动态库
+  fprintf(stderr, "[hook-dlopen] Trying to open library: %s\n", filename ? filename : "NULL");
+
+  // 调用原版 dlopen
+  return real_dlopen(filename, flag);
 }

@@ -1039,7 +1039,7 @@ def main():
     try:
         cudnn_graph_header = find_header_file("cudnn_graph.h")
         cudnn_ops_header = find_header_file("cudnn_ops.h")
-        cuda_header = find_header_file("cuda.h")
+        cuda_header = "/usr/local/cuda-12.4/targets/x86_64-linux/include/cuda.h"
         cublas_header = find_header_file("cublas_api.h")
         cudart_header = find_header_file("cuda_runtime_api.h")
         annotations_header = find_header_file("annotations.h")

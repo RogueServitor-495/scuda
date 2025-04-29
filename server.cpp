@@ -252,6 +252,7 @@ void client_handler(int connfd) {
     int op = rpc_dispatch(&conn, 0);
 
     auto opHandler = get_handler(op);
+    printf("resolved handler for op=%d\n",op);
     if (opHandler(&conn) < 0) {
       std::cerr << "Error handling request." << std::endl;
     }

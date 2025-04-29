@@ -389,15 +389,15 @@ test() {
 build_tests() {
   echo "building test files..."
 
-  nvcc --cudart=shared -lnvidia-ml -lcuda ./test/vector_add.cu -o vector.o
-  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn ./test/cudnn.cu -o cudnn.o
-  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cublas_batched.cu -o cublas_batched.o
-  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/unified.cu -o unified.o
-  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/unified_pointer.cu -o unified_pointer.o
-  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/unified_linked.cu -o unified_linked.o
-  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cublas_unified.cu -o cublas_unified.o
-  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cudnn_managed.cu -o cudnn_managed.o
-  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cuda_graphs_host_func.cu -o cuda_graphs_host_func.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda ../test/vector_add.cu -o vector.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn ../test/cudnn.cu -o cudnn.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ../test/cublas_batched.cu -o cublas_batched.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ../test/unified.cu -o unified.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ../test/unified_pointer.cu -o unified_pointer.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ../test/unified_linked.cu -o unified_linked.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ../test/cublas_unified.cu -o cublas_unified.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ../test/cudnn_managed.cu -o cudnn_managed.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ../test/cuda_graphs_host_func.cu -o cuda_graphs_host_func.o
 }
 
 set_paths() {

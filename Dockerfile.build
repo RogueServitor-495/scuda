@@ -1,5 +1,5 @@
-ARG CUDA_VERSION=12.6.2
-ARG DISTRO_VERSION=24.04
+ARG CUDA_VERSION=12.4.1
+ARG DISTRO_VERSION=22.04
 ARG OS_DISTRO=ubuntu
 ARG CUDNN_TAG=cudnn
 
@@ -19,10 +19,10 @@ WORKDIR /home
 
 COPY . .
 
-RUN cd codegen && \
-    python3 -m venv venv && \
-    venv/bin/pip install -r requirements.txt && \
-    venv/bin/python3 ./codegen.py
+# RUN cd codegen && \
+#     python3 -m venv venv && \
+#     venv/bin/pip install -r requirements.txt && \
+#     venv/bin/python3 ./codegen.py
 
-RUN cmake .
-RUN cmake --build .
+# RUN cmake .
+# RUN cmake --build .

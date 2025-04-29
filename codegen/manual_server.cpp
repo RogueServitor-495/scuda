@@ -300,13 +300,15 @@ int handle_cudaLaunchKernel(conn_t *conn) {
       goto ERROR_1;
 
     // Read the actual argument data from the client
+    printf("receiving arg: [%d/%d], size=%d ...\n", i, num_args, arg_size);
     if (rpc_read(conn, args[i], arg_size) < 0)
       goto ERROR_1;
   }
+  printf("read args end...\n");
 
   request_id = rpc_read_end(conn);
   if (request_id < 0)
-    goto ERROR_1;
+    goto ERROR_1; 
 
   result = cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
 

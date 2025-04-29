@@ -24,6 +24,8 @@ void *_rpc_read_id_dispatch(void *p) {
       break;
   }
   pthread_mutex_unlock(&conn->read_mutex);
+  tid = 0;
+  printf("rpc readID dispatcher exit...\n");
   return NULL;
 }
 
@@ -35,8 +37,11 @@ void *_rpc_read_id_dispatch(void *p) {
 // the sequence because by convention, the handler owns the read lock on
 // entry.
 int rpc_dispatch(conn_t *conn, int parity) {
-  if (tid == 0 &&
-      pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+  // if (tid == 0 &&
+  //     pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+  //   return -1;
+  // }
+  if (pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
     return -1;
   }
 
@@ -76,6 +81,10 @@ int rpc_read_start(conn_t *conn, int write_id) {
 }
 
 int rpc_read(conn_t *conn, void *data, size_t size) {
+  if (size == 0){
+    printf("read buffer size is 0, skip...\n");
+    return 0;
+  }
   int bytes_read = recv(conn->connfd, data, size, MSG_WAITALL);
   if (bytes_read == -1) {
     printf("recv error: %s\n", strerror(errno));
