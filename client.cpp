@@ -100,7 +100,7 @@ int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind) {
   // find the connection in the map first
   auto conn_it = unified_devices.find(conn);
   if (conn_it == unified_devices.end()) {
-    printf("connection not found...\n");
+    // printf("connection not found...\n");
     return 0;
   }
 
