@@ -250,7 +250,7 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count,
       return cudaErrorDevicesUnavailable;
     break;
   }
-
+  printf("[DEBUG]: wait for result...\n");
   if (rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
       rpc_read_end(conn) < 0)
     return cudaErrorDevicesUnavailable;
@@ -528,12 +528,11 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
           return cudaErrorDevicesUnavailable;
         }
   }
-  printf("wait for response...\n");
+
   if (rpc_wait_for_response(conn) < 0) {
     printf("failed to end write...\n");
     return cudaErrorDevicesUnavailable;
   }
-  printf("waiting for response...\n");
 
   if (rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
       rpc_read_end(conn) < 0)
@@ -628,7 +627,6 @@ void parse_ptx_string(void *fatCubin, const char *ptx_string,
             // read the type, ignoring if it's not a valid type
             int type_size = get_type_size(ptx_string + (++i));
             if (type_size == 0){
-              printf("[debug]: unknown type:%c\n",ptx_string + i);
               continue;
             }
             arg_size = type_size;
@@ -642,7 +640,7 @@ void parse_ptx_string(void *fatCubin, const char *ptx_string,
             int n = 0;
             for (int j = start; j < i; j++)
               n = n * 10 + ptx_string[j] - '0';
-            arg_size *= n;
+            arg_size = n;
           } else if (ptx_string[i] == ',' || ptx_string[i] == ')')
             // end of this argument
             break;
@@ -663,18 +661,17 @@ void parse_ptx_string(void *fatCubin, const char *ptx_string,
     });
 
     // parse certain string:
-    const char* prefix = "_ZN2at6native29vectorized_elementwise_kernelILi4ENS0_13AUnaryFunctorIffbNS0_51_GLOBAL__N__75acfe79_18_CompareEQKernel_cu_d8008c9616CompareEqFunctorIfEEEESt5arrayIPcLm2EEEEviT0_T1_";
-    if (name && prefix) {
-      size_t len = std::strlen(prefix);
-      if (std::strncmp(name, prefix, len) == 0){
-        printf("[debug]: target func parsed...\n");
-        printf("[debug]: name: %s\n",name);
-        printf("[debug]: ptx: %s\n",ptx_string);
-        log_to_file(name);
-        log_to_file()
-        log_to_file(ptx_string);
-      }
-    } 
+    // const char* prefix = "_ZN2at6native29vectorized_elementwise_kernelILi4ENS0_13AUnaryFunctorIffbNS0_51_GLOBAL__N__75acfe79_18_CompareEQKernel_cu_d8008c9616CompareEqFunctorIfEEEESt5arrayIPcLm2EEEEviT0_T1_";
+    // if (name && prefix) {
+    //   size_t len = std::strlen(prefix);
+    //   if (std::strncmp(name, prefix, len) == 0){
+    //     printf("[debug]: target func parsed...\n");
+    //     printf("[debug]: name: %s\n",name);
+    //     printf("[debug]: ptx: %s\n",ptx_string);
+    //     log_to_file(name);
+    //     log_to_file(ptx_string);
+    //   }
+    // } 
 
   }
 }
@@ -1363,20 +1360,20 @@ cudaError_t cudaDeviceGetGraphMemAttribute(int device,
   return return_value;
 }
 
-static void* (*real_dlopen)(const char* filename, int flag) = nullptr;
+// static void* (*real_dlopen)(const char* filename, int flag) = nullptr;
 
-extern "C" void* dlopen(const char* filename, int flag) {
-  if (!real_dlopen) {
-      real_dlopen = (void* (*)(const char*, int))dlsym(RTLD_NEXT, "dlopen");
-      if (!real_dlopen) {
-          fprintf(stderr, "[hook-dlopen] Error finding original dlopen!\n");
-          exit(1);
-      }
-  }
+// extern "C" void* dlopen(const char* filename, int flag) {
+//   if (!real_dlopen) {
+//       real_dlopen = (void* (*)(const char*, int))dlsym(RTLD_NEXT, "dlopen");
+//       if (!real_dlopen) {
+//           fprintf(stderr, "[hook-dlopen] Error finding original dlopen!\n");
+//           exit(1);
+//       }
+//   }
 
-  // 打印出每次加载的动态库
-  fprintf(stderr, "[hook-dlopen] Trying to open library: %s\n", filename ? filename : "NULL");
+//   // 打印出每次加载的动态库
+//   fprintf(stderr, "[hook-dlopen] Trying to open library: %s\n", filename ? filename : "NULL");
 
-  // 调用原版 dlopen
-  return real_dlopen(filename, flag);
-}
+//   // 调用原版 dlopen
+//   return real_dlopen(filename, flag);
+// }

@@ -1078,6 +1078,12 @@ def main():
             continue
 
         dupes[function.name.format()] = True
+        
+        if (function.name.segments[0].name=="cublasSetWorkspace_v2" or
+            function.name.segments[0].name=="cuDeviceGetNvSciSyncAttributes" or
+            function.name.segments[0].name=="cudaMalloc"
+            ):
+            print("[debug]: invoke...")
 
         try:
             annotation = next(

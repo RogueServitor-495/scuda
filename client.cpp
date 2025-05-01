@@ -421,7 +421,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 }
 
 void *dlsym(void *handle, const char *name) __THROW {
-  std::cout << "dlsym: " << name << std::endl;
+  // std::cout << "dlsym: " << name << std::endl;
 
   void *func = get_function_pointer(name);
 
@@ -445,7 +445,7 @@ void *dlsym(void *handle, const char *name) __THROW {
                                                          "GLIBC_2.2.5");
   }
 
-  // std::cout << "[dlsym] Falling back to real_dlsym for name: " << name <<
-  // std::endl;
+  std::cout << "[dlsym] Falling back to real_dlsym for name: " << name <<
+  std::endl;
   return real_dlsym(handle, name);
 }

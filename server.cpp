@@ -246,7 +246,7 @@ void client_handler(int connfd) {
     return;
   }
 
-  printf("Client connected.\n");
+  printf("Client connected, connfd=%d.\n",connfd);
 
   while (1) {
     int op = rpc_dispatch(&conn, 0);
