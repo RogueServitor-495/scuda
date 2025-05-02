@@ -100,7 +100,7 @@ int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind) {
   // find the connection in the map first
   auto conn_it = unified_devices.find(conn);
   if (conn_it == unified_devices.end()) {
-    printf("connection not found...\n");
+    // printf("connection not found...\n");
     return 0;
   }
 
@@ -421,7 +421,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 }
 
 void *dlsym(void *handle, const char *name) __THROW {
-  std::cout << "dlsym: " << name << std::endl;
+  // std::cout << "dlsym: " << name << std::endl;
 
   void *func = get_function_pointer(name);
 

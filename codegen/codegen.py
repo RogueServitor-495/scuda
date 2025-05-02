@@ -880,10 +880,8 @@ def parse_annotation(
                     )
                 )
             elif isinstance(param.type, Array):
-                length_param = next(
-                    p for p in params if p.name == length_arg.split(":")[1]
-                )
-                if param.type.const:
+                length_param = next(p for p in params if p.name == length_arg.split(":")[1])
+                if param.type.array_of.const:
                     recv = False
                 operations.append(
                     ArrayOperation(
@@ -892,6 +890,7 @@ def parse_annotation(
                         parameter=param,
                         ptr=param.type,
                         length=length_param,
+                        iter=False,
                     )
                 )
             elif size_arg:
@@ -1071,6 +1070,14 @@ def main():
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
 
     dupes = {}
+    
+    debug_list = [
+        # "cublasDgemmBatched",
+        # "cublasSetWorkspace_v2",
+        # "cuDeviceGetNvSciSyncAttributes",
+        # "cudaMalloc",
+        "cublasSgetrfBatched",
+        ]
 
     for function in functions:
         # ensure duplicate functions can't be written
@@ -1078,6 +1085,9 @@ def main():
             continue
 
         dupes[function.name.format()] = True
+        
+        if (function.name.segments[0].name in debug_list):
+            print("[debug]: invoke...")
 
         try:
             annotation = next(
@@ -1242,7 +1252,9 @@ def main():
             f.write("    return return_value;\n")
             f.write("}\n\n")
 
-        f.write("std::unordered_map<std::string, void *> functionMap = {\n")
+        f.write("std::unordered_map<std::string, void *>& getFunctionMap() {\n")
+        
+        f.write("\tstatic std::unordered_map<std::string, void *> functionMap {\n")
 
         # we need the base nvmlInit, this is important and should be kept here in the codegen.
         for function in INTERNAL_FUNCTIONS:
@@ -1282,10 +1294,13 @@ def main():
                     x=x,
                 )
             )
-        f.write("};\n\n")
+        f.write("\t};\n")
+        f.write("\treturn functionMap;\n")
+        f.write("}\n")
 
         f.write("void *get_function_pointer(const char *name)\n")
         f.write("{\n")
+        f.write("\t\tauto& functionMap = getFunctionMap();\n")
         f.write("    auto it = functionMap.find(name);\n")
         f.write("    if (it == functionMap.end())\n")
         f.write("        return nullptr;\n")

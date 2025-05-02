@@ -37,13 +37,11 @@ void *_rpc_read_id_dispatch(void *p) {
 // the sequence because by convention, the handler owns the read lock on
 // entry.
 int rpc_dispatch(conn_t *conn, int parity) {
-  // if (tid == 0 &&
-  //     pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
-  //   return -1;
-  // }
-  if (pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+  if (tid == 0 &&
+      pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
     return -1;
   }
+
 
   if (pthread_mutex_lock(&conn->read_mutex) < 0) {
     return -1;
