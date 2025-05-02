@@ -16420,7 +16420,7 @@ cublasStatus_t cublasZtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n,
 /**
  * @param handle SEND_ONLY
  * @param n SEND_ONLY
- * @param A SEND_ONLY
+ * @param A SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
  * @param P SEND_RECV
  * @param info SEND_RECV
@@ -16432,7 +16432,7 @@ cublasStatus_t cublasSgetrfBatched(cublasHandle_t handle, int n,
 /**
  * @param handle SEND_ONLY
  * @param n SEND_ONLY
- * @param A SEND_ONLY
+ * @param A SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
  * @param P SEND_RECV
  * @param info SEND_RECV
@@ -16444,7 +16444,7 @@ cublasStatus_t cublasDgetrfBatched(cublasHandle_t handle, int n,
 /**
  * @param handle SEND_ONLY
  * @param n SEND_ONLY
- * @param A SEND_ONLY
+ * @param A SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
  * @param P SEND_RECV
  * @param info SEND_RECV
@@ -16456,7 +16456,7 @@ cublasStatus_t cublasCgetrfBatched(cublasHandle_t handle, int n,
 /**
  * @param handle SEND_ONLY
  * @param n SEND_ONLY
- * @param A SEND_ONLY
+ * @param A SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
  * @param P SEND_RECV
  * @param info SEND_RECV
