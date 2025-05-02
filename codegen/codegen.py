@@ -1071,6 +1071,14 @@ def main():
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
 
     dupes = {}
+    
+    debug_list = [
+        # "cublasDgemmBatched",
+        # "cublasSetWorkspace_v2",
+        # "cuDeviceGetNvSciSyncAttributes",
+        # "cudaMalloc",
+        "cublasSgetrfBatched",
+        ]
 
     for function in functions:
         # ensure duplicate functions can't be written
@@ -1079,10 +1087,7 @@ def main():
 
         dupes[function.name.format()] = True
         
-        if (function.name.segments[0].name=="cublasSetWorkspace_v2" or
-            function.name.segments[0].name=="cuDeviceGetNvSciSyncAttributes" or
-            function.name.segments[0].name=="cudaMalloc"
-            ):
+        if (function.name.segments[0].name in debug_list):
             print("[debug]: invoke...")
 
         try:

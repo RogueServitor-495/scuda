@@ -47375,7 +47375,8 @@ cudnnStatus_t cudnnGetNormalizationTrainingReserveSpaceSize(cudnnHandle_t handle
     return return_value;
 }
 
-std::unordered_map<std::string, void *> functionMap = {
+std::unordered_map<std::string, void *>& getFunctionMap() {
+  static std::unordered_map<std::string, void *> functionMap={
     {"__cudaRegisterVar", (void *)__cudaRegisterVar},
     {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
     {"__cudaRegisterFatBinary", (void *)__cudaRegisterFatBinary},
@@ -48695,10 +48696,13 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGraphAddMemFreeNode", (void *)cudaGraphAddMemFreeNode},
     {"cudaGraphAddMemAllocNode", (void *)cudaGraphAddMemAllocNode},
     {"cudaDeviceGetGraphMemAttribute", (void *)cudaDeviceGetGraphMemAttribute},
+  };
+  return functionMap;
 };
 
 void *get_function_pointer(const char *name)
 {
+    auto& functionMap = getFunctionMap();
     auto it = functionMap.find(name);
     if (it == functionMap.end())
         return nullptr;

@@ -445,7 +445,7 @@ void *dlsym(void *handle, const char *name) __THROW {
                                                          "GLIBC_2.2.5");
   }
 
-  std::cout << "[dlsym] Falling back to real_dlsym for name: " << name <<
-  std::endl;
+  // std::cout << "[dlsym] Falling back to real_dlsym for name: " << name <<
+  // std::endl;
   return real_dlsym(handle, name);
 }
