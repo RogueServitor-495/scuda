@@ -23301,6 +23301,35 @@ ERROR_0:
     return -1;
 }
 
+int handle_cublasSetWorkspace_v2(conn_t *conn)
+{
+    cublasHandle_t handle;
+    void* workspace;
+    size_t workspaceSizeInBytes;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_read(conn, &workspace, sizeof(void*)) < 0 ||
+        rpc_read(conn, &workspaceSizeInBytes, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasSetWorkspace_v2(handle, workspace, workspaceSizeInBytes);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cublasSetStream_v2(conn_t *conn)
 {
     cublasHandle_t handle;
@@ -45805,6 +45834,7 @@ static RequestHandler opHandlers[] = {
     handle_cublasGetVersion_v2,
     handle_cublasGetProperty,
     nullptr,
+    handle_cublasSetWorkspace_v2,
     handle_cublasSetStream_v2,
     handle_cublasGetStream_v2,
     handle_cublasGetPointerMode_v2,

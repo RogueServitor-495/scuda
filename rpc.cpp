@@ -7,6 +7,7 @@
 
 pthread_t tid;
 
+
 void *_rpc_read_id_dispatch(void *p) {
   conn_t *conn = (conn_t *)p;
 
@@ -41,7 +42,7 @@ int rpc_dispatch(conn_t *conn, int parity) {
       pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
     return -1;
   }
-
+  
 
   if (pthread_mutex_lock(&conn->read_mutex) < 0) {
     return -1;
