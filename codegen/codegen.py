@@ -1042,6 +1042,7 @@ def main():
         cublas_header = find_header_file("cublas_api.h")
         cudart_header = find_header_file("cuda_runtime_api.h")
         annotations_header = find_header_file("annotations.h")
+        cublasLt_header = find_header_file("cublasLt.h")
         nvml_header = find_header_file("nvml.h")
     except FileNotFoundError as e:
         print(e)
@@ -1054,6 +1055,7 @@ def main():
     cuda_ast: ParsedData = parse_file(cuda_header, options=options)
     cublas_ast: ParsedData = parse_file(cublas_header, options=options)
     cudart_ast: ParsedData = parse_file(cudart_header, options=options)
+    cublasLt_ast: ParsedData = parse_file(cublasLt_header, options=options)
     annotations: ParsedData = parse_file(annotations_header, options=options)
 
     # any new parsed libaries should be appended to the END of this list.
@@ -1065,6 +1067,7 @@ def main():
         + cublas_ast.namespace.functions
         + cudnn_graph_ast.namespace.functions
         + cudnn_ops_ast.namespace.functions
+        + cublasLt_ast.namespace.functions
     )
 
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []

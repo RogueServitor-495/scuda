@@ -20986,33 +20986,6 @@ cublasStatus_t cublasGetProperty(libraryPropertyType type, int* value)
     return return_value;
 }
 
-cublasStatus_t cublasSetWorkspace_v2(cublasHandle_t handle, void* workspace, size_t workspaceSizeInBytes)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)workspace, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&workspaceSizeInBytes, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    cublasStatus_t return_value;
-    if (rpc_write_start_request(conn, RPC_cublasSetWorkspace_v2) < 0 ||
-        rpc_write(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_write(conn, &workspace, sizeof(void*)) < 0 ||
-        rpc_write(conn, &workspaceSizeInBytes, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)workspace, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&workspaceSizeInBytes, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    return return_value;
-}
-
 cublasStatus_t cublasSetStream_v2(cublasHandle_t handle, cudaStream_t streamId)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -52215,7 +52188,6 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cublasDestroy_v2", (void *)cublasDestroy_v2},
     {"cublasGetVersion_v2", (void *)cublasGetVersion_v2},
     {"cublasGetProperty", (void *)cublasGetProperty},
-    {"cublasSetWorkspace_v2", (void *)cublasSetWorkspace_v2},
     {"cublasSetStream_v2", (void *)cublasSetStream_v2},
     {"cublasGetStream_v2", (void *)cublasGetStream_v2},
     {"cublasGetPointerMode_v2", (void *)cublasGetPointerMode_v2},
