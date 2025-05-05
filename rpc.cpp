@@ -5,17 +5,21 @@
 #include <string.h>
 #include <unistd.h>
 
-pthread_t tid;
 
 void *_rpc_read_id_dispatch(void *p) {
   conn_t *conn = (conn_t *)p;
+  printf("[id dispatcher]:created for connfd=%d\n",conn->connfd);
 
   if (pthread_mutex_lock(&conn->read_mutex) < 0)
     return NULL;
 
   while (1) {
-    while (conn->read_id != 0)
+    while (conn->read_id != 0){
+      printf("[id dispatcher]:waiting for finishing this task...\n");
       pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+    }
+     
+    printf("[id dispatcher]:waiting for next request...\n");
 
     // the read id is zero so it's our turn to read the next int which is the
     // request id of the next request.
@@ -23,8 +27,9 @@ void *_rpc_read_id_dispatch(void *p) {
         pthread_cond_broadcast(&conn->read_cond) < 0)
       break;
   }
+  pthread_cond_broadcast(&conn->read_cond);
   pthread_mutex_unlock(&conn->read_mutex);
-  tid = 0;
+  conn->isAlive = false;
   printf("rpc readID dispatcher exit...\n");
   return NULL;
 }
@@ -37,11 +42,10 @@ void *_rpc_read_id_dispatch(void *p) {
 // the sequence because by convention, the handler owns the read lock on
 // entry.
 int rpc_dispatch(conn_t *conn, int parity) {
-  if (tid == 0 &&
-      pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+  if (conn->read_thread == 0 &&
+      pthread_create(&conn->read_thread, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
     return -1;
   }
-
 
   if (pthread_mutex_lock(&conn->read_mutex) < 0) {
     return -1;
@@ -49,9 +53,16 @@ int rpc_dispatch(conn_t *conn, int parity) {
 
   int op;
 
-  while (conn->read_id < 2 || conn->read_id % 2 != parity)
+  while (conn->isAlive && (conn->read_id < 2 || conn->read_id % 2 != parity)){
+    printf("[dispatcher]:waiting for next op...\n");
     pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+  }
+    
 
+  if (!conn->isAlive){
+    printf("connection [%d] is not alive, dispatcher exit...\n", conn->connfd);
+    return -1;
+  }
   if (rpc_read(conn, &op, sizeof(int)) < 0) {
     pthread_mutex_unlock(&conn->read_mutex);
     return -1;
