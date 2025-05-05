@@ -250,7 +250,7 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count,
       return cudaErrorDevicesUnavailable;
     break;
   }
-  printf("[DEBUG]: wait for result...\n");
+  // printf("[DEBUG]: wait for result...\n");
   if (rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
       rpc_read_end(conn) < 0)
     return cudaErrorDevicesUnavailable;
@@ -519,9 +519,9 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
   if (f == nullptr || rpc_write(conn, &f->arg_count, sizeof(int)) < 0)
     return cudaErrorDevicesUnavailable;
 
-  printf("sending args to server...\n");
+  // printf("sending args to server...\n");
   for (int i = 0; i < f->arg_count; ++i) {
-    printf("sending arg: [%d/%d], arg size=%d ...\n",i,f->arg_count, f->arg_sizes[i]);
+    // printf("sending arg: [%d/%d], arg size=%d ...\n",i,f->arg_count, f->arg_sizes[i]);
     if (rpc_write(conn, &f->arg_sizes[i], sizeof(int)) < 0 ||
         rpc_write(conn, args[i], f->arg_sizes[i]) < 0){
           printf("failed to send args to server...\n");
@@ -1360,20 +1360,20 @@ cudaError_t cudaDeviceGetGraphMemAttribute(int device,
   return return_value;
 }
 
-// static void* (*real_dlopen)(const char* filename, int flag) = nullptr;
+static void* (*real_dlopen)(const char* filename, int flag) = nullptr;
 
-// extern "C" void* dlopen(const char* filename, int flag) {
-//   if (!real_dlopen) {
-//       real_dlopen = (void* (*)(const char*, int))dlsym(RTLD_NEXT, "dlopen");
-//       if (!real_dlopen) {
-//           fprintf(stderr, "[hook-dlopen] Error finding original dlopen!\n");
-//           exit(1);
-//       }
-//   }
+extern "C" void* dlopen(const char* filename, int flag) {
+  if (!real_dlopen) {
+      real_dlopen = (void* (*)(const char*, int))dlsym(RTLD_NEXT, "dlopen");
+      if (!real_dlopen) {
+          fprintf(stderr, "[hook-dlopen] Error finding original dlopen!\n");
+          exit(1);
+      }
+  }
 
-//   // 打印出每次加载的动态库
-//   fprintf(stderr, "[hook-dlopen] Trying to open library: %s\n", filename ? filename : "NULL");
+  // 打印出每次加载的动态库
+  fprintf(stderr, "[hook-dlopen] Trying to open library: %s\n", filename ? filename : "NULL");
 
-//   // 调用原版 dlopen
-//   return real_dlopen(filename, flag);
-// }
+  // 调用原版 dlopen
+  return real_dlopen(filename, flag);
+}

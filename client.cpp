@@ -16,6 +16,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -176,6 +177,10 @@ void *rpc_client_dispatch_thread(void *arg) {
   while (true) {
     op = rpc_dispatch(conn, 1);
 
+    if (op == -1) {
+      printf("socket error...\n");
+    }
+
     if (op == 1) {
       std::cout << "Transferring memory..." << std::endl;
 
@@ -311,14 +316,17 @@ int rpc_open() {
     }
 
     conns[nconns] = {sockfd, 0};
+    conns[nconns].isAlive = true;
     if (pthread_mutex_init(&conns[nconns].read_mutex, NULL) < 0 ||
         pthread_mutex_init(&conns[nconns].write_mutex, NULL) < 0) {
       return -1;
     }
 
-    pthread_create(&conns[nconns].read_thread, NULL, rpc_client_dispatch_thread,
-                   (void *)&conns[nconns]);
+    // pthread_create(&conns[nconns].read_thread, NULL, rpc_client_dispatch_thread,
+    //                (void *)&conns[nconns]);
 
+    std::thread client_dispatcher(rpc_client_dispatch_thread,(void *)&conns[nconns]);
+    client_dispatcher.detach();
     nconns++;
   }
 
