@@ -247,9 +247,15 @@ void client_handler(int connfd) {
   }
 
   printf("Client connected, connfd=%d.\n",connfd);
+  conn.isAlive = true;
 
+  printf("[server]:conn thread=%d\n",conn.read_thread);
   while (1) {
     int op = rpc_dispatch(&conn, 0);
+    if (op == -1){
+      printf("failed to fetch rpc op...\n");
+      break;
+    }
 
     auto opHandler = get_handler(op);
     printf("resolved handler for op=%d\n",op);
@@ -318,10 +324,10 @@ int main() {
       continue;
     }
 
-    std::thread client_thread(client_handler, connfd);
+    std::thread handler_thread(client_handler, connfd);
 
     // detach the thread so it runs independently
-    client_thread.detach();
+    handler_thread.detach();
   }
 
   close(sockfd);

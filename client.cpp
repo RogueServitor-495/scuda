@@ -16,6 +16,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -25,6 +26,8 @@
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/mman.h>
+
+
 
 #include "codegen/gen_client.h"
 #include "rpc.h"
@@ -171,8 +174,9 @@ void invoke_host_func(void *fn) {
 
 void *rpc_client_dispatch_thread(void *arg) {
   conn_t *conn = (conn_t *)arg;
+  conn->isAlive = true;
   int op;
-
+  printf("[client]:conn->readthread=%d\n",conn->read_thread);
   while (true) {
     op = rpc_dispatch(conn, 1);
 
@@ -311,13 +315,17 @@ int rpc_open() {
     }
 
     conns[nconns] = {sockfd, 0};
+    conns[nconns].read_thread=0;
+    printf("[client]:init read thread=%d\n",conns[nconns].read_thread);
     if (pthread_mutex_init(&conns[nconns].read_mutex, NULL) < 0 ||
         pthread_mutex_init(&conns[nconns].write_mutex, NULL) < 0) {
       return -1;
     }
 
-    pthread_create(&conns[nconns].read_thread, NULL, rpc_client_dispatch_thread,
-                   (void *)&conns[nconns]);
+    // pthread_create(&conns[nconns].read_thread, NULL, rpc_client_dispatch_thread,
+    //                (void *)&conns[nconns]);
+    std::thread client_thread(rpc_client_dispatch_thread, (void *)&conns[nconns]);
+    client_thread.detach();
 
     nconns++;
   }

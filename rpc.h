@@ -17,6 +17,8 @@ typedef struct {
   pthread_cond_t read_cond;
   struct iovec write_iov[128];
   int write_iov_count;
+
+  bool isAlive;
 } conn_t;
 
 extern int rpc_dispatch(conn_t *conn, int parity);
