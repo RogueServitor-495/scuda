@@ -2,7 +2,6 @@
 #include <cuda.h>
 #include <cudnn.h>
 #include <cublas_v2.h>
-#include <cublasLt.h>
 #include <cuda_runtime_api.h>
 
 #include <cstring>
@@ -182,69 +181,6 @@ nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int
       return NVML_ERROR_GPU_IS_LOST;
     for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(conn, (void*)name); i++)
       if (maybe_copy_unified_arg(conn, (void*)&name[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* hwbcEntries)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)hwbcCount, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)hwbcEntries, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*hwbcCount) && is_unified_pointer(conn, (void*)hwbcEntries); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&hwbcEntries[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemGetHicVersion) < 0 ||
-        rpc_write(conn, hwbcCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, hwbcCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, hwbcEntries, *hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)hwbcCount, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)hwbcEntries, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*hwbcCount) && is_unified_pointer(conn, (void*)hwbcEntries); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&hwbcEntries[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* count, nvmlDevice_t* deviceArray)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&cpuNumber, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)count, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)deviceArray, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(conn, (void*)deviceArray); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&deviceArray[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemGetTopologyGpuSet) < 0 ||
-        rpc_write(conn, &cpuNumber, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, count, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, deviceArray, *count * sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&cpuNumber, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)count, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)deviceArray, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(conn, (void*)deviceArray); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&deviceArray[i], cudaMemcpyDeviceToHost) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -433,6 +369,35 @@ nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int* deviceCount, nvml
       return NVML_ERROR_GPU_IS_LOST;
     for (int i = 0; i < static_cast<int>(*deviceCount) && is_unified_pointer(conn, (void*)devices); i++)
       if (maybe_copy_unified_arg(conn, (void*)&devices[i], cudaMemcpyDeviceToHost) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return return_value;
+}
+
+nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* hwbcEntries)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)hwbcCount, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)hwbcEntries, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    for (int i = 0; i < static_cast<int>(*hwbcCount) && is_unified_pointer(conn, (void*)hwbcEntries); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&hwbcEntries[i], cudaMemcpyHostToDevice) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    nvmlReturn_t return_value;
+    if (rpc_write_start_request(conn, RPC_nvmlSystemGetHicVersion) < 0 ||
+        rpc_write(conn, hwbcCount, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, hwbcCount, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, hwbcEntries, *hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)hwbcCount, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)hwbcEntries, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    for (int i = 0; i < static_cast<int>(*hwbcCount) && is_unified_pointer(conn, (void*)hwbcEntries); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&hwbcEntries[i], cudaMemcpyDeviceToHost) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -680,52 +645,6 @@ nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char* serial, unsigned int
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetModuleId(nvmlDevice_t device, unsigned int* moduleId)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)moduleId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetModuleId) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, moduleId, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, moduleId, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)moduleId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetC2cModeInfoV(nvmlDevice_t device, nvmlC2cModeInfo_v1_t* c2cModeInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)c2cModeInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetC2cModeInfoV) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, c2cModeInfo, sizeof(nvmlC2cModeInfo_v1_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, c2cModeInfo, sizeof(nvmlC2cModeInfo_v1_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)c2cModeInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetMemoryAffinity(nvmlDevice_t device, unsigned int nodeSetSize, unsigned long* nodeSet, nvmlAffinityScope_t scope)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -869,29 +788,6 @@ nvmlReturn_t nvmlDeviceClearCpuAffinity(nvmlDevice_t device)
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetNumaNodeId(nvmlDevice_t device, unsigned int* node)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)node, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetNumaNodeId) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, node, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, node, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)node, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetTopologyCommonAncestor(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuTopologyLevel_t* pathInfo)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -947,6 +843,40 @@ nvmlReturn_t nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopolo
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)&level, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)count, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)deviceArray, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(conn, (void*)deviceArray); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&deviceArray[i], cudaMemcpyDeviceToHost) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return return_value;
+}
+
+nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* count, nvmlDevice_t* deviceArray)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&cpuNumber, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)count, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)deviceArray, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(conn, (void*)deviceArray); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&deviceArray[i], cudaMemcpyHostToDevice) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    nvmlReturn_t return_value;
+    if (rpc_write_start_request(conn, RPC_nvmlSystemGetTopologyGpuSet) < 0 ||
+        rpc_write(conn, &cpuNumber, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, count, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, count, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, deviceArray, *count * sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&cpuNumber, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)count, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
@@ -1019,6 +949,39 @@ nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char* uuid, unsigned int len
       return NVML_ERROR_GPU_IS_LOST;
     for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(conn, (void*)uuid); i++)
       if (maybe_copy_unified_arg(conn, (void*)&uuid[i], cudaMemcpyDeviceToHost) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return return_value;
+}
+
+nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char* mdevUuid, unsigned int size)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)mdevUuid, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(conn, (void*)mdevUuid); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&mdevUuid[i], cudaMemcpyHostToDevice) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    nvmlReturn_t return_value;
+    if (rpc_write_start_request(conn, RPC_nvmlVgpuInstanceGetMdevUUID) < 0 ||
+        rpc_write(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_write(conn, &size, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, mdevUuid, size * sizeof(char)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)mdevUuid, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(conn, (void*)mdevUuid); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&mdevUuid[i], cudaMemcpyDeviceToHost) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -1188,35 +1151,6 @@ nvmlReturn_t nvmlDeviceValidateInforom(nvmlDevice_t device)
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetLastBBXFlushTime(nvmlDevice_t device, unsigned long long* timestamp, unsigned long* durationUs)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)timestamp, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)durationUs, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetLastBBXFlushTime) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, timestamp, sizeof(unsigned long long)) < 0 ||
-        rpc_write(conn, durationUs, sizeof(unsigned long)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, timestamp, sizeof(unsigned long long)) < 0 ||
-        rpc_read(conn, durationUs, sizeof(unsigned long)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)timestamp, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)durationUs, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetDisplayMode(nvmlDevice_t device, nvmlEnableState_t* display)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -1283,29 +1217,6 @@ nvmlReturn_t nvmlDeviceGetPersistenceMode(nvmlDevice_t device, nvmlEnableState_t
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetPciInfoExt(nvmlDevice_t device, nvmlPciInfoExt_t* pci)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pci, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetPciInfoExt) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, pci, sizeof(nvmlPciInfoExt_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pci, sizeof(nvmlPciInfoExt_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pci, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetPciInfo_v3(nvmlDevice_t device, nvmlPciInfo_t* pci)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -1346,28 +1257,6 @@ nvmlReturn_t nvmlDeviceGetMaxPcieLinkGeneration(nvmlDevice_t device, unsigned in
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)maxLinkGen, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int* maxLinkGenDevice)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxLinkGenDevice, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGpuMaxPcieLinkGeneration) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, maxLinkGenDevice, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxLinkGenDevice, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -1541,28 +1430,6 @@ nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetGpcClkVfOffset(nvmlDevice_t device, int* offset)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)offset, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGpcClkVfOffset) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, offset, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)offset, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetApplicationsClock(nvmlDevice_t device, nvmlClockType_t clockType, unsigned int* clockMHz)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -1613,6 +1480,23 @@ nvmlReturn_t nvmlDeviceGetDefaultApplicationsClock(nvmlDevice_t device, nvmlCloc
     if (maybe_copy_unified_arg(conn, (void*)&clockType, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)clockMHz, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    return return_value;
+}
+
+nvmlReturn_t nvmlDeviceResetApplicationsClocks(nvmlDevice_t device)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    nvmlReturn_t return_value;
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceResetApplicationsClocks) < 0 ||
+        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -1776,6 +1660,55 @@ nvmlReturn_t nvmlDeviceGetAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnab
     return return_value;
 }
 
+nvmlReturn_t nvmlDeviceSetAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnableState_t enabled)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&enabled, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    nvmlReturn_t return_value;
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetAutoBoostedClocksEnabled) < 0 ||
+        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_write(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&enabled, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    return return_value;
+}
+
+nvmlReturn_t nvmlDeviceSetDefaultAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnableState_t enabled, unsigned int flags)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&enabled, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&flags, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    nvmlReturn_t return_value;
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetDefaultAutoBoostedClocksEnabled) < 0 ||
+        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_write(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
+        rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&enabled, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&flags, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    return return_value;
+}
+
 nvmlReturn_t nvmlDeviceGetFanSpeed(nvmlDevice_t device, unsigned int* speed)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -1821,109 +1754,6 @@ nvmlReturn_t nvmlDeviceGetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, uns
     if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)speed, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetTargetFanSpeed(nvmlDevice_t device, unsigned int fan, unsigned int* targetSpeed)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)targetSpeed, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetTargetFanSpeed) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &fan, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, targetSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)targetSpeed, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMinMaxFanSpeed(nvmlDevice_t device, unsigned int* minSpeed, unsigned int* maxSpeed)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)minSpeed, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxSpeed, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetMinMaxFanSpeed) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, minSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, maxSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)minSpeed, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxSpeed, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetFanControlPolicy_v2(nvmlDevice_t device, unsigned int fan, nvmlFanControlPolicy_t* policy)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)policy, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetFanControlPolicy_v2) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &fan, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, policy, sizeof(nvmlFanControlPolicy_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)policy, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNumFans(nvmlDevice_t device, unsigned int* numFans)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)numFans, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetNumFans) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, numFans, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)numFans, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -1982,29 +1812,30 @@ nvmlReturn_t nvmlDeviceGetTemperatureThreshold(nvmlDevice_t device, nvmlTemperat
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetThermalSettings(nvmlDevice_t device, unsigned int sensorIndex, nvmlGpuThermalSettings_t* pThermalSettings)
+nvmlReturn_t nvmlDeviceSetTemperatureThreshold(nvmlDevice_t device, nvmlTemperatureThresholds_t thresholdType, int* temp)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&sensorIndex, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)&thresholdType, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pThermalSettings, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)temp, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetThermalSettings) < 0 ||
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetTemperatureThreshold) < 0 ||
         rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &sensorIndex, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
+        rpc_write(conn, temp, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pThermalSettings, sizeof(nvmlGpuThermalSettings_t)) < 0 ||
+        rpc_read(conn, temp, sizeof(int)) < 0 ||
         rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&sensorIndex, cudaMemcpyDeviceToHost) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)&thresholdType, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pThermalSettings, cudaMemcpyDeviceToHost) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)temp, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -2031,29 +1862,6 @@ nvmlReturn_t nvmlDeviceGetPerformanceState(nvmlDevice_t device, nvmlPstates_t* p
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetCurrentClocksEventReasons(nvmlDevice_t device, unsigned long long* clocksEventReasons)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)clocksEventReasons, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetCurrentClocksEventReasons) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, clocksEventReasons, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, clocksEventReasons, sizeof(unsigned long long)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)clocksEventReasons, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetCurrentClocksThrottleReasons(nvmlDevice_t device, unsigned long long* clocksThrottleReasons)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -2072,29 +1880,6 @@ nvmlReturn_t nvmlDeviceGetCurrentClocksThrottleReasons(nvmlDevice_t device, unsi
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)clocksThrottleReasons, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetSupportedClocksEventReasons(nvmlDevice_t device, unsigned long long* supportedClocksEventReasons)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)supportedClocksEventReasons, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetSupportedClocksEventReasons) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, supportedClocksEventReasons, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, supportedClocksEventReasons, sizeof(unsigned long long)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)supportedClocksEventReasons, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -2139,174 +1924,6 @@ nvmlReturn_t nvmlDeviceGetPowerState(nvmlDevice_t device, nvmlPstates_t* pState)
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)pState, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDynamicPstatesInfo(nvmlDevice_t device, nvmlGpuDynamicPstatesInfo_t* pDynamicPstatesInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pDynamicPstatesInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetDynamicPstatesInfo) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pDynamicPstatesInfo, sizeof(nvmlGpuDynamicPstatesInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pDynamicPstatesInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMemClkVfOffset(nvmlDevice_t device, int* offset)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)offset, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetMemClkVfOffset) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, offset, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)offset, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMinMaxClockOfPState(nvmlDevice_t device, nvmlClockType_t type, nvmlPstates_t pstate, unsigned int* minClockMHz, unsigned int* maxClockMHz)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&type, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&pstate, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)minClockMHz, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxClockMHz, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetMinMaxClockOfPState) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &type, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_write(conn, &pstate, sizeof(nvmlPstates_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, minClockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, maxClockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&type, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&pstate, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)minClockMHz, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxClockMHz, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetSupportedPerformanceStates(nvmlDevice_t device, nvmlPstates_t* pstates, unsigned int size)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pstates, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(conn, (void*)pstates); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&pstates[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetSupportedPerformanceStates) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &size, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pstates, size * sizeof(nvmlPstates_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pstates, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(conn, (void*)pstates); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&pstates[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpcClkMinMaxVfOffset(nvmlDevice_t device, int* minOffset, int* maxOffset)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)minOffset, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxOffset, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGpcClkMinMaxVfOffset) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, minOffset, sizeof(int)) < 0 ||
-        rpc_read(conn, maxOffset, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)minOffset, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxOffset, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMemClkMinMaxVfOffset(nvmlDevice_t device, int* minOffset, int* maxOffset)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)minOffset, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxOffset, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetMemClkMinMaxVfOffset) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, minOffset, sizeof(int)) < 0 ||
-        rpc_read(conn, maxOffset, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)minOffset, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxOffset, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -2519,28 +2136,6 @@ nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t* memory)
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t* memory)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)memory, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetMemoryInfo_v2) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, memory, sizeof(nvmlMemory_v2_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)memory, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetComputeMode(nvmlDevice_t device, nvmlComputeMode_t* mode)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -2613,28 +2208,6 @@ nvmlReturn_t nvmlDeviceGetEccMode(nvmlDevice_t device, nvmlEnableState_t* curren
     if (maybe_copy_unified_arg(conn, (void*)current, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)pending, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDefaultEccMode(nvmlDevice_t device, nvmlEnableState_t* defaultMode)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)defaultMode, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetDefaultEccMode) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, defaultMode, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)defaultMode, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -2953,64 +2526,6 @@ nvmlReturn_t nvmlDeviceGetDecoderUtilization(nvmlDevice_t device, unsigned int* 
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetJpgUtilization(nvmlDevice_t device, unsigned int* utilization, unsigned int* samplingPeriodUs)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)utilization, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)samplingPeriodUs, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetJpgUtilization) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, utilization, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, utilization, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)utilization, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)samplingPeriodUs, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetOfaUtilization(nvmlDevice_t device, unsigned int* utilization, unsigned int* samplingPeriodUs)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)utilization, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)samplingPeriodUs, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetOfaUtilization) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, utilization, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, utilization, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)utilization, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)samplingPeriodUs, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetFBCStats(nvmlDevice_t device, nvmlFBCStats_t* fbcStats)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -3149,7 +2664,7 @@ nvmlReturn_t nvmlDeviceGetBridgeChipInfo(nvmlDevice_t device, nvmlBridgeChipHier
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
+nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v2(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
@@ -3158,16 +2673,14 @@ nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsign
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)infos, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(conn, (void*)infos); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&infos[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
     nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetComputeRunningProcesses_v3) < 0 ||
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetComputeRunningProcesses_v2) < 0 ||
         rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(conn, infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
+        rpc_read(conn, infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
@@ -3177,13 +2690,10 @@ nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsign
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)infos, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(conn, (void*)infos); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&infos[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
+nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v2(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
@@ -3192,16 +2702,14 @@ nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsig
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)infos, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(conn, (void*)infos); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&infos[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
     nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGraphicsRunningProcesses_v3) < 0 ||
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGraphicsRunningProcesses_v2) < 0 ||
         rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(conn, infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
+        rpc_read(conn, infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
@@ -3211,13 +2719,10 @@ nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsig
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)infos, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(conn, (void*)infos); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&infos[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
+nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v2(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
@@ -3226,16 +2731,14 @@ nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, uns
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)infos, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(conn, (void*)infos); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&infos[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
     nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetMPSComputeRunningProcesses_v3) < 0 ||
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetMPSComputeRunningProcesses_v2) < 0 ||
         rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(conn, infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
+        rpc_read(conn, infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
@@ -3244,32 +2747,6 @@ nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, uns
     if (maybe_copy_unified_arg(conn, (void*)infoCount, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)infos, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(conn, (void*)infos); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&infos[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetRunningProcessDetailList(nvmlDevice_t device, nvmlProcessDetailList_t* plist)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)plist, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetRunningProcessDetailList) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, plist, sizeof(nvmlProcessDetailList_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, plist, sizeof(nvmlProcessDetailList_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)plist, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -3444,436 +2921,6 @@ nvmlReturn_t nvmlDeviceGetIrqNum(nvmlDevice_t device, unsigned int* irqNum)
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)irqNum, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* numCores)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)numCores, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetNumGpuCores) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, numCores, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)numCores, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPowerSource(nvmlDevice_t device, nvmlPowerSource_t* powerSource)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)powerSource, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetPowerSource) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, powerSource, sizeof(nvmlPowerSource_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)powerSource, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMemoryBusWidth(nvmlDevice_t device, unsigned int* busWidth)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)busWidth, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetMemoryBusWidth) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, busWidth, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)busWidth, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPcieLinkMaxSpeed(nvmlDevice_t device, unsigned int* maxSpeed)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxSpeed, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetPcieLinkMaxSpeed) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, maxSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)maxSpeed, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPcieSpeed(nvmlDevice_t device, unsigned int* pcieSpeed)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pcieSpeed, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetPcieSpeed) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pcieSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pcieSpeed, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAdaptiveClockInfoStatus(nvmlDevice_t device, unsigned int* adaptiveClockStatus)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)adaptiveClockStatus, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetAdaptiveClockInfoStatus) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, adaptiveClockStatus, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)adaptiveClockStatus, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetBusType(nvmlDevice_t device, nvmlBusType_t* type)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)type, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetBusType) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, type, sizeof(nvmlBusType_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)type, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuFabricInfo(nvmlDevice_t device, nvmlGpuFabricInfo_t* gpuFabricInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpuFabricInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGpuFabricInfo) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, gpuFabricInfo, sizeof(nvmlGpuFabricInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpuFabricInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuFabricInfoV(nvmlDevice_t device, nvmlGpuFabricInfoV_t* gpuFabricInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpuFabricInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGpuFabricInfoV) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, gpuFabricInfo, sizeof(nvmlGpuFabricInfoV_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, gpuFabricInfo, sizeof(nvmlGpuFabricInfoV_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpuFabricInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetConfComputeCapabilities(nvmlConfComputeSystemCaps_t* capabilities)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)capabilities, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemGetConfComputeCapabilities) < 0 ||
-        rpc_write(conn, capabilities, sizeof(nvmlConfComputeSystemCaps_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, capabilities, sizeof(nvmlConfComputeSystemCaps_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)capabilities, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetConfComputeState(nvmlConfComputeSystemState_t* state)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)state, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemGetConfComputeState) < 0 ||
-        rpc_write(conn, state, sizeof(nvmlConfComputeSystemState_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, state, sizeof(nvmlConfComputeSystemState_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)state, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetConfComputeMemSizeInfo(nvmlDevice_t device, nvmlConfComputeMemSizeInfo_t* memInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)memInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetConfComputeMemSizeInfo) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, memInfo, sizeof(nvmlConfComputeMemSizeInfo_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, memInfo, sizeof(nvmlConfComputeMemSizeInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)memInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetConfComputeGpusReadyState(unsigned int* isAcceptingWork)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)isAcceptingWork, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemGetConfComputeGpusReadyState) < 0 ||
-        rpc_write(conn, isAcceptingWork, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, isAcceptingWork, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)isAcceptingWork, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetConfComputeProtectedMemoryUsage(nvmlDevice_t device, nvmlMemory_t* memory)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)memory, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetConfComputeProtectedMemoryUsage) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, memory, sizeof(nvmlMemory_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, memory, sizeof(nvmlMemory_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)memory, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetConfComputeGpuCertificate(nvmlDevice_t device, nvmlConfComputeGpuCertificate_t* gpuCert)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpuCert, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetConfComputeGpuCertificate) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, gpuCert, sizeof(nvmlConfComputeGpuCertificate_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, gpuCert, sizeof(nvmlConfComputeGpuCertificate_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpuCert, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetConfComputeGpuAttestationReport(nvmlDevice_t device, nvmlConfComputeGpuAttestationReport_t* gpuAtstReport)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpuAtstReport, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetConfComputeGpuAttestationReport) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, gpuAtstReport, sizeof(nvmlConfComputeGpuAttestationReport_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, gpuAtstReport, sizeof(nvmlConfComputeGpuAttestationReport_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpuAtstReport, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetConfComputeKeyRotationThresholdInfo(nvmlConfComputeGetKeyRotationThresholdInfo_t* pKeyRotationThrInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)pKeyRotationThrInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemGetConfComputeKeyRotationThresholdInfo) < 0 ||
-        rpc_write(conn, pKeyRotationThrInfo, sizeof(nvmlConfComputeGetKeyRotationThresholdInfo_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pKeyRotationThrInfo, sizeof(nvmlConfComputeGetKeyRotationThresholdInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pKeyRotationThrInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetConfComputeSettings(nvmlSystemConfComputeSettings_t* settings)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)settings, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemGetConfComputeSettings) < 0 ||
-        rpc_write(conn, settings, sizeof(nvmlSystemConfComputeSettings_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, settings, sizeof(nvmlSystemConfComputeSettings_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)settings, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGspFirmwareVersion(nvmlDevice_t device, char* version)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)version, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGspFirmwareVersion) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, version, sizeof(char)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)version, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGspFirmwareMode(nvmlDevice_t device, unsigned int* isEnabled, unsigned int* defaultMode)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)isEnabled, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)defaultMode, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGspFirmwareMode) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, isEnabled, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, defaultMode, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)isEnabled, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)defaultMode, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -4175,90 +3222,6 @@ nvmlReturn_t nvmlDeviceGetArchitecture(nvmlDevice_t device, nvmlDeviceArchitectu
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetClkMonStatus(nvmlDevice_t device, nvmlClkMonStatus_t* status)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)status, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetClkMonStatus) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, status, sizeof(nvmlClkMonStatus_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)status, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlProcessUtilizationSample_t* utilization, unsigned int* processSamplesCount, unsigned long long lastSeenTimeStamp)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)processSamplesCount, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)utilization, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*processSamplesCount) && is_unified_pointer(conn, (void*)utilization); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&utilization[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&lastSeenTimeStamp, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetProcessUtilization) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, processSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, processSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, utilization, *processSamplesCount * sizeof(nvmlProcessUtilizationSample_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)processSamplesCount, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)utilization, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*processSamplesCount) && is_unified_pointer(conn, (void*)utilization); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&utilization[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&lastSeenTimeStamp, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetProcessesUtilizationInfo(nvmlDevice_t device, nvmlProcessesUtilizationInfo_t* procesesUtilInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)procesesUtilInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetProcessesUtilizationInfo) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, procesesUtilInfo, sizeof(nvmlProcessesUtilizationInfo_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, procesesUtilInfo, sizeof(nvmlProcessesUtilizationInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)procesesUtilInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlUnitSetLedState(nvmlUnit_t unit, nvmlLedColor_t color)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -4511,145 +3474,24 @@ nvmlReturn_t nvmlDeviceSetApplicationsClocks(nvmlDevice_t device, unsigned int m
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceResetApplicationsClocks(nvmlDevice_t device)
+nvmlReturn_t nvmlDeviceGetClkMonStatus(nvmlDevice_t device, nvmlClkMonStatus_t* status)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)status, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
     nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceResetApplicationsClocks) < 0 ||
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetClkMonStatus) < 0 ||
         rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, status, sizeof(nvmlClkMonStatus_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnableState_t enabled)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&enabled, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetAutoBoostedClocksEnabled) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&enabled, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetDefaultAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnableState_t enabled, unsigned int flags)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&enabled, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&flags, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetDefaultAutoBoostedClocksEnabled) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&enabled, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&flags, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetDefaultFanSpeed_v2(nvmlDevice_t device, unsigned int fan)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetDefaultFanSpeed_v2) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &fan, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetFanControlPolicy(nvmlDevice_t device, unsigned int fan, nvmlFanControlPolicy_t policy)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&policy, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetFanControlPolicy) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &fan, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &policy, sizeof(nvmlFanControlPolicy_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&policy, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetTemperatureThreshold(nvmlDevice_t device, nvmlTemperatureThresholds_t thresholdType, int* temp)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&thresholdType, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)temp, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetTemperatureThreshold) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
-        rpc_write(conn, temp, sizeof(int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, temp, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&thresholdType, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)temp, cudaMemcpyDeviceToHost) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)status, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -4721,134 +3563,6 @@ nvmlReturn_t nvmlDeviceSetAPIRestriction(nvmlDevice_t device, nvmlRestrictedAPI_
     if (maybe_copy_unified_arg(conn, (void*)&apiType, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)&isRestricted, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, unsigned int speed)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&speed, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetFanSpeed_v2) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &fan, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &speed, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&fan, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&speed, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetGpcClkVfOffset(nvmlDevice_t device, int offset)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&offset, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetGpcClkVfOffset) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &offset, sizeof(int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&offset, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetMemClkVfOffset(nvmlDevice_t device, int offset)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&offset, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetMemClkVfOffset) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &offset, sizeof(int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&offset, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetConfComputeUnprotectedMemSize(nvmlDevice_t device, unsigned long long sizeKiB)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&sizeKiB, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetConfComputeUnprotectedMemSize) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &sizeKiB, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&sizeKiB, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemSetConfComputeGpusReadyState(unsigned int isAcceptingWork)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&isAcceptingWork, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemSetConfComputeGpusReadyState) < 0 ||
-        rpc_write(conn, &isAcceptingWork, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&isAcceptingWork, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemSetConfComputeKeyRotationThresholdInfo(nvmlConfComputeSetKeyRotationThresholdInfo_t* pKeyRotationThrInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)pKeyRotationThrInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemSetConfComputeKeyRotationThresholdInfo) < 0 ||
-        rpc_write(conn, pKeyRotationThrInfo, sizeof(nvmlConfComputeSetKeyRotationThresholdInfo_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pKeyRotationThrInfo, sizeof(nvmlConfComputeSetKeyRotationThresholdInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pKeyRotationThrInfo, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -5486,39 +4200,6 @@ nvmlReturn_t nvmlDeviceGetFieldValues(nvmlDevice_t device, int valuesCount, nvml
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceClearFieldValues(nvmlDevice_t device, int valuesCount, nvmlFieldValue_t* values)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&valuesCount, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)values, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(valuesCount) && is_unified_pointer(conn, (void*)values); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&values[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceClearFieldValues) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &valuesCount, sizeof(int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, values, valuesCount * sizeof(nvmlFieldValue_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&valuesCount, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)values, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(valuesCount) && is_unified_pointer(conn, (void*)values); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&values[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtualizationMode_t* pVirtualMode)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -5585,203 +4266,6 @@ nvmlReturn_t nvmlDeviceSetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtual
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetVgpuHeterogeneousMode(nvmlDevice_t device, nvmlVgpuHeterogeneousMode_t* pHeterogeneousMode)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pHeterogeneousMode, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuHeterogeneousMode) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, pHeterogeneousMode, sizeof(nvmlVgpuHeterogeneousMode_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pHeterogeneousMode, sizeof(nvmlVgpuHeterogeneousMode_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pHeterogeneousMode, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetVgpuHeterogeneousMode(nvmlDevice_t device, const nvmlVgpuHeterogeneousMode_t* pHeterogeneousMode)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pHeterogeneousMode, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetVgpuHeterogeneousMode) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &pHeterogeneousMode, sizeof(const nvmlVgpuHeterogeneousMode_t*)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pHeterogeneousMode, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetPlacementId(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuPlacementId_t* pPlacement)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pPlacement, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlVgpuInstanceGetPlacementId) < 0 ||
-        rpc_write(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(conn, pPlacement, sizeof(nvmlVgpuPlacementId_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pPlacement, sizeof(nvmlVgpuPlacementId_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pPlacement, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuTypeSupportedPlacements(nvmlDevice_t device, nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuPlacementList_t* pPlacementList)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pPlacementList, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuTypeSupportedPlacements) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(conn, pPlacementList, sizeof(nvmlVgpuPlacementList_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pPlacementList, sizeof(nvmlVgpuPlacementList_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pPlacementList, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuTypeCreatablePlacements(nvmlDevice_t device, nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuPlacementList_t* pPlacementList)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pPlacementList, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuTypeCreatablePlacements) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(conn, pPlacementList, sizeof(nvmlVgpuPlacementList_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pPlacementList, sizeof(nvmlVgpuPlacementList_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pPlacementList, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetGspHeapSize(nvmlVgpuTypeId_t vgpuTypeId, unsigned long long* gspHeapSize)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gspHeapSize, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlVgpuTypeGetGspHeapSize) < 0 ||
-        rpc_write(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(conn, gspHeapSize, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, gspHeapSize, sizeof(unsigned long long)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gspHeapSize, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetFbReservation(nvmlVgpuTypeId_t vgpuTypeId, unsigned long long* fbReservation)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)fbReservation, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlVgpuTypeGetFbReservation) < 0 ||
-        rpc_write(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(conn, fbReservation, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, fbReservation, sizeof(unsigned long long)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)fbReservation, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetVgpuCapabilities(nvmlDevice_t device, nvmlDeviceVgpuCapability_t capability, nvmlEnableState_t state)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&capability, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&state, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetVgpuCapabilities) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &capability, sizeof(nvmlDeviceVgpuCapability_t)) < 0 ||
-        rpc_write(conn, &state, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&capability, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&state, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetGridLicensableFeatures_v4(nvmlDevice_t device, nvmlGridLicensableFeatures_t* pGridLicensableFeatures)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -5804,51 +4288,41 @@ nvmlReturn_t nvmlDeviceGetGridLicensableFeatures_v4(nvmlDevice_t device, nvmlGri
     return return_value;
 }
 
-nvmlReturn_t nvmlGetVgpuDriverCapabilities(nvmlVgpuDriverCapability_t capability, unsigned int* capResult)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&capability, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)capResult, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGetVgpuDriverCapabilities) < 0 ||
-        rpc_write(conn, &capability, sizeof(nvmlVgpuDriverCapability_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, capResult, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&capability, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)capResult, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuCapabilities(nvmlDevice_t device, nvmlDeviceVgpuCapability_t capability, unsigned int* capResult)
+nvmlReturn_t nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlProcessUtilizationSample_t* utilization, unsigned int* processSamplesCount, unsigned long long lastSeenTimeStamp)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&capability, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)processSamplesCount, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)capResult, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)utilization, cudaMemcpyHostToDevice) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    for (int i = 0; i < static_cast<int>(*processSamplesCount) && is_unified_pointer(conn, (void*)utilization); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&utilization[i], cudaMemcpyHostToDevice) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&lastSeenTimeStamp, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuCapabilities) < 0 ||
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetProcessUtilization) < 0 ||
         rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &capability, sizeof(nvmlDeviceVgpuCapability_t)) < 0 ||
+        rpc_write(conn, processSamplesCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, capResult, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, processSamplesCount, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, utilization, *processSamplesCount * sizeof(nvmlProcessUtilizationSample_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&capability, cudaMemcpyDeviceToHost) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)processSamplesCount, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)capResult, cudaMemcpyDeviceToHost) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)utilization, cudaMemcpyDeviceToHost) < 0)
+      return NVML_ERROR_GPU_IS_LOST;
+    for (int i = 0; i < static_cast<int>(*processSamplesCount) && is_unified_pointer(conn, (void*)utilization); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&utilization[i], cudaMemcpyDeviceToHost) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (maybe_copy_unified_arg(conn, (void*)&lastSeenTimeStamp, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -6653,100 +5127,6 @@ nvmlReturn_t nvmlVgpuInstanceGetGpuInstanceId(nvmlVgpuInstance_t vgpuInstance, u
     return return_value;
 }
 
-nvmlReturn_t nvmlVgpuInstanceGetGpuPciId(nvmlVgpuInstance_t vgpuInstance, char* vgpuPciId, unsigned int* length)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)length, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)vgpuPciId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*length) && is_unified_pointer(conn, (void*)vgpuPciId); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&vgpuPciId[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlVgpuInstanceGetGpuPciId) < 0 ||
-        rpc_write(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(conn, length, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, length, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, vgpuPciId, *length * sizeof(char)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)length, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)vgpuPciId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*length) && is_unified_pointer(conn, (void*)vgpuPciId); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&vgpuPciId[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetCapabilities(nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuCapability_t capability, unsigned int* capResult)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&capability, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)capResult, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlVgpuTypeGetCapabilities) < 0 ||
-        rpc_write(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(conn, &capability, sizeof(nvmlVgpuCapability_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, capResult, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuTypeId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&capability, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)capResult, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char* mdevUuid, unsigned int size)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)mdevUuid, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(conn, (void*)mdevUuid); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&mdevUuid[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlVgpuInstanceGetMdevUUID) < 0 ||
-        rpc_write(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(conn, &size, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, mdevUuid, size * sizeof(char)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)mdevUuid, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(conn, (void*)mdevUuid); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&mdevUuid[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlVgpuInstanceGetMetadata(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuMetadata_t* vgpuMetadata, unsigned int* bufferSize)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -6877,95 +5257,6 @@ nvmlReturn_t nvmlDeviceGetPgpuMetadataString(nvmlDevice_t device, char* pgpuMeta
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetVgpuSchedulerLog(nvmlDevice_t device, nvmlVgpuSchedulerLog_t* pSchedulerLog)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pSchedulerLog, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuSchedulerLog) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pSchedulerLog, sizeof(nvmlVgpuSchedulerLog_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pSchedulerLog, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuSchedulerState(nvmlDevice_t device, nvmlVgpuSchedulerGetState_t* pSchedulerState)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pSchedulerState, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuSchedulerState) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pSchedulerState, sizeof(nvmlVgpuSchedulerGetState_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pSchedulerState, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuSchedulerCapabilities(nvmlDevice_t device, nvmlVgpuSchedulerCapabilities_t* pCapabilities)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pCapabilities, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuSchedulerCapabilities) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pCapabilities, sizeof(nvmlVgpuSchedulerCapabilities_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pCapabilities, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetVgpuSchedulerState(nvmlDevice_t device, nvmlVgpuSchedulerSetState_t* pSchedulerState)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pSchedulerState, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetVgpuSchedulerState) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, pSchedulerState, sizeof(nvmlVgpuSchedulerSetState_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pSchedulerState, sizeof(nvmlVgpuSchedulerSetState_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)pSchedulerState, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlGetVgpuVersion(nvmlVgpuVersion_t* supported, nvmlVgpuVersion_t* current)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -7050,29 +5341,6 @@ nvmlReturn_t nvmlDeviceGetVgpuUtilization(nvmlDevice_t device, unsigned long lon
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetVgpuInstancesUtilizationInfo(nvmlDevice_t device, nvmlVgpuInstancesUtilizationInfo_t* vgpuUtilInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)vgpuUtilInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuInstancesUtilizationInfo) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, vgpuUtilInfo, sizeof(nvmlVgpuInstancesUtilizationInfo_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, vgpuUtilInfo, sizeof(nvmlVgpuInstancesUtilizationInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)vgpuUtilInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetVgpuProcessUtilization(nvmlDevice_t device, unsigned long long lastSeenTimeStamp, unsigned int* vgpuProcessSamplesCount, nvmlVgpuProcessUtilizationSample_t* utilizationSamples)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -7109,29 +5377,6 @@ nvmlReturn_t nvmlDeviceGetVgpuProcessUtilization(nvmlDevice_t device, unsigned l
     for (int i = 0; i < static_cast<int>(*vgpuProcessSamplesCount) && is_unified_pointer(conn, (void*)utilizationSamples); i++)
       if (maybe_copy_unified_arg(conn, (void*)&utilizationSamples[i], cudaMemcpyDeviceToHost) < 0)
         return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuProcessesUtilizationInfo(nvmlDevice_t device, nvmlVgpuProcessesUtilizationInfo_t* vgpuProcUtilInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)vgpuProcUtilInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetVgpuProcessesUtilizationInfo) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, vgpuProcUtilInfo, sizeof(nvmlVgpuProcessesUtilizationInfo_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, vgpuProcUtilInfo, sizeof(nvmlVgpuProcessesUtilizationInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)vgpuProcUtilInfo, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
 
@@ -7231,28 +5476,6 @@ nvmlReturn_t nvmlVgpuInstanceClearAccountingPids(nvmlVgpuInstance_t vgpuInstance
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetLicenseInfo_v2(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuLicenseInfo_t* licenseInfo)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)licenseInfo, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlVgpuInstanceGetLicenseInfo_v2) < 0 ||
-        rpc_write(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, licenseInfo, sizeof(nvmlVgpuLicenseInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&vgpuInstance, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)licenseInfo, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -7365,33 +5588,6 @@ nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfo(nvmlDevice_t device, unsigned i
         rpc_write(conn, &profile, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, info, sizeof(nvmlGpuInstanceProfileInfo_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&profile, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)info, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfoV(nvmlDevice_t device, unsigned int profile, nvmlGpuInstanceProfileInfo_v2_t* info)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&profile, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)info, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetGpuInstanceProfileInfoV) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &profile, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, info, sizeof(nvmlGpuInstanceProfileInfo_v2_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
@@ -7634,38 +5830,6 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstanceProfileInfo(nvmlGpuInstance_t gpuI
     return return_value;
 }
 
-nvmlReturn_t nvmlGpuInstanceGetComputeInstanceProfileInfoV(nvmlGpuInstance_t gpuInstance, unsigned int profile, unsigned int engProfile, nvmlComputeInstanceProfileInfo_v2_t* info)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&gpuInstance, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&profile, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&engProfile, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)info, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpuInstanceGetComputeInstanceProfileInfoV) < 0 ||
-        rpc_write(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(conn, &profile, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &engProfile, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, info, sizeof(nvmlComputeInstanceProfileInfo_v2_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpuInstance, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&profile, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&engProfile, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)info, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlGpuInstanceGetComputeInstanceRemainingCapacity(nvmlGpuInstance_t gpuInstance, unsigned int profileId, unsigned int* count)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -7690,45 +5854,6 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstanceRemainingCapacity(nvmlGpuInstance_
       return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)count, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceGetComputeInstancePossiblePlacements(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstancePlacement_t* placements, unsigned int* count)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&gpuInstance, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&profileId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)count, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)placements, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(conn, (void*)placements); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&placements[i], cudaMemcpyHostToDevice) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpuInstanceGetComputeInstancePossiblePlacements) < 0 ||
-        rpc_write(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(conn, &profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, count, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, placements, *count * sizeof(nvmlComputeInstancePlacement_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpuInstance, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&profileId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)count, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)placements, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(conn, (void*)placements); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&placements[i], cudaMemcpyDeviceToHost) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
 
@@ -8001,272 +6126,24 @@ nvmlReturn_t nvmlDeviceGetDeviceHandleFromMigDeviceHandle(nvmlDevice_t migDevice
     return return_value;
 }
 
-nvmlReturn_t nvmlGpmMetricsGet(nvmlGpmMetricsGet_t* metricsGet)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)metricsGet, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpmMetricsGet) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, metricsGet, sizeof(nvmlGpmMetricsGet_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)metricsGet, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmSampleFree(nvmlGpmSample_t gpmSample)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&gpmSample, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpmSampleFree) < 0 ||
-        rpc_write(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpmSample, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmSampleAlloc(nvmlGpmSample_t* gpmSample)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)gpmSample, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpmSampleAlloc) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpmSample, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmSampleGet(nvmlDevice_t device, nvmlGpmSample_t gpmSample)
+nvmlReturn_t nvmlDeviceGetBusType(nvmlDevice_t device, nvmlBusType_t* type)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpmSample, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)type, cudaMemcpyHostToDevice) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpmSampleGet) < 0 ||
+    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetBusType) < 0 ||
         rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, type, sizeof(nvmlBusType_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpmSample, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmMigSampleGet(nvmlDevice_t device, unsigned int gpuInstanceId, nvmlGpmSample_t gpmSample)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpuInstanceId, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpmSample, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpmMigSampleGet) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &gpuInstanceId, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpuInstanceId, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&gpmSample, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmQueryDeviceSupport(nvmlDevice_t device, nvmlGpmSupport_t* gpmSupport)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpmSupport, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpmQueryDeviceSupport) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, gpmSupport, sizeof(nvmlGpmSupport_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)gpmSupport, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmQueryIfStreamingEnabled(nvmlDevice_t device, unsigned int* state)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)state, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpmQueryIfStreamingEnabled) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, state, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, state, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)state, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmSetStreamingEnabled(nvmlDevice_t device, unsigned int state)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&state, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlGpmSetStreamingEnabled) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &state, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&state, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetNvLinkDeviceLowPowerThreshold(nvmlDevice_t device, nvmlNvLinkPowerThres_t* info)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)info, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetNvLinkDeviceLowPowerThreshold) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, info, sizeof(nvmlNvLinkPowerThres_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)info, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemSetNvlinkBwMode(unsigned int nvlinkBwMode)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&nvlinkBwMode, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemSetNvlinkBwMode) < 0 ||
-        rpc_write(conn, &nvlinkBwMode, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&nvlinkBwMode, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetNvlinkBwMode(unsigned int* nvlinkBwMode)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)nvlinkBwMode, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlSystemGetNvlinkBwMode) < 0 ||
-        rpc_write(conn, nvlinkBwMode, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, nvlinkBwMode, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)nvlinkBwMode, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetPowerManagementLimit_v2(nvmlDevice_t device, nvmlPowerValue_v2_t* powerValue)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)powerValue, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceSetPowerManagementLimit_v2) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, powerValue, sizeof(nvmlPowerValue_v2_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, powerValue, sizeof(nvmlPowerValue_v2_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)powerValue, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetSramEccErrorStatus(nvmlDevice_t device, nvmlEccSramErrorStatus_t* status)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)status, cudaMemcpyHostToDevice) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    nvmlReturn_t return_value;
-    if (rpc_write_start_request(conn, RPC_nvmlDeviceGetSramEccErrorStatus) < 0 ||
-        rpc_write(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, status, sizeof(nvmlEccSramErrorStatus_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, status, sizeof(nvmlEccSramErrorStatus_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)&device, cudaMemcpyDeviceToHost) < 0)
-      return NVML_ERROR_GPU_IS_LOST;
-    if (maybe_copy_unified_arg(conn, (void*)status, cudaMemcpyDeviceToHost) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)type, cudaMemcpyDeviceToHost) < 0)
       return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -24838,6 +22715,140 @@ cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t objec
     return return_value;
 }
 
+cudaError_t cudaGraphAddNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, struct cudaGraphNodeParams* nodeParams)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)pGraphNode, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)pDependencies, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&numDependencies, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodeParams, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    cudaError_t return_value;
+    if (rpc_write_start_request(conn, RPC_cudaGraphAddNode) < 0 ||
+        rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(conn, nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)pGraphNode, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)pDependencies, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&numDependencies, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodeParams, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddNode_v2(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, const cudaGraphEdgeData* dependencyData, size_t numDependencies, struct cudaGraphNodeParams* nodeParams)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)pGraphNode, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)pDependencies, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)dependencyData, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&numDependencies, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodeParams, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    cudaError_t return_value;
+    if (rpc_write_start_request(conn, RPC_cudaGraphAddNode_v2) < 0 ||
+        rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(conn, &dependencyData, sizeof(const cudaGraphEdgeData*)) < 0 ||
+        rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(conn, nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)pGraphNode, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)pDependencies, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)dependencyData, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&numDependencies, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodeParams, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphNodeSetParams(cudaGraphNode_t node, struct cudaGraphNodeParams* nodeParams)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&node, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodeParams, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    cudaError_t return_value;
+    if (rpc_write_start_request(conn, RPC_cudaGraphNodeSetParams) < 0 ||
+        rpc_write(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(conn, nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&node, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodeParams, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecNodeSetParams(cudaGraphExec_t graphExec, cudaGraphNode_t node, struct cudaGraphNodeParams* nodeParams)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&graphExec, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&node, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodeParams, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    cudaError_t return_value;
+    if (rpc_write_start_request(conn, RPC_cudaGraphExecNodeSetParams) < 0 ||
+        rpc_write(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(conn, nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&graphExec, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&node, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodeParams, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaGraphConditionalHandleCreate(cudaGraphConditionalHandle* pHandle_out, cudaGraph_t graph, unsigned int defaultLaunchValue, unsigned int flags)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -25050,33 +23061,6 @@ cublasStatus_t cublasGetProperty(libraryPropertyType type, int* value)
     if (maybe_copy_unified_arg(conn, (void*)&type, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)value, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    return return_value;
-}
-
-cublasStatus_t cublasSetWorkspace_v2(cublasHandle_t handle, void* workspace, size_t workspaceSizeInBytes)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)workspace, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&workspaceSizeInBytes, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    cublasStatus_t return_value;
-    if (rpc_write_start_request(conn, RPC_cublasSetWorkspace_v2) < 0 ||
-        rpc_write(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_write(conn, &workspace, sizeof(void*)) < 0 ||
-        rpc_write(conn, &workspaceSizeInBytes, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)workspace, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&workspaceSizeInBytes, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     return return_value;
 }
@@ -55518,16 +53502,16 @@ const char* cublasLtGetStatusName(cublasStatus_t status)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&status, cudaMemcpyHostToDevice) < 0)
-      return nullptr;
+      return const char*;
     const char* return_value;
     if (rpc_write_start_request(conn, RPC_cublasLtGetStatusName) < 0 ||
         rpc_write(conn, &status, sizeof(cublasStatus_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(const char*)) < 0 ||
         rpc_read_end(conn) < 0)
-        return nullptr;
+        return const char*;
     if (maybe_copy_unified_arg(conn, (void*)&status, cudaMemcpyDeviceToHost) < 0)
-      return nullptr;
+      return const char*;
     return return_value;
 }
 
@@ -55535,16 +53519,16 @@ const char* cublasLtGetStatusString(cublasStatus_t status)
 {
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&status, cudaMemcpyHostToDevice) < 0)
-      return nullptr;
+      return const char*;
     const char* return_value;
     if (rpc_write_start_request(conn, RPC_cublasLtGetStatusString) < 0 ||
         rpc_write(conn, &status, sizeof(cublasStatus_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(const char*)) < 0 ||
         rpc_read_end(conn) < 0)
-        return nullptr;
+        return const char*;
     if (maybe_copy_unified_arg(conn, (void*)&status, cudaMemcpyDeviceToHost) < 0)
-      return nullptr;
+      return const char*;
     return return_value;
 }
 
@@ -55556,7 +53540,7 @@ size_t cublasLtGetVersion()
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(size_t)) < 0 ||
         rpc_read_end(conn) < 0)
-        return -1;
+        return size_t;
     return return_value;
 }
 
@@ -55568,7 +53552,7 @@ size_t cublasLtGetCudartVersion()
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(size_t)) < 0 ||
         rpc_read_end(conn) < 0)
-        return -1;
+        return size_t;
     return return_value;
 }
 
@@ -55630,6 +53614,23 @@ cublasStatus_t cublasLtHeuristicsCacheSetCapacity(size_t capacity)
     return return_value;
 }
 
+unsigned cublasLtDisableCpuInstructionsSetMask(unsigned mask)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&mask, cudaMemcpyHostToDevice) < 0)
+      return unsigned;
+    unsigned return_value;
+    if (rpc_write_start_request(conn, RPC_cublasLtDisableCpuInstructionsSetMask) < 0 ||
+        rpc_write(conn, &mask, sizeof(unsigned)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(unsigned)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return unsigned;
+    if (maybe_copy_unified_arg(conn, (void*)&mask, cudaMemcpyDeviceToHost) < 0)
+      return unsigned;
+    return return_value;
+}
+
 cublasStatus_t cublasLtMatrixLayoutInit_internal(cublasLtMatrixLayout_t matLayout, size_t size, cudaDataType type, uint64_t rows, uint64_t cols, int64_t ld)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -55660,6 +53661,43 @@ cublasStatus_t cublasLtMatrixLayoutInit_internal(cublasLtMatrixLayout_t matLayou
     if (maybe_copy_unified_arg(conn, (void*)&matLayout, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&type, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&rows, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&cols, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ld, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasLtMatrixLayoutInit(cublasLtMatrixLayout_t matLayout, cudaDataType type, uint64_t rows, uint64_t cols, int64_t ld)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&matLayout, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&type, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&rows, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&cols, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ld, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    if (rpc_write_start_request(conn, RPC_cublasLtMatrixLayoutInit) < 0 ||
+        rpc_write(conn, &matLayout, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, &type, sizeof(cudaDataType)) < 0 ||
+        rpc_write(conn, &rows, sizeof(uint64_t)) < 0 ||
+        rpc_write(conn, &cols, sizeof(uint64_t)) < 0 ||
+        rpc_write(conn, &ld, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&matLayout, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&type, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -55791,6 +53829,33 @@ cublasStatus_t cublasLtMatmulDescInit_internal(cublasLtMatmulDesc_t matmulDesc, 
     return return_value;
 }
 
+cublasStatus_t cublasLtMatmulDescInit(cublasLtMatmulDesc_t matmulDesc, cublasComputeType_t computeType, cudaDataType_t scaleType)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&matmulDesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&computeType, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&scaleType, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    if (rpc_write_start_request(conn, RPC_cublasLtMatmulDescInit) < 0 ||
+        rpc_write(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
+        rpc_write(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
+        rpc_write(conn, &scaleType, sizeof(cudaDataType_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&matmulDesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&computeType, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&scaleType, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 cublasStatus_t cublasLtMatmulDescCreate(cublasLtMatmulDesc_t* matmulDesc, cublasComputeType_t computeType, cudaDataType_t scaleType)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -55895,6 +53960,28 @@ cublasStatus_t cublasLtMatrixTransformDescInit_internal(cublasLtMatrixTransformD
     return return_value;
 }
 
+cublasStatus_t cublasLtMatrixTransformDescInit(cublasLtMatrixTransformDesc_t transformDesc, cudaDataType scaleType)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&transformDesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&scaleType, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    if (rpc_write_start_request(conn, RPC_cublasLtMatrixTransformDescInit) < 0 ||
+        rpc_write(conn, &transformDesc, sizeof(cublasLtMatrixTransformDesc_t)) < 0 ||
+        rpc_write(conn, &scaleType, sizeof(cudaDataType)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transformDesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&scaleType, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 cublasStatus_t cublasLtMatrixTransformDescCreate(cublasLtMatrixTransformDesc_t* transformDesc, cudaDataType scaleType)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -55989,6 +54076,23 @@ cublasStatus_t cublasLtMatmulPreferenceInit_internal(cublasLtMatmulPreference_t 
     return return_value;
 }
 
+cublasStatus_t cublasLtMatmulPreferenceInit(cublasLtMatmulPreference_t pref)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&pref, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    if (rpc_write_start_request(conn, RPC_cublasLtMatmulPreferenceInit) < 0 ||
+        rpc_write(conn, &pref, sizeof(cublasLtMatmulPreference_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&pref, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 cublasStatus_t cublasLtMatmulPreferenceCreate(cublasLtMatmulPreference_t* pref)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -56036,15 +54140,10 @@ cublasStatus_t cublasLtMatmulPreferenceSetAttribute(cublasLtMatmulPreference_t p
     if (maybe_copy_unified_arg(conn, (void*)&sizeInBytes, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     cublasStatus_t return_value;
-
-    printf("[client]: test debug...\n");
-    size_t workspaceSize = *(const size_t*) buf;
-    printf("[client]: workspaceSize=%d\n",workspaceSize);
-
     if (rpc_write_start_request(conn, RPC_cublasLtMatmulPreferenceSetAttribute) < 0 ||
         rpc_write(conn, &pref, sizeof(cublasLtMatmulPreference_t)) < 0 ||
         rpc_write(conn, &attr, sizeof(cublasLtMatmulPreferenceAttributes_t)) < 0 ||
-        rpc_write(conn, &workspaceSize, sizeof(size_t)) < 0 ||
+        rpc_write(conn, &buf, sizeof(const void*)) < 0 ||
         rpc_write(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
@@ -56057,77 +54156,6 @@ cublasStatus_t cublasLtMatmulPreferenceSetAttribute(cublasLtMatmulPreference_t p
     if (maybe_copy_unified_arg(conn, (void*)buf, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&sizeInBytes, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    return return_value;
-}
-
-cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t operationDesc, cublasLtMatrixLayout_t Adesc, cublasLtMatrixLayout_t Bdesc, cublasLtMatrixLayout_t Cdesc, cublasLtMatrixLayout_t Ddesc, cublasLtMatmulPreference_t preference, int requestedAlgoCount, cublasLtMatmulHeuristicResult_t heuristicResultsArray[], int* returnAlgoCount)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    printf("[debug]: heuristic1\n");
-    if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&operationDesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Adesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Bdesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Cdesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Ddesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&preference, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&requestedAlgoCount, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)heuristicResultsArray, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    for (int i = 0; i < static_cast<int>(*returnAlgoCount) && is_unified_pointer(conn, (void*)heuristicResultsArray); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&heuristicResultsArray[i], cudaMemcpyHostToDevice) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)returnAlgoCount, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    cublasStatus_t return_value;
-    printf("[debug]: heuristic2\n");
-    if (rpc_write_start_request(conn, RPC_cublasLtMatmulAlgoGetHeuristic) < 0 ||
-        rpc_write(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
-        rpc_write(conn, &operationDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
-        rpc_write(conn, &Adesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &Bdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &preference, sizeof(cublasLtMatmulPreference_t)) < 0 ||
-        rpc_write(conn, &requestedAlgoCount, sizeof(int)) < 0 ||
-        // rpc_write(conn, &heuristicResultsArray, sizeof(cublasLtMatmulHeuristicResult_t)) < 0 ||
-        // rpc_write(conn, returnAlgoCount, sizeof(int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, returnAlgoCount, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&operationDesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Adesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Bdesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Cdesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Ddesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&preference, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&requestedAlgoCount, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)heuristicResultsArray, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    for (int i = 0; i < static_cast<int>(*returnAlgoCount) && is_unified_pointer(conn, (void*)heuristicResultsArray); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&heuristicResultsArray[i], cudaMemcpyDeviceToHost) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)returnAlgoCount, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     return return_value;
 }
@@ -56391,8 +54419,6 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlSystemGetCudaDriverVersion", (void *)nvmlSystemGetCudaDriverVersion},
     {"nvmlSystemGetCudaDriverVersion_v2", (void *)nvmlSystemGetCudaDriverVersion_v2},
     {"nvmlSystemGetProcessName", (void *)nvmlSystemGetProcessName},
-    {"nvmlSystemGetHicVersion", (void *)nvmlSystemGetHicVersion},
-    {"nvmlSystemGetTopologyGpuSet", (void *)nvmlSystemGetTopologyGpuSet},
     {"nvmlUnitGetCount", (void *)nvmlUnitGetCount},
     {"nvmlUnitGetHandleByIndex", (void *)nvmlUnitGetHandleByIndex},
     {"nvmlUnitGetUnitInfo", (void *)nvmlUnitGetUnitInfo},
@@ -56401,6 +54427,7 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlUnitGetTemperature", (void *)nvmlUnitGetTemperature},
     {"nvmlUnitGetFanSpeedInfo", (void *)nvmlUnitGetFanSpeedInfo},
     {"nvmlUnitGetDevices", (void *)nvmlUnitGetDevices},
+    {"nvmlSystemGetHicVersion", (void *)nvmlSystemGetHicVersion},
     {"nvmlDeviceGetCount_v2", (void *)nvmlDeviceGetCount_v2},
     {"nvmlDeviceGetAttributes_v2", (void *)nvmlDeviceGetAttributes_v2},
     {"nvmlDeviceGetHandleByIndex_v2", (void *)nvmlDeviceGetHandleByIndex_v2},
@@ -56411,32 +54438,28 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceGetBrand", (void *)nvmlDeviceGetBrand},
     {"nvmlDeviceGetIndex", (void *)nvmlDeviceGetIndex},
     {"nvmlDeviceGetSerial", (void *)nvmlDeviceGetSerial},
-    {"nvmlDeviceGetModuleId", (void *)nvmlDeviceGetModuleId},
-    {"nvmlDeviceGetC2cModeInfoV", (void *)nvmlDeviceGetC2cModeInfoV},
     {"nvmlDeviceGetMemoryAffinity", (void *)nvmlDeviceGetMemoryAffinity},
     {"nvmlDeviceGetCpuAffinityWithinScope", (void *)nvmlDeviceGetCpuAffinityWithinScope},
     {"nvmlDeviceGetCpuAffinity", (void *)nvmlDeviceGetCpuAffinity},
     {"nvmlDeviceSetCpuAffinity", (void *)nvmlDeviceSetCpuAffinity},
     {"nvmlDeviceClearCpuAffinity", (void *)nvmlDeviceClearCpuAffinity},
-    {"nvmlDeviceGetNumaNodeId", (void *)nvmlDeviceGetNumaNodeId},
     {"nvmlDeviceGetTopologyCommonAncestor", (void *)nvmlDeviceGetTopologyCommonAncestor},
     {"nvmlDeviceGetTopologyNearestGpus", (void *)nvmlDeviceGetTopologyNearestGpus},
+    {"nvmlSystemGetTopologyGpuSet", (void *)nvmlSystemGetTopologyGpuSet},
     {"nvmlDeviceGetP2PStatus", (void *)nvmlDeviceGetP2PStatus},
     {"nvmlDeviceGetUUID", (void *)nvmlDeviceGetUUID},
+    {"nvmlVgpuInstanceGetMdevUUID", (void *)nvmlVgpuInstanceGetMdevUUID},
     {"nvmlDeviceGetMinorNumber", (void *)nvmlDeviceGetMinorNumber},
     {"nvmlDeviceGetBoardPartNumber", (void *)nvmlDeviceGetBoardPartNumber},
     {"nvmlDeviceGetInforomVersion", (void *)nvmlDeviceGetInforomVersion},
     {"nvmlDeviceGetInforomImageVersion", (void *)nvmlDeviceGetInforomImageVersion},
     {"nvmlDeviceGetInforomConfigurationChecksum", (void *)nvmlDeviceGetInforomConfigurationChecksum},
     {"nvmlDeviceValidateInforom", (void *)nvmlDeviceValidateInforom},
-    {"nvmlDeviceGetLastBBXFlushTime", (void *)nvmlDeviceGetLastBBXFlushTime},
     {"nvmlDeviceGetDisplayMode", (void *)nvmlDeviceGetDisplayMode},
     {"nvmlDeviceGetDisplayActive", (void *)nvmlDeviceGetDisplayActive},
     {"nvmlDeviceGetPersistenceMode", (void *)nvmlDeviceGetPersistenceMode},
-    {"nvmlDeviceGetPciInfoExt", (void *)nvmlDeviceGetPciInfoExt},
     {"nvmlDeviceGetPciInfo_v3", (void *)nvmlDeviceGetPciInfo_v3},
     {"nvmlDeviceGetMaxPcieLinkGeneration", (void *)nvmlDeviceGetMaxPcieLinkGeneration},
-    {"nvmlDeviceGetGpuMaxPcieLinkGeneration", (void *)nvmlDeviceGetGpuMaxPcieLinkGeneration},
     {"nvmlDeviceGetMaxPcieLinkWidth", (void *)nvmlDeviceGetMaxPcieLinkWidth},
     {"nvmlDeviceGetCurrPcieLinkGeneration", (void *)nvmlDeviceGetCurrPcieLinkGeneration},
     {"nvmlDeviceGetCurrPcieLinkWidth", (void *)nvmlDeviceGetCurrPcieLinkWidth},
@@ -56444,35 +54467,25 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceGetPcieReplayCounter", (void *)nvmlDeviceGetPcieReplayCounter},
     {"nvmlDeviceGetClockInfo", (void *)nvmlDeviceGetClockInfo},
     {"nvmlDeviceGetMaxClockInfo", (void *)nvmlDeviceGetMaxClockInfo},
-    {"nvmlDeviceGetGpcClkVfOffset", (void *)nvmlDeviceGetGpcClkVfOffset},
     {"nvmlDeviceGetApplicationsClock", (void *)nvmlDeviceGetApplicationsClock},
     {"nvmlDeviceGetDefaultApplicationsClock", (void *)nvmlDeviceGetDefaultApplicationsClock},
+    {"nvmlDeviceResetApplicationsClocks", (void *)nvmlDeviceResetApplicationsClocks},
     {"nvmlDeviceGetClock", (void *)nvmlDeviceGetClock},
     {"nvmlDeviceGetMaxCustomerBoostClock", (void *)nvmlDeviceGetMaxCustomerBoostClock},
     {"nvmlDeviceGetSupportedMemoryClocks", (void *)nvmlDeviceGetSupportedMemoryClocks},
     {"nvmlDeviceGetSupportedGraphicsClocks", (void *)nvmlDeviceGetSupportedGraphicsClocks},
     {"nvmlDeviceGetAutoBoostedClocksEnabled", (void *)nvmlDeviceGetAutoBoostedClocksEnabled},
+    {"nvmlDeviceSetAutoBoostedClocksEnabled", (void *)nvmlDeviceSetAutoBoostedClocksEnabled},
+    {"nvmlDeviceSetDefaultAutoBoostedClocksEnabled", (void *)nvmlDeviceSetDefaultAutoBoostedClocksEnabled},
     {"nvmlDeviceGetFanSpeed", (void *)nvmlDeviceGetFanSpeed},
     {"nvmlDeviceGetFanSpeed_v2", (void *)nvmlDeviceGetFanSpeed_v2},
-    {"nvmlDeviceGetTargetFanSpeed", (void *)nvmlDeviceGetTargetFanSpeed},
-    {"nvmlDeviceGetMinMaxFanSpeed", (void *)nvmlDeviceGetMinMaxFanSpeed},
-    {"nvmlDeviceGetFanControlPolicy_v2", (void *)nvmlDeviceGetFanControlPolicy_v2},
-    {"nvmlDeviceGetNumFans", (void *)nvmlDeviceGetNumFans},
     {"nvmlDeviceGetTemperature", (void *)nvmlDeviceGetTemperature},
     {"nvmlDeviceGetTemperatureThreshold", (void *)nvmlDeviceGetTemperatureThreshold},
-    {"nvmlDeviceGetThermalSettings", (void *)nvmlDeviceGetThermalSettings},
+    {"nvmlDeviceSetTemperatureThreshold", (void *)nvmlDeviceSetTemperatureThreshold},
     {"nvmlDeviceGetPerformanceState", (void *)nvmlDeviceGetPerformanceState},
-    {"nvmlDeviceGetCurrentClocksEventReasons", (void *)nvmlDeviceGetCurrentClocksEventReasons},
     {"nvmlDeviceGetCurrentClocksThrottleReasons", (void *)nvmlDeviceGetCurrentClocksThrottleReasons},
-    {"nvmlDeviceGetSupportedClocksEventReasons", (void *)nvmlDeviceGetSupportedClocksEventReasons},
     {"nvmlDeviceGetSupportedClocksThrottleReasons", (void *)nvmlDeviceGetSupportedClocksThrottleReasons},
     {"nvmlDeviceGetPowerState", (void *)nvmlDeviceGetPowerState},
-    {"nvmlDeviceGetDynamicPstatesInfo", (void *)nvmlDeviceGetDynamicPstatesInfo},
-    {"nvmlDeviceGetMemClkVfOffset", (void *)nvmlDeviceGetMemClkVfOffset},
-    {"nvmlDeviceGetMinMaxClockOfPState", (void *)nvmlDeviceGetMinMaxClockOfPState},
-    {"nvmlDeviceGetSupportedPerformanceStates", (void *)nvmlDeviceGetSupportedPerformanceStates},
-    {"nvmlDeviceGetGpcClkMinMaxVfOffset", (void *)nvmlDeviceGetGpcClkMinMaxVfOffset},
-    {"nvmlDeviceGetMemClkMinMaxVfOffset", (void *)nvmlDeviceGetMemClkMinMaxVfOffset},
     {"nvmlDeviceGetPowerManagementMode", (void *)nvmlDeviceGetPowerManagementMode},
     {"nvmlDeviceGetPowerManagementLimit", (void *)nvmlDeviceGetPowerManagementLimit},
     {"nvmlDeviceGetPowerManagementLimitConstraints", (void *)nvmlDeviceGetPowerManagementLimitConstraints},
@@ -56482,11 +54495,9 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceGetEnforcedPowerLimit", (void *)nvmlDeviceGetEnforcedPowerLimit},
     {"nvmlDeviceGetGpuOperationMode", (void *)nvmlDeviceGetGpuOperationMode},
     {"nvmlDeviceGetMemoryInfo", (void *)nvmlDeviceGetMemoryInfo},
-    {"nvmlDeviceGetMemoryInfo_v2", (void *)nvmlDeviceGetMemoryInfo_v2},
     {"nvmlDeviceGetComputeMode", (void *)nvmlDeviceGetComputeMode},
     {"nvmlDeviceGetCudaComputeCapability", (void *)nvmlDeviceGetCudaComputeCapability},
     {"nvmlDeviceGetEccMode", (void *)nvmlDeviceGetEccMode},
-    {"nvmlDeviceGetDefaultEccMode", (void *)nvmlDeviceGetDefaultEccMode},
     {"nvmlDeviceGetBoardId", (void *)nvmlDeviceGetBoardId},
     {"nvmlDeviceGetMultiGpuBoard", (void *)nvmlDeviceGetMultiGpuBoard},
     {"nvmlDeviceGetTotalEccErrors", (void *)nvmlDeviceGetTotalEccErrors},
@@ -56498,43 +54509,20 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceGetEncoderStats", (void *)nvmlDeviceGetEncoderStats},
     {"nvmlDeviceGetEncoderSessions", (void *)nvmlDeviceGetEncoderSessions},
     {"nvmlDeviceGetDecoderUtilization", (void *)nvmlDeviceGetDecoderUtilization},
-    {"nvmlDeviceGetJpgUtilization", (void *)nvmlDeviceGetJpgUtilization},
-    {"nvmlDeviceGetOfaUtilization", (void *)nvmlDeviceGetOfaUtilization},
     {"nvmlDeviceGetFBCStats", (void *)nvmlDeviceGetFBCStats},
     {"nvmlDeviceGetFBCSessions", (void *)nvmlDeviceGetFBCSessions},
     {"nvmlDeviceGetDriverModel", (void *)nvmlDeviceGetDriverModel},
     {"nvmlDeviceGetVbiosVersion", (void *)nvmlDeviceGetVbiosVersion},
     {"nvmlDeviceGetBridgeChipInfo", (void *)nvmlDeviceGetBridgeChipInfo},
-    {"nvmlDeviceGetComputeRunningProcesses_v3", (void *)nvmlDeviceGetComputeRunningProcesses_v3},
-    {"nvmlDeviceGetGraphicsRunningProcesses_v3", (void *)nvmlDeviceGetGraphicsRunningProcesses_v3},
-    {"nvmlDeviceGetMPSComputeRunningProcesses_v3", (void *)nvmlDeviceGetMPSComputeRunningProcesses_v3},
-    {"nvmlDeviceGetRunningProcessDetailList", (void *)nvmlDeviceGetRunningProcessDetailList},
+    {"nvmlDeviceGetComputeRunningProcesses_v2", (void *)nvmlDeviceGetComputeRunningProcesses_v2},
+    {"nvmlDeviceGetGraphicsRunningProcesses_v2", (void *)nvmlDeviceGetGraphicsRunningProcesses_v2},
+    {"nvmlDeviceGetMPSComputeRunningProcesses_v2", (void *)nvmlDeviceGetMPSComputeRunningProcesses_v2},
     {"nvmlDeviceOnSameBoard", (void *)nvmlDeviceOnSameBoard},
     {"nvmlDeviceGetAPIRestriction", (void *)nvmlDeviceGetAPIRestriction},
     {"nvmlDeviceGetSamples", (void *)nvmlDeviceGetSamples},
     {"nvmlDeviceGetBAR1MemoryInfo", (void *)nvmlDeviceGetBAR1MemoryInfo},
     {"nvmlDeviceGetViolationStatus", (void *)nvmlDeviceGetViolationStatus},
     {"nvmlDeviceGetIrqNum", (void *)nvmlDeviceGetIrqNum},
-    {"nvmlDeviceGetNumGpuCores", (void *)nvmlDeviceGetNumGpuCores},
-    {"nvmlDeviceGetPowerSource", (void *)nvmlDeviceGetPowerSource},
-    {"nvmlDeviceGetMemoryBusWidth", (void *)nvmlDeviceGetMemoryBusWidth},
-    {"nvmlDeviceGetPcieLinkMaxSpeed", (void *)nvmlDeviceGetPcieLinkMaxSpeed},
-    {"nvmlDeviceGetPcieSpeed", (void *)nvmlDeviceGetPcieSpeed},
-    {"nvmlDeviceGetAdaptiveClockInfoStatus", (void *)nvmlDeviceGetAdaptiveClockInfoStatus},
-    {"nvmlDeviceGetBusType", (void *)nvmlDeviceGetBusType},
-    {"nvmlDeviceGetGpuFabricInfo", (void *)nvmlDeviceGetGpuFabricInfo},
-    {"nvmlDeviceGetGpuFabricInfoV", (void *)nvmlDeviceGetGpuFabricInfoV},
-    {"nvmlSystemGetConfComputeCapabilities", (void *)nvmlSystemGetConfComputeCapabilities},
-    {"nvmlSystemGetConfComputeState", (void *)nvmlSystemGetConfComputeState},
-    {"nvmlDeviceGetConfComputeMemSizeInfo", (void *)nvmlDeviceGetConfComputeMemSizeInfo},
-    {"nvmlSystemGetConfComputeGpusReadyState", (void *)nvmlSystemGetConfComputeGpusReadyState},
-    {"nvmlDeviceGetConfComputeProtectedMemoryUsage", (void *)nvmlDeviceGetConfComputeProtectedMemoryUsage},
-    {"nvmlDeviceGetConfComputeGpuCertificate", (void *)nvmlDeviceGetConfComputeGpuCertificate},
-    {"nvmlDeviceGetConfComputeGpuAttestationReport", (void *)nvmlDeviceGetConfComputeGpuAttestationReport},
-    {"nvmlSystemGetConfComputeKeyRotationThresholdInfo", (void *)nvmlSystemGetConfComputeKeyRotationThresholdInfo},
-    {"nvmlSystemGetConfComputeSettings", (void *)nvmlSystemGetConfComputeSettings},
-    {"nvmlDeviceGetGspFirmwareVersion", (void *)nvmlDeviceGetGspFirmwareVersion},
-    {"nvmlDeviceGetGspFirmwareMode", (void *)nvmlDeviceGetGspFirmwareMode},
     {"nvmlDeviceGetAccountingMode", (void *)nvmlDeviceGetAccountingMode},
     {"nvmlDeviceGetAccountingStats", (void *)nvmlDeviceGetAccountingStats},
     {"nvmlDeviceGetAccountingPids", (void *)nvmlDeviceGetAccountingPids},
@@ -56545,9 +54533,6 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceGetRemappedRows", (void *)nvmlDeviceGetRemappedRows},
     {"nvmlDeviceGetRowRemapperHistogram", (void *)nvmlDeviceGetRowRemapperHistogram},
     {"nvmlDeviceGetArchitecture", (void *)nvmlDeviceGetArchitecture},
-    {"nvmlDeviceGetClkMonStatus", (void *)nvmlDeviceGetClkMonStatus},
-    {"nvmlDeviceGetProcessUtilization", (void *)nvmlDeviceGetProcessUtilization},
-    {"nvmlDeviceGetProcessesUtilizationInfo", (void *)nvmlDeviceGetProcessesUtilizationInfo},
     {"nvmlUnitSetLedState", (void *)nvmlUnitSetLedState},
     {"nvmlDeviceSetPersistenceMode", (void *)nvmlDeviceSetPersistenceMode},
     {"nvmlDeviceSetComputeMode", (void *)nvmlDeviceSetComputeMode},
@@ -56559,21 +54544,10 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceSetMemoryLockedClocks", (void *)nvmlDeviceSetMemoryLockedClocks},
     {"nvmlDeviceResetMemoryLockedClocks", (void *)nvmlDeviceResetMemoryLockedClocks},
     {"nvmlDeviceSetApplicationsClocks", (void *)nvmlDeviceSetApplicationsClocks},
-    {"nvmlDeviceResetApplicationsClocks", (void *)nvmlDeviceResetApplicationsClocks},
-    {"nvmlDeviceSetAutoBoostedClocksEnabled", (void *)nvmlDeviceSetAutoBoostedClocksEnabled},
-    {"nvmlDeviceSetDefaultAutoBoostedClocksEnabled", (void *)nvmlDeviceSetDefaultAutoBoostedClocksEnabled},
-    {"nvmlDeviceSetDefaultFanSpeed_v2", (void *)nvmlDeviceSetDefaultFanSpeed_v2},
-    {"nvmlDeviceSetFanControlPolicy", (void *)nvmlDeviceSetFanControlPolicy},
-    {"nvmlDeviceSetTemperatureThreshold", (void *)nvmlDeviceSetTemperatureThreshold},
+    {"nvmlDeviceGetClkMonStatus", (void *)nvmlDeviceGetClkMonStatus},
     {"nvmlDeviceSetPowerManagementLimit", (void *)nvmlDeviceSetPowerManagementLimit},
     {"nvmlDeviceSetGpuOperationMode", (void *)nvmlDeviceSetGpuOperationMode},
     {"nvmlDeviceSetAPIRestriction", (void *)nvmlDeviceSetAPIRestriction},
-    {"nvmlDeviceSetFanSpeed_v2", (void *)nvmlDeviceSetFanSpeed_v2},
-    {"nvmlDeviceSetGpcClkVfOffset", (void *)nvmlDeviceSetGpcClkVfOffset},
-    {"nvmlDeviceSetMemClkVfOffset", (void *)nvmlDeviceSetMemClkVfOffset},
-    {"nvmlDeviceSetConfComputeUnprotectedMemSize", (void *)nvmlDeviceSetConfComputeUnprotectedMemSize},
-    {"nvmlSystemSetConfComputeGpusReadyState", (void *)nvmlSystemSetConfComputeGpusReadyState},
-    {"nvmlSystemSetConfComputeKeyRotationThresholdInfo", (void *)nvmlSystemSetConfComputeKeyRotationThresholdInfo},
     {"nvmlDeviceSetAccountingMode", (void *)nvmlDeviceSetAccountingMode},
     {"nvmlDeviceClearAccountingPids", (void *)nvmlDeviceClearAccountingPids},
     {"nvmlDeviceGetNvLinkState", (void *)nvmlDeviceGetNvLinkState},
@@ -56598,21 +54572,11 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceRemoveGpu_v2", (void *)nvmlDeviceRemoveGpu_v2},
     {"nvmlDeviceDiscoverGpus", (void *)nvmlDeviceDiscoverGpus},
     {"nvmlDeviceGetFieldValues", (void *)nvmlDeviceGetFieldValues},
-    {"nvmlDeviceClearFieldValues", (void *)nvmlDeviceClearFieldValues},
     {"nvmlDeviceGetVirtualizationMode", (void *)nvmlDeviceGetVirtualizationMode},
     {"nvmlDeviceGetHostVgpuMode", (void *)nvmlDeviceGetHostVgpuMode},
     {"nvmlDeviceSetVirtualizationMode", (void *)nvmlDeviceSetVirtualizationMode},
-    {"nvmlDeviceGetVgpuHeterogeneousMode", (void *)nvmlDeviceGetVgpuHeterogeneousMode},
-    {"nvmlDeviceSetVgpuHeterogeneousMode", (void *)nvmlDeviceSetVgpuHeterogeneousMode},
-    {"nvmlVgpuInstanceGetPlacementId", (void *)nvmlVgpuInstanceGetPlacementId},
-    {"nvmlDeviceGetVgpuTypeSupportedPlacements", (void *)nvmlDeviceGetVgpuTypeSupportedPlacements},
-    {"nvmlDeviceGetVgpuTypeCreatablePlacements", (void *)nvmlDeviceGetVgpuTypeCreatablePlacements},
-    {"nvmlVgpuTypeGetGspHeapSize", (void *)nvmlVgpuTypeGetGspHeapSize},
-    {"nvmlVgpuTypeGetFbReservation", (void *)nvmlVgpuTypeGetFbReservation},
-    {"nvmlDeviceSetVgpuCapabilities", (void *)nvmlDeviceSetVgpuCapabilities},
     {"nvmlDeviceGetGridLicensableFeatures_v4", (void *)nvmlDeviceGetGridLicensableFeatures_v4},
-    {"nvmlGetVgpuDriverCapabilities", (void *)nvmlGetVgpuDriverCapabilities},
-    {"nvmlDeviceGetVgpuCapabilities", (void *)nvmlDeviceGetVgpuCapabilities},
+    {"nvmlDeviceGetProcessUtilization", (void *)nvmlDeviceGetProcessUtilization},
     {"nvmlDeviceGetSupportedVgpus", (void *)nvmlDeviceGetSupportedVgpus},
     {"nvmlDeviceGetCreatableVgpus", (void *)nvmlDeviceGetCreatableVgpus},
     {"nvmlVgpuTypeGetClass", (void *)nvmlVgpuTypeGetClass},
@@ -56642,34 +54606,23 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlVgpuInstanceGetFBCStats", (void *)nvmlVgpuInstanceGetFBCStats},
     {"nvmlVgpuInstanceGetFBCSessions", (void *)nvmlVgpuInstanceGetFBCSessions},
     {"nvmlVgpuInstanceGetGpuInstanceId", (void *)nvmlVgpuInstanceGetGpuInstanceId},
-    {"nvmlVgpuInstanceGetGpuPciId", (void *)nvmlVgpuInstanceGetGpuPciId},
-    {"nvmlVgpuTypeGetCapabilities", (void *)nvmlVgpuTypeGetCapabilities},
-    {"nvmlVgpuInstanceGetMdevUUID", (void *)nvmlVgpuInstanceGetMdevUUID},
     {"nvmlVgpuInstanceGetMetadata", (void *)nvmlVgpuInstanceGetMetadata},
     {"nvmlDeviceGetVgpuMetadata", (void *)nvmlDeviceGetVgpuMetadata},
     {"nvmlGetVgpuCompatibility", (void *)nvmlGetVgpuCompatibility},
     {"nvmlDeviceGetPgpuMetadataString", (void *)nvmlDeviceGetPgpuMetadataString},
-    {"nvmlDeviceGetVgpuSchedulerLog", (void *)nvmlDeviceGetVgpuSchedulerLog},
-    {"nvmlDeviceGetVgpuSchedulerState", (void *)nvmlDeviceGetVgpuSchedulerState},
-    {"nvmlDeviceGetVgpuSchedulerCapabilities", (void *)nvmlDeviceGetVgpuSchedulerCapabilities},
-    {"nvmlDeviceSetVgpuSchedulerState", (void *)nvmlDeviceSetVgpuSchedulerState},
     {"nvmlGetVgpuVersion", (void *)nvmlGetVgpuVersion},
     {"nvmlSetVgpuVersion", (void *)nvmlSetVgpuVersion},
     {"nvmlDeviceGetVgpuUtilization", (void *)nvmlDeviceGetVgpuUtilization},
-    {"nvmlDeviceGetVgpuInstancesUtilizationInfo", (void *)nvmlDeviceGetVgpuInstancesUtilizationInfo},
     {"nvmlDeviceGetVgpuProcessUtilization", (void *)nvmlDeviceGetVgpuProcessUtilization},
-    {"nvmlDeviceGetVgpuProcessesUtilizationInfo", (void *)nvmlDeviceGetVgpuProcessesUtilizationInfo},
     {"nvmlVgpuInstanceGetAccountingMode", (void *)nvmlVgpuInstanceGetAccountingMode},
     {"nvmlVgpuInstanceGetAccountingPids", (void *)nvmlVgpuInstanceGetAccountingPids},
     {"nvmlVgpuInstanceGetAccountingStats", (void *)nvmlVgpuInstanceGetAccountingStats},
     {"nvmlVgpuInstanceClearAccountingPids", (void *)nvmlVgpuInstanceClearAccountingPids},
-    {"nvmlVgpuInstanceGetLicenseInfo_v2", (void *)nvmlVgpuInstanceGetLicenseInfo_v2},
     {"nvmlGetExcludedDeviceCount", (void *)nvmlGetExcludedDeviceCount},
     {"nvmlGetExcludedDeviceInfoByIndex", (void *)nvmlGetExcludedDeviceInfoByIndex},
     {"nvmlDeviceSetMigMode", (void *)nvmlDeviceSetMigMode},
     {"nvmlDeviceGetMigMode", (void *)nvmlDeviceGetMigMode},
     {"nvmlDeviceGetGpuInstanceProfileInfo", (void *)nvmlDeviceGetGpuInstanceProfileInfo},
-    {"nvmlDeviceGetGpuInstanceProfileInfoV", (void *)nvmlDeviceGetGpuInstanceProfileInfoV},
     {"nvmlDeviceGetGpuInstancePossiblePlacements_v2", (void *)nvmlDeviceGetGpuInstancePossiblePlacements_v2},
     {"nvmlDeviceGetGpuInstanceRemainingCapacity", (void *)nvmlDeviceGetGpuInstanceRemainingCapacity},
     {"nvmlDeviceCreateGpuInstance", (void *)nvmlDeviceCreateGpuInstance},
@@ -56678,9 +54631,7 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceGetGpuInstanceById", (void *)nvmlDeviceGetGpuInstanceById},
     {"nvmlGpuInstanceGetInfo", (void *)nvmlGpuInstanceGetInfo},
     {"nvmlGpuInstanceGetComputeInstanceProfileInfo", (void *)nvmlGpuInstanceGetComputeInstanceProfileInfo},
-    {"nvmlGpuInstanceGetComputeInstanceProfileInfoV", (void *)nvmlGpuInstanceGetComputeInstanceProfileInfoV},
     {"nvmlGpuInstanceGetComputeInstanceRemainingCapacity", (void *)nvmlGpuInstanceGetComputeInstanceRemainingCapacity},
-    {"nvmlGpuInstanceGetComputeInstancePossiblePlacements", (void *)nvmlGpuInstanceGetComputeInstancePossiblePlacements},
     {"nvmlGpuInstanceCreateComputeInstance", (void *)nvmlGpuInstanceCreateComputeInstance},
     {"nvmlComputeInstanceDestroy", (void *)nvmlComputeInstanceDestroy},
     {"nvmlGpuInstanceGetComputeInstances", (void *)nvmlGpuInstanceGetComputeInstances},
@@ -56692,19 +54643,7 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"nvmlDeviceGetMaxMigDeviceCount", (void *)nvmlDeviceGetMaxMigDeviceCount},
     {"nvmlDeviceGetMigDeviceHandleByIndex", (void *)nvmlDeviceGetMigDeviceHandleByIndex},
     {"nvmlDeviceGetDeviceHandleFromMigDeviceHandle", (void *)nvmlDeviceGetDeviceHandleFromMigDeviceHandle},
-    {"nvmlGpmMetricsGet", (void *)nvmlGpmMetricsGet},
-    {"nvmlGpmSampleFree", (void *)nvmlGpmSampleFree},
-    {"nvmlGpmSampleAlloc", (void *)nvmlGpmSampleAlloc},
-    {"nvmlGpmSampleGet", (void *)nvmlGpmSampleGet},
-    {"nvmlGpmMigSampleGet", (void *)nvmlGpmMigSampleGet},
-    {"nvmlGpmQueryDeviceSupport", (void *)nvmlGpmQueryDeviceSupport},
-    {"nvmlGpmQueryIfStreamingEnabled", (void *)nvmlGpmQueryIfStreamingEnabled},
-    {"nvmlGpmSetStreamingEnabled", (void *)nvmlGpmSetStreamingEnabled},
-    {"nvmlDeviceSetNvLinkDeviceLowPowerThreshold", (void *)nvmlDeviceSetNvLinkDeviceLowPowerThreshold},
-    {"nvmlSystemSetNvlinkBwMode", (void *)nvmlSystemSetNvlinkBwMode},
-    {"nvmlSystemGetNvlinkBwMode", (void *)nvmlSystemGetNvlinkBwMode},
-    {"nvmlDeviceSetPowerManagementLimit_v2", (void *)nvmlDeviceSetPowerManagementLimit_v2},
-    {"nvmlDeviceGetSramEccErrorStatus", (void *)nvmlDeviceGetSramEccErrorStatus},
+    {"nvmlDeviceGetBusType", (void *)nvmlDeviceGetBusType},
     {"cuInit", (void *)cuInit},
     {"cuDriverGetVersion", (void *)cuDriverGetVersion},
     {"cuDeviceGet", (void *)cuDeviceGet},
@@ -57320,6 +55259,10 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cudaUserObjectRelease", (void *)cudaUserObjectRelease},
     {"cudaGraphRetainUserObject", (void *)cudaGraphRetainUserObject},
     {"cudaGraphReleaseUserObject", (void *)cudaGraphReleaseUserObject},
+    {"cudaGraphAddNode", (void *)cudaGraphAddNode},
+    {"cudaGraphAddNode_v2", (void *)cudaGraphAddNode_v2},
+    {"cudaGraphNodeSetParams", (void *)cudaGraphNodeSetParams},
+    {"cudaGraphExecNodeSetParams", (void *)cudaGraphExecNodeSetParams},
     {"cudaGraphConditionalHandleCreate", (void *)cudaGraphConditionalHandleCreate},
     {"cudaGetDriverEntryPoint", (void *)cudaGetDriverEntryPoint},
     {"cudaGetExportTable", (void *)cudaGetExportTable},
@@ -57329,7 +55272,6 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cublasDestroy_v2", (void *)cublasDestroy_v2},
     {"cublasGetVersion_v2", (void *)cublasGetVersion_v2},
     {"cublasGetProperty", (void *)cublasGetProperty},
-    {"cublasSetWorkspace_v2", (void *)cublasSetWorkspace_v2},
     {"cublasSetStream_v2", (void *)cublasSetStream_v2},
     {"cublasGetStream_v2", (void *)cublasGetStream_v2},
     {"cublasGetPointerMode_v2", (void *)cublasGetPointerMode_v2},
@@ -57849,23 +55791,27 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cublasLtGetProperty", (void *)cublasLtGetProperty},
     {"cublasLtHeuristicsCacheGetCapacity", (void *)cublasLtHeuristicsCacheGetCapacity},
     {"cublasLtHeuristicsCacheSetCapacity", (void *)cublasLtHeuristicsCacheSetCapacity},
+    {"cublasLtDisableCpuInstructionsSetMask", (void *)cublasLtDisableCpuInstructionsSetMask},
     {"cublasLtMatrixLayoutInit_internal", (void *)cublasLtMatrixLayoutInit_internal},
+    {"cublasLtMatrixLayoutInit", (void *)cublasLtMatrixLayoutInit},
     {"cublasLtMatrixLayoutCreate", (void *)cublasLtMatrixLayoutCreate},
     {"cublasLtMatrixLayoutDestroy", (void *)cublasLtMatrixLayoutDestroy},
     {"cublasLtMatrixLayoutSetAttribute", (void *)cublasLtMatrixLayoutSetAttribute},
     {"cublasLtMatmulDescInit_internal", (void *)cublasLtMatmulDescInit_internal},
+    {"cublasLtMatmulDescInit", (void *)cublasLtMatmulDescInit},
     {"cublasLtMatmulDescCreate", (void *)cublasLtMatmulDescCreate},
     {"cublasLtMatmulDescDestroy", (void *)cublasLtMatmulDescDestroy},
     {"cublasLtMatmulDescSetAttribute", (void *)cublasLtMatmulDescSetAttribute},
     {"cublasLtMatrixTransformDescInit_internal", (void *)cublasLtMatrixTransformDescInit_internal},
+    {"cublasLtMatrixTransformDescInit", (void *)cublasLtMatrixTransformDescInit},
     {"cublasLtMatrixTransformDescCreate", (void *)cublasLtMatrixTransformDescCreate},
     {"cublasLtMatrixTransformDescDestroy", (void *)cublasLtMatrixTransformDescDestroy},
     {"cublasLtMatrixTransformDescSetAttribute", (void *)cublasLtMatrixTransformDescSetAttribute},
     {"cublasLtMatmulPreferenceInit_internal", (void *)cublasLtMatmulPreferenceInit_internal},
+    {"cublasLtMatmulPreferenceInit", (void *)cublasLtMatmulPreferenceInit},
     {"cublasLtMatmulPreferenceCreate", (void *)cublasLtMatmulPreferenceCreate},
     {"cublasLtMatmulPreferenceDestroy", (void *)cublasLtMatmulPreferenceDestroy},
     {"cublasLtMatmulPreferenceSetAttribute", (void *)cublasLtMatmulPreferenceSetAttribute},
-    {"cublasLtMatmulAlgoGetHeuristic", (void *)cublasLtMatmulAlgoGetHeuristic},
     {"cublasLtMatmulAlgoInit", (void *)cublasLtMatmulAlgoInit},
     {"cublasLtMatmulAlgoCheck", (void *)cublasLtMatmulAlgoCheck},
     {"cublasLtMatmulAlgoConfigSetAttribute", (void *)cublasLtMatmulAlgoConfigSetAttribute},

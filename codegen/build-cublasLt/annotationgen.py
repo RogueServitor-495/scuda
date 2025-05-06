@@ -11,7 +11,7 @@ def main():
         "/usr/local/cuda-12.4/include",
     ]))
 
-    nvml_ast: ParsedData = parse_file("/usr/local/cuda-12.4/targets/x86_64-linux/include/nvml.h", options=options)
+    nvml_ast: ParsedData = parse_file("/usr/include/nvml.h", options=options)
     cudnn_graph_ast: ParsedData = parse_file("/usr/include/cudnn_graph.h", options=options)
     cudnn_ops_ast: ParsedData = parse_file("/usr/include/cudnn_ops.h", options=options)
     cuda_ast: ParsedData = parse_file("/usr/local/cuda-12.4/targets/x86_64-linux/include/cuda.h", options=options)

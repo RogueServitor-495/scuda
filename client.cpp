@@ -179,6 +179,7 @@ void *rpc_client_dispatch_thread(void *arg) {
 
     if (op == -1) {
       printf("socket error...\n");
+      break;
     }
 
     if (op == 1) {

@@ -86,14 +86,6 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaDeviceGetGraphMemAttribute"
 ]
 
-# some functions in cublasLt.h is statically inlined, we can not hook them
-INLINED_FUNCTIONS = [
-    "cublasLtMatrixLayoutInit",
-    "cublasLtMatmulDescInit",
-    "cublasLtMatrixTransformDescInit",
-    "cublasLtMatmulPreferenceInit",
-]
-
 
 @dataclass
 class NullableOperation:
@@ -997,15 +989,15 @@ def error_const(return_type: str) -> str:
     if return_type == "cudnnStatus_t":
         return "CUDNN_STATUS_NOT_INITIALIZED"
     if return_type == "size_t":
-        return "-1"
+        return "size_t"
     if return_type == "const char*":
-        return "nullptr"
+        return "const char*"
     if return_type == "void":
-        return ""
+        return "void"
     if return_type == "struct cudaChannelFormatDesc":
         return "struct cudaChannelFormatDesc"
     if return_type == "unsigned":
-        return "-1"
+        return "unsigned"
     raise NotImplementedError("Unknown return type: %s" % return_type)
 
 
@@ -1053,7 +1045,7 @@ def main():
         cudart_header = find_header_file("cuda_runtime_api.h")
         annotations_header = find_header_file("annotations.h")
         cublasLt_header = find_header_file("cublasLt.h")
-        nvml_header = find_header_file("/usr/local/cuda-12.4/targets/x86_64-linux/include/nvml.h")
+        nvml_header = find_header_file("nvml.h")
     except FileNotFoundError as e:
         print(e)
         return
@@ -1146,7 +1138,6 @@ def main():
             "#include <cuda.h>\n"
             "#include <cudnn.h>\n"
             "#include <cublas_v2.h>\n"
-            "#include <cublasLt.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -1163,9 +1154,6 @@ def main():
         for function, annotation, operations, disabled in functions_with_annotations:
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
             if disabled:
-                continue
-            if function.name.format() in INLINED_FUNCTIONS:
-                print(f"skipping static inline function {function.name}")
                 continue
 
             params = []
@@ -1283,10 +1271,6 @@ def main():
             if disabled:
                 continue
 
-            if function.name.format() in INLINED_FUNCTIONS:
-                print(f"skipping static inline function {function.name}")
-                continue
-            
             f.write(
                 '    {{"{name}", (void *){name}}},\n'.format(
                     name=function.name.format()
@@ -1335,7 +1319,6 @@ def main():
             "#include <cuda.h>\n"
             "#include <cudnn.h>\n"
             "#include <cublas_v2.h>\n"
-            "#include <cublasLt.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"

@@ -65,6 +65,7 @@ find_library(CUBLAS_LIBRARY cublas HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/l
 find_library(CUDNN_LIBRARY cudnn HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
 find_library(CUDART_LIBRARY cudart HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
 find_library(NVML_LIBRARY nvidia-ml HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/include)
+find_library(CUBLASLT_LIBRARY cublasLt HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
 
 if (NOT CUBLAS_LIBRARY)
     message(FATAL_ERROR "cuBLAS library not found. Ensure CUDA is installed and the library path is correct.")
@@ -90,7 +91,7 @@ set_target_properties(${CLIENT_OUTPUT} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_executable(${SERVER_OUTPUT} ${SERVER_SOURCES} ${SERVER_HEADERS})
 target_include_directories(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_LIBRARIES} cuda)
-target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDART_LIBRARY} ${CUBLAS_LIBRARY} ${CUDNN_LIBRARY} ${NVML_LIBRARY})
+target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDART_LIBRARY} ${CUBLAS_LIBRARY} ${CUDNN_LIBRARY} ${NVML_LIBRARY} ${CUBLASLT_LIBRARY})
 
 set_source_files_properties(
     ${SERVER_SOURCES}

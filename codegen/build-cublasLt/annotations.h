@@ -8219,7 +8219,7 @@ cublasStatus_t cublasGetProperty(libraryPropertyType type, int *value);
 size_t cublasGetCudartVersion();
 /**
  * @param handle SEND_ONLY
- * @param workspace SEND_ONLY
+ * @param workspace SEND_RECV
  * @param workspaceSizeInBytes SEND_ONLY
  */
 cublasStatus_t cublasSetWorkspace_v2(cublasHandle_t handle, void *workspace,
@@ -17136,7 +17136,6 @@ cudaError_t cudaGraphAddDependencies_v2(cudaGraph_t graph, const cudaGraphNode_t
  */
 cudaError_t cudaGraphRemoveDependencies_v2(cudaGraph_t graph, const cudaGraphNode_t* from, const cudaGraphNode_t* to, const cudaGraphEdgeData* edgeData, size_t numDependencies);
 /**
- * @disabled
  * @param pGraphNode SEND_RECV
  * @param graph SEND_ONLY
  * @param pDependencies SEND_RECV
@@ -17145,7 +17144,6 @@ cudaError_t cudaGraphRemoveDependencies_v2(cudaGraph_t graph, const cudaGraphNod
  */
 cudaError_t cudaGraphAddNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, struct cudaGraphNodeParams* nodeParams);
 /**
- * @disabled
  * @param pGraphNode SEND_RECV
  * @param graph SEND_ONLY
  * @param pDependencies SEND_RECV
@@ -17155,13 +17153,11 @@ cudaError_t cudaGraphAddNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, con
  */
 cudaError_t cudaGraphAddNode_v2(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, const cudaGraphEdgeData* dependencyData, size_t numDependencies, struct cudaGraphNodeParams* nodeParams);
 /**
- * @disabled
  * @param node SEND_ONLY
  * @param nodeParams SEND_RECV
  */
 cudaError_t cudaGraphNodeSetParams(cudaGraphNode_t node, struct cudaGraphNodeParams* nodeParams);
 /**
- * @disabled
  * @param graphExec SEND_ONLY
  * @param node SEND_ONLY
  * @param nodeParams SEND_RECV
@@ -17291,7 +17287,6 @@ cublasStatus_t cublasLtHeuristicsCacheGetCapacity(size_t* capacity);
  */
 cublasStatus_t cublasLtHeuristicsCacheSetCapacity(size_t capacity);
 /**
- * @disabled
  * @param mask SEND_ONLY
  */
 unsigned cublasLtDisableCpuInstructionsSetMask(unsigned mask);
@@ -17486,7 +17481,7 @@ cublasStatus_t cublasLtMatmulPreferenceGetAttribute(cublasLtMatmulPreference_t p
  * @param Ddesc SEND_ONLY
  * @param preference SEND_ONLY
  * @param requestedAlgoCount SEND_ONLY
- * @param heuristicResultsArray SEND_ONLY LENGTH:returnAlgoCount
+ * @param heuristicResultsArray SEND_ONLY
  * @param returnAlgoCount SEND_RECV
  */
 cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t operationDesc, cublasLtMatrixLayout_t Adesc, cublasLtMatrixLayout_t Bdesc, cublasLtMatrixLayout_t Cdesc, cublasLtMatrixLayout_t Ddesc, cublasLtMatmulPreference_t preference, int requestedAlgoCount, cublasLtMatmulHeuristicResult_t heuristicResultsArray[], int* returnAlgoCount);
@@ -17572,210 +17567,3 @@ cublasStatus_t cublasLtLoggerSetMask(int mask);
 /**
  */
 cublasStatus_t cublasLtLoggerForceDisable();
-/**
- * @param device SEND_ONLY
- * @param moduleId SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetModuleId(nvmlDevice_t device, unsigned int* moduleId);
-/**
- * @param device SEND_ONLY
- * @param c2cModeInfo SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetC2cModeInfoV(nvmlDevice_t device, nvmlC2cModeInfo_v1_t* c2cModeInfo);
-/**
- * @param device SEND_ONLY
- * @param node SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetNumaNodeId(nvmlDevice_t device, unsigned int* node);
-/**
- * @param device SEND_ONLY
- * @param timestamp SEND_RECV
- * @param durationUs SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetLastBBXFlushTime(nvmlDevice_t device, unsigned long long* timestamp, unsigned long* durationUs);
-/**
- * @param device SEND_ONLY
- * @param pci SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetPciInfoExt(nvmlDevice_t device, nvmlPciInfoExt_t* pci);
-/**
- * @param device SEND_ONLY
- * @param clocksEventReasons SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetCurrentClocksEventReasons(nvmlDevice_t device, unsigned long long* clocksEventReasons);
-/**
- * @param device SEND_ONLY
- * @param supportedClocksEventReasons SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetSupportedClocksEventReasons(nvmlDevice_t device, unsigned long long* supportedClocksEventReasons);
-/**
- * @param device SEND_ONLY
- * @param utilization SEND_RECV
- * @param samplingPeriodUs SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetJpgUtilization(nvmlDevice_t device, unsigned int* utilization, unsigned int* samplingPeriodUs);
-/**
- * @param device SEND_ONLY
- * @param utilization SEND_RECV
- * @param samplingPeriodUs SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetOfaUtilization(nvmlDevice_t device, unsigned int* utilization, unsigned int* samplingPeriodUs);
-/**
- * @param device SEND_ONLY
- * @param plist SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetRunningProcessDetailList(nvmlDevice_t device, nvmlProcessDetailList_t* plist);
-/**
- * @param device SEND_ONLY
- * @param gpuFabricInfo SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetGpuFabricInfoV(nvmlDevice_t device, nvmlGpuFabricInfoV_t* gpuFabricInfo);
-/**
- * @param capabilities SEND_RECV
- */
-nvmlReturn_t nvmlSystemGetConfComputeCapabilities(nvmlConfComputeSystemCaps_t* capabilities);
-/**
- * @param state SEND_RECV
- */
-nvmlReturn_t nvmlSystemGetConfComputeState(nvmlConfComputeSystemState_t* state);
-/**
- * @param device SEND_ONLY
- * @param memInfo SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetConfComputeMemSizeInfo(nvmlDevice_t device, nvmlConfComputeMemSizeInfo_t* memInfo);
-/**
- * @param isAcceptingWork SEND_RECV
- */
-nvmlReturn_t nvmlSystemGetConfComputeGpusReadyState(unsigned int* isAcceptingWork);
-/**
- * @param device SEND_ONLY
- * @param memory SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetConfComputeProtectedMemoryUsage(nvmlDevice_t device, nvmlMemory_t* memory);
-/**
- * @param device SEND_ONLY
- * @param gpuCert SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetConfComputeGpuCertificate(nvmlDevice_t device, nvmlConfComputeGpuCertificate_t* gpuCert);
-/**
- * @param device SEND_ONLY
- * @param gpuAtstReport SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetConfComputeGpuAttestationReport(nvmlDevice_t device, nvmlConfComputeGpuAttestationReport_t* gpuAtstReport);
-/**
- * @param pKeyRotationThrInfo SEND_RECV
- */
-nvmlReturn_t nvmlSystemGetConfComputeKeyRotationThresholdInfo(nvmlConfComputeGetKeyRotationThresholdInfo_t* pKeyRotationThrInfo);
-/**
- * @param settings SEND_RECV
- */
-nvmlReturn_t nvmlSystemGetConfComputeSettings(nvmlSystemConfComputeSettings_t* settings);
-/**
- * @param device SEND_ONLY
- * @param procesesUtilInfo SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetProcessesUtilizationInfo(nvmlDevice_t device, nvmlProcessesUtilizationInfo_t* procesesUtilInfo);
-/**
- * @param device SEND_ONLY
- * @param sizeKiB SEND_ONLY
- */
-nvmlReturn_t nvmlDeviceSetConfComputeUnprotectedMemSize(nvmlDevice_t device, unsigned long long sizeKiB);
-/**
- * @param isAcceptingWork SEND_ONLY
- */
-nvmlReturn_t nvmlSystemSetConfComputeGpusReadyState(unsigned int isAcceptingWork);
-/**
- * @param pKeyRotationThrInfo SEND_RECV
- */
-nvmlReturn_t nvmlSystemSetConfComputeKeyRotationThresholdInfo(nvmlConfComputeSetKeyRotationThresholdInfo_t* pKeyRotationThrInfo);
-/**
- * @param device SEND_ONLY
- * @param pHeterogeneousMode SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetVgpuHeterogeneousMode(nvmlDevice_t device, nvmlVgpuHeterogeneousMode_t* pHeterogeneousMode);
-/**
- * @param device SEND_ONLY
- * @param pHeterogeneousMode SEND_RECV
- */
-nvmlReturn_t nvmlDeviceSetVgpuHeterogeneousMode(nvmlDevice_t device, const nvmlVgpuHeterogeneousMode_t* pHeterogeneousMode);
-/**
- * @param vgpuInstance SEND_ONLY
- * @param pPlacement SEND_RECV
- */
-nvmlReturn_t nvmlVgpuInstanceGetPlacementId(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuPlacementId_t* pPlacement);
-/**
- * @param device SEND_ONLY
- * @param vgpuTypeId SEND_ONLY
- * @param pPlacementList SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetVgpuTypeSupportedPlacements(nvmlDevice_t device, nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuPlacementList_t* pPlacementList);
-/**
- * @param device SEND_ONLY
- * @param vgpuTypeId SEND_ONLY
- * @param pPlacementList SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetVgpuTypeCreatablePlacements(nvmlDevice_t device, nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuPlacementList_t* pPlacementList);
-/**
- * @param vgpuTypeId SEND_ONLY
- * @param gspHeapSize SEND_RECV
- */
-nvmlReturn_t nvmlVgpuTypeGetGspHeapSize(nvmlVgpuTypeId_t vgpuTypeId, unsigned long long* gspHeapSize);
-/**
- * @param vgpuTypeId SEND_ONLY
- * @param fbReservation SEND_RECV
- */
-nvmlReturn_t nvmlVgpuTypeGetFbReservation(nvmlVgpuTypeId_t vgpuTypeId, unsigned long long* fbReservation);
-/**
- * @param device SEND_ONLY
- * @param capability SEND_ONLY
- * @param state SEND_ONLY
- */
-nvmlReturn_t nvmlDeviceSetVgpuCapabilities(nvmlDevice_t device, nvmlDeviceVgpuCapability_t capability, nvmlEnableState_t state);
-/**
- * @param device SEND_ONLY
- * @param pSchedulerState SEND_RECV
- */
-nvmlReturn_t nvmlDeviceSetVgpuSchedulerState(nvmlDevice_t device, nvmlVgpuSchedulerSetState_t* pSchedulerState);
-/**
- * @param device SEND_ONLY
- * @param vgpuUtilInfo SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetVgpuInstancesUtilizationInfo(nvmlDevice_t device, nvmlVgpuInstancesUtilizationInfo_t* vgpuUtilInfo);
-/**
- * @param device SEND_ONLY
- * @param vgpuProcUtilInfo SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetVgpuProcessesUtilizationInfo(nvmlDevice_t device, nvmlVgpuProcessesUtilizationInfo_t* vgpuProcUtilInfo);
-/**
- * @param device SEND_ONLY
- * @param state SEND_RECV
- */
-nvmlReturn_t nvmlGpmQueryIfStreamingEnabled(nvmlDevice_t device, unsigned int* state);
-/**
- * @param device SEND_ONLY
- * @param state SEND_ONLY
- */
-nvmlReturn_t nvmlGpmSetStreamingEnabled(nvmlDevice_t device, unsigned int state);
-/**
- * @param nvlinkBwMode SEND_ONLY
- */
-nvmlReturn_t nvmlSystemSetNvlinkBwMode(unsigned int nvlinkBwMode);
-/**
- * @param nvlinkBwMode SEND_RECV
- */
-nvmlReturn_t nvmlSystemGetNvlinkBwMode(unsigned int* nvlinkBwMode);
-/**
- * @param device SEND_ONLY
- * @param powerValue SEND_RECV
- */
-nvmlReturn_t nvmlDeviceSetPowerManagementLimit_v2(nvmlDevice_t device, nvmlPowerValue_v2_t* powerValue);
-/**
- * @param device SEND_ONLY
- * @param status SEND_RECV
- */
-nvmlReturn_t nvmlDeviceGetSramEccErrorStatus(nvmlDevice_t device, nvmlEccSramErrorStatus_t* status);
-/**
- * @param vgpuInstance SEND_ONLY
- * @param licenseInfo SEND_RECV
- */
-nvmlReturn_t nvmlVgpuInstanceGetLicenseInfo(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuLicenseInfo_t* licenseInfo);
