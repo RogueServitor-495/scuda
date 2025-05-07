@@ -1465,7 +1465,7 @@ cublasStatus_t cublasLtMatmul(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t
     //   return CUBLAS_STATUS_NOT_INITIALIZED;
     // }
     printf("size of algo=%d\n",sizeof(const cublasLtMatmulAlgo_t));
-    std::cout << "algo is:" << algo <<  std::endl; 
+    // std::cout << "algo is:" << algo <<  std::endl; 
 
     if (rpc_write_start_request(conn, RPC_cublasLtMatmul) < 0 ||
         rpc_write(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
@@ -1480,7 +1480,7 @@ cublasStatus_t cublasLtMatmul(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t
         rpc_write(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
         rpc_write(conn, &D, sizeof(void*)) < 0 ||
         rpc_write(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &algo, sizeof(const cublasLtMatmulAlgo_t)) < 0 ||
+        rpc_write(conn, algo, sizeof(cublasLtMatmulAlgo_t)) < 0 ||
         rpc_write(conn, &workspace, sizeof(void*)) < 0 ||
         rpc_write(conn, &workspaceSizeInBytes, sizeof(size_t)) < 0 ||
         rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
@@ -1550,6 +1550,8 @@ cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle, cubl
     if (maybe_copy_unified_arg(conn, (void*)returnAlgoCount, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     cublasStatus_t return_value;
+
+    cublasLtMatmulAlgo_t algo;
     if (rpc_write_start_request(conn, RPC_cublasLtMatmulAlgoGetHeuristic) < 0 ||
         rpc_write(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
         rpc_write(conn, &operationDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
@@ -1563,6 +1565,7 @@ cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle, cubl
         rpc_read(conn, returnAlgoCount, sizeof(int)) < 0 ||
         rpc_read(conn, heuristicResultsArray, *returnAlgoCount * sizeof(cublasLtMatmulHeuristicResult_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        // rpc_read(conn, &algo, sizeof(cublasLtMatmulAlgo_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyDeviceToHost) < 0)

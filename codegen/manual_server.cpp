@@ -1037,6 +1037,7 @@ int handle_cublasLtMatmul(conn_t *conn)
     void* D;
     cublasLtMatrixLayout_t Ddesc;
     cublasLtMatmulAlgo_t algo;
+    // void* algo = (void *)malloc(sizeof(cublasLtMatmulAlgo_t));
     void* workspace;
     size_t workspaceSizeInBytes;
     cudaStream_t stream;
@@ -1067,7 +1068,7 @@ int handle_cublasLtMatmul(conn_t *conn)
         rpc_read(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
         rpc_read(conn, &D, sizeof(void*)) < 0 ||
         rpc_read(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_read(conn, &algo, sizeof(const cublasLtMatmulAlgo_t)) < 0 ||
+        rpc_read(conn, &algo, sizeof(cublasLtMatmulAlgo_t)) < 0 ||
         rpc_read(conn, &workspace, sizeof(void*)) < 0 ||
         rpc_read(conn, &workspaceSizeInBytes, sizeof(size_t)) < 0 ||
         rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
@@ -1083,8 +1084,7 @@ int handle_cublasLtMatmul(conn_t *conn)
       B, Bdesc, &beta, 
       C, Cdesc, 
       D, Ddesc, 
-      &algo, workspace, 
-      workspaceSizeInBytes, stream);
+      &algo, workspace, workspaceSizeInBytes, stream);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
@@ -1131,6 +1131,7 @@ int handle_cublasLtMatmulAlgoGetHeuristic(conn_t *conn)
         rpc_write(conn, &returnAlgoCount, sizeof(int)) < 0 ||
         rpc_write(conn, &heuristicResultsArray, returnAlgoCount * sizeof(cublasLtMatmulHeuristicResult_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        // rpc_write(conn, &heuristicResultsArray.algo, sizeof(cublasLtMatmulAlgo_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
 
