@@ -49952,14 +49952,14 @@ int handle_cublasLtMatmulDescSetAttribute(conn_t *conn)
 {
     cublasLtMatmulDesc_t matmulDesc;
     cublasLtMatmulDescAttributes_t attr;
-    const void* buf;
+    void* buf = (void *)malloc(sizeof(const void*));
     size_t sizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
         rpc_read(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
         rpc_read(conn, &attr, sizeof(cublasLtMatmulDescAttributes_t)) < 0 ||
-        rpc_read(conn, &buf, sizeof(const void*)) < 0 ||
+        rpc_read(conn, buf, sizeof(const void*)) < 0 ||
         rpc_read(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
         false)
         goto ERROR_0;

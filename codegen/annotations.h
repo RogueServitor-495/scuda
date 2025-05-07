@@ -17399,7 +17399,7 @@ cublasStatus_t cublasLtMatmulDescDestroy(cublasLtMatmulDesc_t matmulDesc);
 /**
  * @param matmulDesc SEND_ONLY
  * @param attr SEND_ONLY
- * @param buf SEND_RECV
+ * @param buf SEND_ONLY
  * @param sizeInBytes SEND_ONLY
  */
 cublasStatus_t cublasLtMatmulDescSetAttribute(cublasLtMatmulDesc_t matmulDesc, cublasLtMatmulDescAttributes_t attr, const void* buf, size_t sizeInBytes);

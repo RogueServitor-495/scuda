@@ -55849,7 +55849,7 @@ cublasStatus_t cublasLtMatmulDescSetAttribute(cublasLtMatmulDesc_t matmulDesc, c
     if (rpc_write_start_request(conn, RPC_cublasLtMatmulDescSetAttribute) < 0 ||
         rpc_write(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
         rpc_write(conn, &attr, sizeof(cublasLtMatmulDescAttributes_t)) < 0 ||
-        rpc_write(conn, &buf, sizeof(const void*)) < 0 ||
+        rpc_write(conn, buf, sizeof(const void*)) < 0 ||
         rpc_write(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
@@ -55865,7 +55865,6 @@ cublasStatus_t cublasLtMatmulDescSetAttribute(cublasLtMatmulDesc_t matmulDesc, c
       return CUBLAS_STATUS_NOT_INITIALIZED;
     return return_value;
 }
-
 
 cublasStatus_t cublasLtMatrixTransformDescInit_internal(cublasLtMatrixTransformDesc_t transformDesc, size_t size, cudaDataType scaleType)
 {
@@ -57748,7 +57747,6 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cublasLtMatmulDescCreate", (void *)cublasLtMatmulDescCreate},
     {"cublasLtMatmulDescDestroy", (void *)cublasLtMatmulDescDestroy},
     {"cublasLtMatmulDescSetAttribute", (void *)cublasLtMatmulDescSetAttribute},
-    {"cublasLtMatmulDescGetAttribute", (void *)cublasLtMatmulDescGetAttribute},
     {"cublasLtMatrixTransformDescInit_internal", (void *)cublasLtMatrixTransformDescInit_internal},
     {"cublasLtMatrixTransformDescCreate", (void *)cublasLtMatrixTransformDescCreate},
     {"cublasLtMatrixTransformDescDestroy", (void *)cublasLtMatrixTransformDescDestroy},
@@ -57756,7 +57754,6 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cublasLtMatmulPreferenceInit_internal", (void *)cublasLtMatmulPreferenceInit_internal},
     {"cublasLtMatmulPreferenceCreate", (void *)cublasLtMatmulPreferenceCreate},
     {"cublasLtMatmulPreferenceDestroy", (void *)cublasLtMatmulPreferenceDestroy},
-    {"cublasLtMatmulAlgoGetHeuristic", (void *)cublasLtMatmulAlgoGetHeuristic},
     {"cublasLtMatmulAlgoInit", (void *)cublasLtMatmulAlgoInit},
     {"cublasLtMatmulAlgoCheck", (void *)cublasLtMatmulAlgoCheck},
     {"cublasLtMatmulAlgoConfigSetAttribute", (void *)cublasLtMatmulAlgoConfigSetAttribute},
@@ -57823,6 +57820,7 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cublasLtMatmulPreferenceSetAttribute", (void *)cublasLtMatmulPreferenceSetAttribute},
     {"cublasLtMatmul", (void *)cublasLtMatmul},
     {"cublasLtMatmulAlgoGetHeuristic", (void *)cublasLtMatmulAlgoGetHeuristic},
+    {"cublasLtMatmulDescGetAttribute", (void *)cublasLtMatmulDescGetAttribute},
 	};
 	return functionMap;
 }
