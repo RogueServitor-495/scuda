@@ -26,5 +26,10 @@ int handle___cudaPopCallConfiguration(conn_t *conn);
 int handle_cudaGraphAddHostNode(conn_t *conn);
 int handle_cudaGraphAddMemcpyNode(conn_t *conn);
 int handle_cudaGraphDestroy(conn_t *conn);
+int handle_cudaLaunchKernel(conn_t *conn);
+int handle_cublasLtMatmulPreferenceSetAttribute(conn_t *conn);
+int handle_cublasLtMatmul(conn_t *conn);
+int handle_cublasLtMatmulAlgoGetHeuristic(conn_t *conn);
+int handle_cublasLtMatmulDescGetAttribute(conn_t *conn);
 
 #endif

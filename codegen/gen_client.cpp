@@ -55687,7 +55687,6 @@ cublasStatus_t cublasLtMatrixLayoutCreate(cublasLtMatrixLayout_t* matLayout, cud
       return CUBLAS_STATUS_NOT_INITIALIZED;
     cublasStatus_t return_value;
     if (rpc_write_start_request(conn, RPC_cublasLtMatrixLayoutCreate) < 0 ||
-        rpc_write(conn, matLayout, sizeof(cublasLtMatrixLayout_t)) < 0 ||
         rpc_write(conn, &type, sizeof(cudaDataType)) < 0 ||
         rpc_write(conn, &rows, sizeof(uint64_t)) < 0 ||
         rpc_write(conn, &cols, sizeof(uint64_t)) < 0 ||
@@ -55802,7 +55801,6 @@ cublasStatus_t cublasLtMatmulDescCreate(cublasLtMatmulDesc_t* matmulDesc, cublas
       return CUBLAS_STATUS_NOT_INITIALIZED;
     cublasStatus_t return_value;
     if (rpc_write_start_request(conn, RPC_cublasLtMatmulDescCreate) < 0 ||
-        rpc_write(conn, matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
         rpc_write(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
         rpc_write(conn, &scaleType, sizeof(cudaDataType_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -55867,6 +55865,7 @@ cublasStatus_t cublasLtMatmulDescSetAttribute(cublasLtMatmulDesc_t matmulDesc, c
       return CUBLAS_STATUS_NOT_INITIALIZED;
     return return_value;
 }
+
 
 cublasStatus_t cublasLtMatrixTransformDescInit_internal(cublasLtMatrixTransformDesc_t transformDesc, size_t size, cudaDataType scaleType)
 {
@@ -56020,114 +56019,6 @@ cublasStatus_t cublasLtMatmulPreferenceDestroy(cublasLtMatmulPreference_t pref)
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&pref, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    return return_value;
-}
-
-cublasStatus_t cublasLtMatmulPreferenceSetAttribute(cublasLtMatmulPreference_t pref, cublasLtMatmulPreferenceAttributes_t attr, const void* buf, size_t sizeInBytes)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&pref, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&attr, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)buf, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&sizeInBytes, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    cublasStatus_t return_value;
-
-    printf("[client]: test debug...\n");
-    size_t workspaceSize = *(const size_t*) buf;
-    printf("[client]: workspaceSize=%d\n",workspaceSize);
-
-    if (rpc_write_start_request(conn, RPC_cublasLtMatmulPreferenceSetAttribute) < 0 ||
-        rpc_write(conn, &pref, sizeof(cublasLtMatmulPreference_t)) < 0 ||
-        rpc_write(conn, &attr, sizeof(cublasLtMatmulPreferenceAttributes_t)) < 0 ||
-        rpc_write(conn, &workspaceSize, sizeof(size_t)) < 0 ||
-        rpc_write(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&pref, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&attr, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)buf, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&sizeInBytes, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    return return_value;
-}
-
-cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t operationDesc, cublasLtMatrixLayout_t Adesc, cublasLtMatrixLayout_t Bdesc, cublasLtMatrixLayout_t Cdesc, cublasLtMatrixLayout_t Ddesc, cublasLtMatmulPreference_t preference, int requestedAlgoCount, cublasLtMatmulHeuristicResult_t heuristicResultsArray[], int* returnAlgoCount)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    printf("[debug]: heuristic1\n");
-    if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&operationDesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Adesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Bdesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Cdesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Ddesc, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&preference, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&requestedAlgoCount, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)heuristicResultsArray, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    for (int i = 0; i < static_cast<int>(*returnAlgoCount) && is_unified_pointer(conn, (void*)heuristicResultsArray); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&heuristicResultsArray[i], cudaMemcpyHostToDevice) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)returnAlgoCount, cudaMemcpyHostToDevice) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    cublasStatus_t return_value;
-    printf("[debug]: heuristic2\n");
-    if (rpc_write_start_request(conn, RPC_cublasLtMatmulAlgoGetHeuristic) < 0 ||
-        rpc_write(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
-        rpc_write(conn, &operationDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
-        rpc_write(conn, &Adesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &Bdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_write(conn, &preference, sizeof(cublasLtMatmulPreference_t)) < 0 ||
-        rpc_write(conn, &requestedAlgoCount, sizeof(int)) < 0 ||
-        // rpc_write(conn, &heuristicResultsArray, sizeof(cublasLtMatmulHeuristicResult_t)) < 0 ||
-        // rpc_write(conn, returnAlgoCount, sizeof(int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, returnAlgoCount, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&operationDesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Adesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Bdesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Cdesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&Ddesc, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&preference, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)&requestedAlgoCount, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)heuristicResultsArray, cudaMemcpyDeviceToHost) < 0)
-      return CUBLAS_STATUS_NOT_INITIALIZED;
-    for (int i = 0; i < static_cast<int>(*returnAlgoCount) && is_unified_pointer(conn, (void*)heuristicResultsArray); i++)
-      if (maybe_copy_unified_arg(conn, (void*)&heuristicResultsArray[i], cudaMemcpyDeviceToHost) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)returnAlgoCount, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     return return_value;
 }
@@ -57857,6 +57748,7 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cublasLtMatmulDescCreate", (void *)cublasLtMatmulDescCreate},
     {"cublasLtMatmulDescDestroy", (void *)cublasLtMatmulDescDestroy},
     {"cublasLtMatmulDescSetAttribute", (void *)cublasLtMatmulDescSetAttribute},
+    {"cublasLtMatmulDescGetAttribute", (void *)cublasLtMatmulDescGetAttribute},
     {"cublasLtMatrixTransformDescInit_internal", (void *)cublasLtMatrixTransformDescInit_internal},
     {"cublasLtMatrixTransformDescCreate", (void *)cublasLtMatrixTransformDescCreate},
     {"cublasLtMatrixTransformDescDestroy", (void *)cublasLtMatrixTransformDescDestroy},
@@ -57864,7 +57756,6 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cublasLtMatmulPreferenceInit_internal", (void *)cublasLtMatmulPreferenceInit_internal},
     {"cublasLtMatmulPreferenceCreate", (void *)cublasLtMatmulPreferenceCreate},
     {"cublasLtMatmulPreferenceDestroy", (void *)cublasLtMatmulPreferenceDestroy},
-    {"cublasLtMatmulPreferenceSetAttribute", (void *)cublasLtMatmulPreferenceSetAttribute},
     {"cublasLtMatmulAlgoGetHeuristic", (void *)cublasLtMatmulAlgoGetHeuristic},
     {"cublasLtMatmulAlgoInit", (void *)cublasLtMatmulAlgoInit},
     {"cublasLtMatmulAlgoCheck", (void *)cublasLtMatmulAlgoCheck},
@@ -57929,6 +57820,9 @@ std::unordered_map<std::string, void *>& getFunctionMap() {
     {"cudaGraphAddMemFreeNode", (void *)cudaGraphAddMemFreeNode},
     {"cudaGraphAddMemAllocNode", (void *)cudaGraphAddMemAllocNode},
     {"cudaDeviceGetGraphMemAttribute", (void *)cudaDeviceGetGraphMemAttribute},
+    {"cublasLtMatmulPreferenceSetAttribute", (void *)cublasLtMatmulPreferenceSetAttribute},
+    {"cublasLtMatmul", (void *)cublasLtMatmul},
+    {"cublasLtMatmulAlgoGetHeuristic", (void *)cublasLtMatmulAlgoGetHeuristic},
 	};
 	return functionMap;
 }

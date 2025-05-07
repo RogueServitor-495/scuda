@@ -83,7 +83,11 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaGraphAddHostNode",
     "cudaGraphAddMemFreeNode",
     "cudaGraphAddMemAllocNode",
-    "cudaDeviceGetGraphMemAttribute"
+    "cudaDeviceGetGraphMemAttribute",
+    "cublasLtMatmulPreferenceSetAttribute",
+    "cublasLtMatmul",
+    "cublasLtMatmulAlgoGetHeuristic",
+    "cublasLtMatmulDescGetAttribute",
 ]
 
 # some functions in cublasLt.h is statically inlined, we can not hook them
@@ -439,7 +443,7 @@ class ArrayOperation:
             f.write(
                 "        rpc_write(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type=self.ptr.ptr_to.format(),
+                    param_type= self.parameter.type.array_of.typename.format() if isinstance(self.parameter.type, Array) else self.ptr.ptr_to.format(),
                     length=self.length.name,
                 )
             )
@@ -462,7 +466,7 @@ class ArrayOperation:
             f.write(
                 "        rpc_read(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type=self.ptr.ptr_to.format(),
+                    param_type= self.parameter.type.array_of.typename.format() if isinstance(self.parameter.type, Array) else self.ptr.ptr_to.format(),
                     length=length,
                 )
             )
@@ -1089,7 +1093,8 @@ def main():
         # "cublasSetWorkspace_v2",
         # "cuDeviceGetNvSciSyncAttributes",
         # "cudaMalloc",
-        "cublasSgetrfBatched",
+        # "cublasSgetrfBatched",
+        "cublasLtMatmulAlgoGetHeuristic",
         ]
 
     for function in functions:

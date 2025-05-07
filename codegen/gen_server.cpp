@@ -49755,7 +49755,6 @@ int handle_cublasLtMatrixLayoutCreate(conn_t *conn)
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
-        rpc_read(conn, &matLayout, sizeof(cublasLtMatrixLayout_t)) < 0 ||
         rpc_read(conn, &type, sizeof(cudaDataType)) < 0 ||
         rpc_read(conn, &rows, sizeof(uint64_t)) < 0 ||
         rpc_read(conn, &cols, sizeof(uint64_t)) < 0 ||
@@ -49903,7 +49902,6 @@ int handle_cublasLtMatmulDescCreate(conn_t *conn)
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
-        rpc_read(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
         rpc_read(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
         rpc_read(conn, &scaleType, sizeof(cudaDataType_t)) < 0 ||
         false)
@@ -50215,84 +50213,6 @@ int handle_cublasLtMatmulPreferenceDestroy(conn_t *conn)
     scuda_intercept_result = cublasLtMatmulPreferenceDestroy(pref);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasLtMatmulPreferenceSetAttribute(conn_t *conn)
-{
-    cublasLtMatmulPreference_t pref;
-    cublasLtMatmulPreferenceAttributes_t attr;
-    const void* buf;
-    size_t workspaceSize;
-    size_t sizeInBytes;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &pref, sizeof(cublasLtMatmulPreference_t)) < 0 ||
-        rpc_read(conn, &attr, sizeof(cublasLtMatmulPreferenceAttributes_t)) < 0 ||
-        rpc_read(conn, &workspaceSize, sizeof(size_t)) < 0 ||
-        rpc_read(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasLtMatmulPreferenceSetAttribute(pref, attr, &workspaceSize
-        , sizeInBytes);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasLtMatmulAlgoGetHeuristic(conn_t *conn)
-{
-    cublasLtHandle_t lightHandle;
-    cublasLtMatmulDesc_t operationDesc;
-    cublasLtMatrixLayout_t Adesc;
-    cublasLtMatrixLayout_t Bdesc;
-    cublasLtMatrixLayout_t Cdesc;
-    cublasLtMatrixLayout_t Ddesc;
-    cublasLtMatmulPreference_t preference;
-    int requestedAlgoCount;
-    // cublasLtMatmulHeuristicResult_t* heuristicResultsArray = nullptr;
-    cublasLtMatmulHeuristicResult_t heuristicResultsArray;
-    int returnAlgoCount;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
-        rpc_read(conn, &operationDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
-        rpc_read(conn, &Adesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_read(conn, &Bdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_read(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_read(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_read(conn, &preference, sizeof(cublasLtMatmulPreference_t)) < 0 ||
-        rpc_read(conn, &requestedAlgoCount, sizeof(int)) < 0 ||
-        // rpc_read(conn, &heuristicResultsArray, sizeof(cublasLtMatmulHeuristicResult_t*)) < 0 ||
-        // rpc_read(conn, &returnAlgoCount, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasLtMatmulAlgoGetHeuristic(lightHandle, operationDesc, Adesc, Bdesc, Cdesc, Ddesc, preference, requestedAlgoCount, &heuristicResultsArray, &returnAlgoCount);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &returnAlgoCount, sizeof(int)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -52097,6 +52017,7 @@ static RequestHandler opHandlers[] = {
     handle_cublasLtHeuristicsCacheGetCapacity,
     handle_cublasLtHeuristicsCacheSetCapacity,
     nullptr,
+    handle_cublasLtMatmul,
     handle_cublasLtMatrixLayoutInit_internal,
     handle_cublasLtMatrixLayoutInit,
     handle_cublasLtMatrixLayoutCreate,
@@ -52107,6 +52028,7 @@ static RequestHandler opHandlers[] = {
     handle_cublasLtMatmulDescCreate,
     handle_cublasLtMatmulDescDestroy,
     handle_cublasLtMatmulDescSetAttribute,
+    handle_cublasLtMatmulDescGetAttribute,
     handle_cublasLtMatrixTransformDescInit_internal,
     handle_cublasLtMatrixTransformDescInit,
     handle_cublasLtMatrixTransformDescCreate,

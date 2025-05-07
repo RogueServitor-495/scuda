@@ -48,4 +48,26 @@ cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t *nodes,
                               size_t *numNodes);
 cudaError_t cudaGraphDestroy(cudaGraph_t graph);
 
+cublasStatus_t cublasLtMatmulPreferenceSetAttribute(cublasLtMatmulPreference_t pref, 
+                                        cublasLtMatmulPreferenceAttributes_t attr, 
+                                        const void* buf, size_t sizeInBytes);
+cublasStatus_t cublasLtMatmul(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t computeDesc, 
+    const void* alpha, const void* A, cublasLtMatrixLayout_t Adesc, 
+    const void* B, cublasLtMatrixLayout_t Bdesc, const void* beta, 
+    const void* C, cublasLtMatrixLayout_t Cdesc, 
+    void* D, cublasLtMatrixLayout_t Ddesc, const cublasLtMatmulAlgo_t* algo, 
+    void* workspace, size_t workspaceSizeInBytes, cudaStream_t stream);
+
+
+cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle, 
+    cublasLtMatmulDesc_t operationDesc, cublasLtMatrixLayout_t Adesc, cublasLtMatrixLayout_t Bdesc, 
+    cublasLtMatrixLayout_t Cdesc, cublasLtMatrixLayout_t Ddesc, 
+    cublasLtMatmulPreference_t preference, int requestedAlgoCount, 
+    cublasLtMatmulHeuristicResult_t heuristicResultsArray[], int* returnAlgoCount);
+
+
+cublasStatus_t cublasLtMatmulDescGetAttribute(cublasLtMatmulDesc_t matmulDesc, 
+    cublasLtMatmulDescAttributes_t attr, void* buf, size_t sizeInBytes, size_t* sizeWritten);
+
 extern "C" void* dlopen(const char* filename, int flag);
+

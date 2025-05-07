@@ -2,6 +2,7 @@
 #include <cublas_v2.h>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <cublasLt.h>
 #include <dlfcn.h>
 #include <iostream>
 #include <nvml.h>
@@ -14,6 +15,31 @@
 #include "gen_api.h"
 #include "ptx_fatbin.hpp"
 #include "rpc.h"
+
+#define MAX_SCALING_FACTOR_HOST_SIZE 8  // send as FP64 if type unknown
+
+inline int getDataSize(cublasLtPointerMode_t mode, size_t* alphaSize, size_t* betaSize)
+{
+    switch (mode) {
+        case CUBLAS_POINTER_MODE_HOST:  
+          *alphaSize = MAX_SCALING_FACTOR_HOST_SIZE;
+          *betaSize = MAX_SCALING_FACTOR_HOST_SIZE;
+          return 0;
+        case CUBLASLT_POINTER_MODE_DEVICE:  
+        case CUBLASLT_POINTER_MODE_DEVICE_VECTOR:
+        case CUBLASLT_POINTER_MODE_ALPHA_DEVICE_VECTOR_BETA_ZERO: 
+          *alphaSize = sizeof(const void*);
+          *betaSize = sizeof(const void*);
+          return 0;
+        case CUBLASLT_POINTER_MODE_ALPHA_DEVICE_VECTOR_BETA_HOST:  
+          *alphaSize = sizeof(const void*);
+          *betaSize = MAX_SCALING_FACTOR_HOST_SIZE;
+          return 0;
+        default:
+            std::cout << "unsupported mode:" << mode << std::endl;
+            return -1;
+    }
+}
 
 extern void add_host_node(void *, void *);
 
@@ -1360,6 +1386,256 @@ cudaError_t cudaDeviceGetGraphMemAttribute(int device,
   return return_value;
 }
 
+cublasStatus_t cublasLtMatmulPreferenceSetAttribute(cublasLtMatmulPreference_t pref, cublasLtMatmulPreferenceAttributes_t attr, const void* buf, size_t sizeInBytes)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&pref, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&attr, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)buf, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&sizeInBytes, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    size_t workspaceSize = *(const size_t*) buf;
+    if (rpc_write_start_request(conn, RPC_cublasLtMatmulPreferenceSetAttribute) < 0 ||
+        rpc_write(conn, &pref, sizeof(cublasLtMatmulPreference_t)) < 0 ||
+        rpc_write(conn, &attr, sizeof(cublasLtMatmulPreferenceAttributes_t)) < 0 ||
+        rpc_write(conn, &workspaceSize, sizeof(size_t)) < 0 ||
+        rpc_write(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&pref, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&attr, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)buf, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&sizeInBytes, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasLtMatmul(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t computeDesc, const void* alpha, const void* A, cublasLtMatrixLayout_t Adesc, const void* B, cublasLtMatrixLayout_t Bdesc, const void* beta, const void* C, cublasLtMatrixLayout_t Cdesc, void* D, cublasLtMatrixLayout_t Ddesc, const cublasLtMatmulAlgo_t* algo, void* workspace, size_t workspaceSizeInBytes, cudaStream_t stream)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&computeDesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Adesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)B, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Bdesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Cdesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)D, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Ddesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)algo, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)workspace, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&workspaceSizeInBytes, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&stream, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+
+    // query whether alpha and beta are on device
+    // size_t alphaSize,betaSize;
+    // cublasLtPointerMode_t pointMode;
+    // cublasLtMatmulDescGetAttribute(computeDesc, CUBLASLT_MATMUL_DESC_POINTER_MODE,
+    //                               &pointMode, sizeof(pointMode), nullptr);
+    // if(getDataSize(pointMode, &alphaSize, &betaSize) != 0) {
+    //   return CUBLAS_STATUS_NOT_INITIALIZED;
+    // }
+    printf("size of algo=%d\n",sizeof(const cublasLtMatmulAlgo_t));
+    std::cout << "algo is:" << algo <<  std::endl; 
+
+    if (rpc_write_start_request(conn, RPC_cublasLtMatmul) < 0 ||
+        rpc_write(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
+        rpc_write(conn, &computeDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
+        rpc_write(conn, alpha, sizeof(const void*)) < 0 ||
+        rpc_write(conn, &A, sizeof(const void*)) < 0 ||
+        rpc_write(conn, &Adesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, &B, sizeof(const void*)) < 0 ||
+        rpc_write(conn, &Bdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, beta, sizeof(const void*)) < 0 ||
+        rpc_write(conn, &C, sizeof(const void*)) < 0 ||
+        rpc_write(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, &D, sizeof(void*)) < 0 ||
+        rpc_write(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, &algo, sizeof(const cublasLtMatmulAlgo_t)) < 0 ||
+        rpc_write(conn, &workspace, sizeof(void*)) < 0 ||
+        rpc_write(conn, &workspaceSizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&computeDesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Adesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)B, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Bdesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Cdesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)D, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Ddesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)algo, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)workspace, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&workspaceSizeInBytes, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&stream, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t operationDesc, cublasLtMatrixLayout_t Adesc, cublasLtMatrixLayout_t Bdesc, cublasLtMatrixLayout_t Cdesc, cublasLtMatrixLayout_t Ddesc, cublasLtMatmulPreference_t preference, int requestedAlgoCount, cublasLtMatmulHeuristicResult_t heuristicResultsArray[], int* returnAlgoCount)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&operationDesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Adesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Bdesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Cdesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Ddesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&preference, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&requestedAlgoCount, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)heuristicResultsArray, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    for (int i = 0; i < static_cast<int>(*returnAlgoCount) && is_unified_pointer(conn, (void*)heuristicResultsArray); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&heuristicResultsArray[i], cudaMemcpyHostToDevice) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)returnAlgoCount, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    if (rpc_write_start_request(conn, RPC_cublasLtMatmulAlgoGetHeuristic) < 0 ||
+        rpc_write(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
+        rpc_write(conn, &operationDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
+        rpc_write(conn, &Adesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, &Bdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_write(conn, &preference, sizeof(cublasLtMatmulPreference_t)) < 0 ||
+        rpc_write(conn, &requestedAlgoCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, returnAlgoCount, sizeof(int)) < 0 ||
+        rpc_read(conn, heuristicResultsArray, *returnAlgoCount * sizeof(cublasLtMatmulHeuristicResult_t)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&lightHandle, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&operationDesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Adesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Bdesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Cdesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&Ddesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&preference, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&requestedAlgoCount, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)heuristicResultsArray, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    for (int i = 0; i < static_cast<int>(*returnAlgoCount) && is_unified_pointer(conn, (void*)heuristicResultsArray); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&heuristicResultsArray[i], cudaMemcpyDeviceToHost) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)returnAlgoCount, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+
+cublasStatus_t cublasLtMatmulDescGetAttribute(cublasLtMatmulDesc_t matmulDesc, cublasLtMatmulDescAttributes_t attr, void* buf, size_t sizeInBytes, size_t* sizeWritten)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    printf("[debug]: try to get attribute...\n");
+    if (maybe_copy_unified_arg(conn, (void*)&matmulDesc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&attr, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)buf, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&sizeInBytes, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)sizeWritten, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    printf("[debug]: start connection to get attribute...\n");
+    if (rpc_write_start_request(conn, RPC_cublasLtMatmulDescGetAttribute) < 0 ||
+        rpc_write(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
+        rpc_write(conn, &attr, sizeof(cublasLtMatmulDescAttributes_t)) < 0 ||
+        rpc_write(conn, &sizeInBytes, sizeof(size_t)) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    printf("[debug]: stage 2\n");
+    if (
+        rpc_write(conn, &sizeWritten, sizeof(sizeWritten)) < 0 ||
+        (sizeWritten != nullptr && rpc_write(conn, sizeWritten, sizeof(size_t)) < 0) ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, buf, sizeInBytes) < 0 ||
+        (sizeWritten != nullptr && rpc_read(conn, sizeWritten, sizeof(size_t)) < 0) ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&matmulDesc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&attr, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)buf, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&sizeInBytes, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)sizeWritten, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 static void* (*real_dlopen)(const char* filename, int flag) = nullptr;
 
 extern "C" void* dlopen(const char* filename, int flag) {
@@ -1371,9 +1647,9 @@ extern "C" void* dlopen(const char* filename, int flag) {
       }
   }
 
-  // 打印出每次加载的动态库
   fprintf(stderr, "[hook-dlopen] Trying to open library: %s\n", filename ? filename : "NULL");
 
-  // 调用原版 dlopen
   return real_dlopen(filename, flag);
 }
+
+

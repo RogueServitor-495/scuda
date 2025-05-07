@@ -17296,20 +17296,21 @@ cublasStatus_t cublasLtHeuristicsCacheSetCapacity(size_t capacity);
  */
 unsigned cublasLtDisableCpuInstructionsSetMask(unsigned mask);
 /**
+ * @disabled
  * @param lightHandle SEND_ONLY
  * @param computeDesc SEND_ONLY
  * @param alpha SEND_RECV
- * @param A SEND_RECV
+ * @param A SEND_ONLY
  * @param Adesc SEND_ONLY
- * @param B SEND_RECV
+ * @param B SEND_ONLY
  * @param Bdesc SEND_ONLY
  * @param beta SEND_RECV
- * @param C SEND_RECV
+ * @param C SEND_ONLY
  * @param Cdesc SEND_ONLY
- * @param D SEND_RECV
+ * @param D SEND_ONLY
  * @param Ddesc SEND_ONLY
  * @param algo SEND_RECV
- * @param workspace SEND_RECV
+ * @param workspace SEND_ONLY
  * @param workspaceSizeInBytes SEND_ONLY
  * @param stream SEND_ONLY
  */
@@ -17346,7 +17347,7 @@ cublasStatus_t cublasLtMatrixLayoutInit_internal(cublasLtMatrixLayout_t matLayou
  */
 cublasStatus_t cublasLtMatrixLayoutInit(cublasLtMatrixLayout_t matLayout, cudaDataType type, uint64_t rows, uint64_t cols, int64_t ld);
 /**
- * @param matLayout SEND_RECV
+ * @param matLayout RECV_ONLY
  * @param type SEND_ONLY
  * @param rows SEND_ONLY
  * @param cols SEND_ONLY
@@ -17386,7 +17387,7 @@ cublasStatus_t cublasLtMatmulDescInit_internal(cublasLtMatmulDesc_t matmulDesc, 
  */
 cublasStatus_t cublasLtMatmulDescInit(cublasLtMatmulDesc_t matmulDesc, cublasComputeType_t computeType, cudaDataType_t scaleType);
 /**
- * @param matmulDesc SEND_RECV
+ * @param matmulDesc RECV_ONLY
  * @param computeType SEND_ONLY
  * @param scaleType SEND_ONLY
  */
@@ -17403,11 +17404,12 @@ cublasStatus_t cublasLtMatmulDescDestroy(cublasLtMatmulDesc_t matmulDesc);
  */
 cublasStatus_t cublasLtMatmulDescSetAttribute(cublasLtMatmulDesc_t matmulDesc, cublasLtMatmulDescAttributes_t attr, const void* buf, size_t sizeInBytes);
 /**
+ * @disabled
  * @param matmulDesc SEND_ONLY
  * @param attr SEND_ONLY
- * @param buf SEND_RECV
+ * @param buf RECV_ONLY
  * @param sizeInBytes SEND_ONLY
- * @param sizeWritten SEND_RECV
+ * @param sizeWritten SEND_RECV NULLABLE
  */
 cublasStatus_t cublasLtMatmulDescGetAttribute(cublasLtMatmulDesc_t matmulDesc, cublasLtMatmulDescAttributes_t attr, void* buf, size_t sizeInBytes, size_t* sizeWritten);
 /**
@@ -17463,9 +17465,10 @@ cublasStatus_t cublasLtMatmulPreferenceCreate(cublasLtMatmulPreference_t* pref);
  */
 cublasStatus_t cublasLtMatmulPreferenceDestroy(cublasLtMatmulPreference_t pref);
 /**
+ * @disabled
  * @param pref SEND_ONLY
  * @param attr SEND_ONLY
- * @param buf SEND_RECV
+ * @param buf SEND_ONLY
  * @param sizeInBytes SEND_ONLY
  */
 cublasStatus_t cublasLtMatmulPreferenceSetAttribute(cublasLtMatmulPreference_t pref, cublasLtMatmulPreferenceAttributes_t attr, const void* buf, size_t sizeInBytes);
@@ -17478,6 +17481,7 @@ cublasStatus_t cublasLtMatmulPreferenceSetAttribute(cublasLtMatmulPreference_t p
  */
 cublasStatus_t cublasLtMatmulPreferenceGetAttribute(cublasLtMatmulPreference_t pref, cublasLtMatmulPreferenceAttributes_t attr, void* buf, size_t sizeInBytes, size_t* sizeWritten);
 /**
+ * @disabled
  * @param lightHandle SEND_ONLY
  * @param operationDesc SEND_ONLY
  * @param Adesc SEND_ONLY
@@ -17486,8 +17490,8 @@ cublasStatus_t cublasLtMatmulPreferenceGetAttribute(cublasLtMatmulPreference_t p
  * @param Ddesc SEND_ONLY
  * @param preference SEND_ONLY
  * @param requestedAlgoCount SEND_ONLY
- * @param heuristicResultsArray SEND_ONLY LENGTH:returnAlgoCount
- * @param returnAlgoCount SEND_RECV
+ * @param heuristicResultsArray RECV_ONLY LENGTH:returnAlgoCount
+ * @param returnAlgoCount RECV_ONLY
  */
 cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle, cublasLtMatmulDesc_t operationDesc, cublasLtMatrixLayout_t Adesc, cublasLtMatrixLayout_t Bdesc, cublasLtMatrixLayout_t Cdesc, cublasLtMatrixLayout_t Ddesc, cublasLtMatmulPreference_t preference, int requestedAlgoCount, cublasLtMatmulHeuristicResult_t heuristicResultsArray[], int* returnAlgoCount);
 /**

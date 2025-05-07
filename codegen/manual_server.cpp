@@ -1,6 +1,7 @@
 #include <cublas_v2.h>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <cublasLt.h>
 #include <dlfcn.h>
 #include <iostream>
 #include <nvml.h>
@@ -988,4 +989,194 @@ int handle_cudaDeviceGetGraphMemAttribute(conn_t *conn) {
   return 0;
 ERROR_0:
   return -1;
+}
+
+int handle_cublasLtMatmulPreferenceSetAttribute(conn_t *conn)
+{
+    cublasLtMatmulPreference_t pref;
+    cublasLtMatmulPreferenceAttributes_t attr;
+    size_t sizeInBytes;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    size_t workspaceSize;
+    if (
+        rpc_read(conn, &pref, sizeof(cublasLtMatmulPreference_t)) < 0 ||
+        rpc_read(conn, &attr, sizeof(cublasLtMatmulPreferenceAttributes_t)) < 0 ||
+        rpc_read(conn, &workspaceSize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasLtMatmulPreferenceSetAttribute(pref, attr, &workspaceSize, sizeInBytes);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cublasLtMatmul(conn_t *conn)
+{
+    cublasLtHandle_t lightHandle;
+    cublasLtMatmulDesc_t computeDesc;
+    float alpha;
+    const void* A;
+    cublasLtMatrixLayout_t Adesc;
+    const void* B;
+    cublasLtMatrixLayout_t Bdesc;
+    float beta;
+    const void* C;
+    cublasLtMatrixLayout_t Cdesc;
+    void* D;
+    cublasLtMatrixLayout_t Ddesc;
+    cublasLtMatmulAlgo_t algo;
+    void* workspace;
+    size_t workspaceSizeInBytes;
+    cudaStream_t stream;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
+        rpc_read(conn, &computeDesc, sizeof(cublasLtMatmulDesc_t)) < 0)
+        goto ERROR_0;
+
+    // parse the bytes of alpha and beta
+    // size_t maxBytes = 8;
+    // size_t nBytes;
+    cudaDataType_t scaleType;
+    cublasLtMatmulDescGetAttribute(computeDesc, CUBLASLT_MATMUL_DESC_SCALE_TYPE,
+                                  &scaleType, sizeof(scaleType), nullptr);
+    // nBytes = dataTypeSize(scaleType);
+
+
+    if (
+        rpc_read(conn, &alpha, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &Adesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_read(conn, &B, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &Bdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &C, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_read(conn, &D, sizeof(void*)) < 0 ||
+        rpc_read(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_read(conn, &algo, sizeof(const cublasLtMatmulAlgo_t)) < 0 ||
+        rpc_read(conn, &workspace, sizeof(void*)) < 0 ||
+        rpc_read(conn, &workspaceSizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    // scuda_intercept_result = cublasLtMatmul(lightHandle, computeDesc, &alpha, A, Adesc, B, Bdesc, &beta, C, Cdesc, D, Ddesc, algo, workspace, workspaceSizeInBytes, stream);
+    scuda_intercept_result = cublasLtMatmul(lightHandle, computeDesc, 
+      &alpha, A, Adesc, 
+      B, Bdesc, &beta, 
+      C, Cdesc, 
+      D, Ddesc, 
+      &algo, workspace, 
+      workspaceSizeInBytes, stream);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cublasLtMatmulAlgoGetHeuristic(conn_t *conn)
+{
+    cublasLtHandle_t lightHandle;
+    cublasLtMatmulDesc_t operationDesc;
+    cublasLtMatrixLayout_t Adesc;
+    cublasLtMatrixLayout_t Bdesc;
+    cublasLtMatrixLayout_t Cdesc;
+    cublasLtMatrixLayout_t Ddesc;
+    cublasLtMatmulPreference_t preference;
+    int requestedAlgoCount;
+    cublasLtMatmulHeuristicResult_t heuristicResultsArray;
+    int returnAlgoCount;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &lightHandle, sizeof(cublasLtHandle_t)) < 0 ||
+        rpc_read(conn, &operationDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
+        rpc_read(conn, &Adesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_read(conn, &Bdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_read(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_read(conn, &Ddesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
+        rpc_read(conn, &preference, sizeof(cublasLtMatmulPreference_t)) < 0 ||
+        rpc_read(conn, &requestedAlgoCount, sizeof(int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasLtMatmulAlgoGetHeuristic(lightHandle, operationDesc, Adesc, Bdesc, Cdesc, Ddesc, preference, requestedAlgoCount, &heuristicResultsArray, &returnAlgoCount);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &returnAlgoCount, sizeof(int)) < 0 ||
+        rpc_write(conn, &heuristicResultsArray, returnAlgoCount * sizeof(cublasLtMatmulHeuristicResult_t)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cublasLtMatmulDescGetAttribute(conn_t *conn)
+{
+    cublasLtMatmulDesc_t matmulDesc;
+    cublasLtMatmulDescAttributes_t attr;
+    void* buf;
+    size_t sizeInBytes;
+    size_t* sizeWrittenCheck;
+    size_t sizeWritten;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
+        rpc_read(conn, &attr, sizeof(cublasLtMatmulDescAttributes_t)) < 0 ||
+        false)
+        goto ERROR_0;
+    std::cout << "writtenCheck size:" << sizeof(sizeWrittenCheck) << std::endl;
+    if(        rpc_read(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &sizeWrittenCheck, sizeof(sizeWrittenCheck)) < 0 ||
+        (sizeWrittenCheck && rpc_read(conn, sizeWrittenCheck, sizeof(size_t)) < 0) ||
+        false)
+        goto ERROR_1;
+        
+    buf = (void*)malloc(sizeInBytes);
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_1;
+    scuda_intercept_result = cublasLtMatmulDescGetAttribute(matmulDesc, attr, buf, sizeInBytes, &sizeWritten);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, buf, sizeInBytes) < 0 ||
+        (sizeWrittenCheck && rpc_write(conn, &sizeWritten, sizeof(size_t)) < 0) ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_1;
+
+    return 0;
+ERROR_1:
+    free((void *) buf);
+ERROR_0:
+    return -1;
 }
