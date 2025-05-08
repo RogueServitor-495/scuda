@@ -23277,36 +23277,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaHostAlloc(conn_t *conn)
-{
-    void* pHost;
-    size_t size;
-    unsigned int flags;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &pHost, sizeof(void*)) < 0 ||
-        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
-        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaHostAlloc(&pHost, size, flags);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pHost, sizeof(void*)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaMalloc3D(conn_t *conn)
 {
     struct cudaPitchedPtr pitchedDevPtr;
@@ -27979,7 +27949,6 @@ int handle_cublasGetMathMode(conn_t *conn)
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
-
     return 0;
 ERROR_0:
     return -1;
@@ -28006,7 +27975,7 @@ int handle_cublasSetMathMode(conn_t *conn)
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
-
+    printf("[DEBUG]setMathMode finished...\n");
     return 0;
 ERROR_0:
     return -1;

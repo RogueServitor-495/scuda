@@ -20771,34 +20771,6 @@ cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray)
     return return_value;
 }
 
-cudaError_t cudaHostAlloc(void** pHost, size_t size, unsigned int flags)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)pHost, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&flags, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    cudaError_t return_value;
-    if (rpc_write_start_request(conn, RPC_cudaHostAlloc) < 0 ||
-        rpc_write(conn, pHost, sizeof(void*)) < 0 ||
-        rpc_write(conn, &size, sizeof(size_t)) < 0 ||
-        rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pHost, sizeof(void*)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)pHost, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&flags, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaMalloc3D(struct cudaPitchedPtr* pitchedDevPtr, struct cudaExtent extent)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -25247,6 +25219,7 @@ cublasStatus_t cublasSetMathMode(cublasHandle_t handle, cublasMath_t mode)
     if (maybe_copy_unified_arg(conn, (void*)&mode, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     cublasStatus_t return_value;
+    printf("[DEBUG]: start set math mode...\n");
     if (rpc_write_start_request(conn, RPC_cublasSetMathMode) < 0 ||
         rpc_write(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(conn, &mode, sizeof(cublasMath_t)) < 0 ||
@@ -25254,6 +25227,7 @@ cublasStatus_t cublasSetMathMode(cublasHandle_t handle, cublasMath_t mode)
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
+    printf("[DEBUG]: finish set math mode...\n");
     if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&mode, cudaMemcpyDeviceToHost) < 0)

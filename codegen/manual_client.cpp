@@ -257,18 +257,21 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count,
   // we need to swap device directions in this case
   switch (kind) {
   case cudaMemcpyDeviceToHost:
+    printf("[DEBUG] copy size=%d from device=[%p] to host...\n", count, src);
     if (rpc_write(conn, &src, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 || rpc_read(conn, dst, count) < 0)
       return cudaErrorDevicesUnavailable;
     break;
   case cudaMemcpyHostToDevice:
+    printf("[DEBUG] copy size=%d from host to device=[%p]...\n", count, dst);
     if (rpc_write(conn, &dst, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
         rpc_write(conn, src, count) < 0 || rpc_wait_for_response(conn) < 0)
       return cudaErrorDevicesUnavailable;
     break;
   case cudaMemcpyDeviceToDevice:
+    printf("[DEBUG] copy size=%d from device=[%p] to device=[%p]...\n", count, src, dst);
     if (rpc_write(conn, &dst, sizeof(void *)) < 0 ||
         rpc_write(conn, &src, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
@@ -1032,6 +1035,7 @@ cudaError_t cudaHostRegister(void *devPtr, size_t size, unsigned int flags) {
 }
 
 cudaError_t cudaMallocHost(void **ptr, size_t size) {
+  printf("[debug] try page-lock, fall back to malloc...\n");
   *ptr = (void *)malloc(size);
 
   return cudaSuccess;
@@ -1637,6 +1641,13 @@ cublasStatus_t cublasLtMatmulDescGetAttribute(cublasLtMatmulDesc_t matmulDesc, c
     if (maybe_copy_unified_arg(conn, (void*)sizeWritten, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     return return_value;
+}
+
+cudaError_t cudaHostAlloc(void** pHost, size_t size, unsigned int flags) {
+  printf("[debug] cudaMallocHost calls cudaHostAlloc...\n");
+
+  *pHost = (void *)malloc(size);
+  return cudaSuccess;
 }
 
 static void* (*real_dlopen)(const char* filename, int flag) = nullptr;

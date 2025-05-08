@@ -5220,6 +5220,7 @@ cudaError_t cudaFreeArray(cudaArray_t array);
  */
 cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray);
 /**
+ * @disabled
  * @param pHost SEND_RECV
  * @param size SEND_ONLY
  * @param flags SEND_ONLY

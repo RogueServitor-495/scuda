@@ -7,6 +7,7 @@
 #include <nvml.h>
 
 int handle_cudaMallocHost(conn_t *conn);
+int handle_cudaHostAlloc(conn_t *conn); 
 int handle_cudaGraphAddKernelNode(conn_t *conn);
 int handle_cudaGraphGetNodes(conn_t *conn);
 int handle_cudaGraphAddMemAllocNode(conn_t *conn);

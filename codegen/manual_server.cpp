@@ -105,7 +105,7 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
   cudaError_t result;
   void *src;
   void *dst;
-  void *host_data;
+  void *host_data = NULL;
   std::size_t count;
   enum cudaMemcpyKind kind;
   int stream_null_check;
@@ -126,6 +126,7 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
   switch (kind) {
   case cudaMemcpyDeviceToHost:
     host_data = malloc(count);
+    printf("[DEBUG] allocated size=%d at [%p]...\n", count, host_data);
     if (host_data == NULL)
       goto ERROR_0;
 
@@ -134,9 +135,11 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
       goto ERROR_0;
 
     result = cudaMemcpyAsync(host_data, src, count, kind, stream);
+    printf("[DEBUG] copy size=%d from device=[%p] to host...\n", count, src);
     break;
   case cudaMemcpyHostToDevice:
     host_data = malloc(count);
+    printf("[DEBUG] allocated size=%d at [%p]...\n", count, host_data);
     if (host_data == NULL)
       goto ERROR_0;
 
@@ -149,13 +152,16 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
       goto ERROR_0;
 
     result = cudaMemcpyAsync(dst, host_data, count, kind, stream);
+    printf("[DEBUG] copy size=%d from host to device=[%p]...\n", count, src);
     break;
   case cudaMemcpyDeviceToDevice:
+  printf("[DEBUG] allocated a void pointer at [%p]...\n", host_data);
     request_id = rpc_read_end(conn);
     if (request_id < 0)
       goto ERROR_0;
 
     result = cudaMemcpyAsync(dst, src, count, kind, stream);
+    printf("[DEBUG] copy size=%d from device=[%p] to device=[%p]...\n", count, src, dst);
     break;
   }
 
@@ -168,7 +174,9 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
        cudaStreamAddCallback(
            stream,
            [](cudaStream_t stream, cudaError_t status, void *ptr) {
+             printf("[streamCallback] start to free memory at [%p]...\n", ptr);
              free(ptr);
+             printf("[streamCallback] free host memory finished at [%p]...\n", ptr);
            },
            host_data, 0) != cudaSuccess))
     goto ERROR_0;
@@ -681,6 +689,8 @@ ERROR_0:
 }
 
 int handle_cudaMallocHost(conn_t *conn) { return 0; }
+
+int handle_cudaHostAlloc(conn_t *conn) {return 0;}
 
 int handle_cudaGraphGetNodes(conn_t *conn) {
   cudaGraph_t graph;
