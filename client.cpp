@@ -108,6 +108,7 @@ int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind) {
   // now find the argument in the sub-map for this connection
   auto &devices = conn_it->second;
   auto device_it = devices.find(arg);
+  printf("copy unified pointer [%p]...\n", arg);
   if (device_it != devices.end()) {
     std::cout << "Found unified arg pointer; copying..." << std::endl;
 
@@ -123,7 +124,7 @@ int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind) {
       std::cout << "Successfully copied " << size << " bytes" << std::endl;
     }
   } else {
-    printf("arg not found...\n");
+    printf("arg is not unified managed...\n");
   }
 
   return 0;

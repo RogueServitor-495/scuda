@@ -1007,10 +1007,16 @@ cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags) {
 
   std::cout << "allocated unified device mem " << d_mem << " size: " << size
             << std::endl;
-
+  
   allocate_unified_mem_pointer(conn, d_mem, size);
 
+   printf("registered [%p] as unified pointer...\n", d_mem);
+
+  
+
   *devPtr = d_mem;
+
+  printf("set devPtr = [%p] point at [%p]\n", devPtr, d_mem);
 
   return cudaSuccess;
 }

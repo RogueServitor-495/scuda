@@ -13415,7 +13415,7 @@ cublasStatus_t cublasSgemmEx_64(cublasHandle_t handle, cublasOperation_t transa,
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param beta SEND_RECV
- * @param C SEND_RECV
+ * @param C SEND_ONLY
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
  * @param computeType SEND_ONLY
@@ -13444,7 +13444,7 @@ cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa,
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param beta SEND_RECV
- * @param C SEND_RECV
+ * @param C SEND_ONLY
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
  * @param computeType SEND_ONLY
@@ -16649,7 +16649,7 @@ cublasStatus_t cublasMigrateComputeType(cublasHandle_t handle,
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param beta SEND_RECV NULLABLE
- * @param C SEND_RECV
+ * @param C SEND_ONLY
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
  * @param computeType SEND_ONLY

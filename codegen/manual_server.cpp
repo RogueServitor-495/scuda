@@ -1036,12 +1036,12 @@ int handle_cublasLtMatmul(conn_t *conn)
 {
     cublasLtHandle_t lightHandle;
     cublasLtMatmulDesc_t computeDesc;
-    float alpha;
+    void* alpha = malloc(sizeof(const void*));
     const void* A;
     cublasLtMatrixLayout_t Adesc;
     const void* B;
     cublasLtMatrixLayout_t Bdesc;
-    float beta;
+    void* beta = malloc(sizeof(const void*));
     const void* C;
     cublasLtMatrixLayout_t Cdesc;
     void* D;
@@ -1068,12 +1068,12 @@ int handle_cublasLtMatmul(conn_t *conn)
 
 
     if (
-        rpc_read(conn, &alpha, sizeof(const void*)) < 0 ||
+        rpc_read(conn, alpha, sizeof(const void*)) < 0 ||
         rpc_read(conn, &A, sizeof(const void*)) < 0 ||
         rpc_read(conn, &Adesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
         rpc_read(conn, &B, sizeof(const void*)) < 0 ||
         rpc_read(conn, &Bdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const void*)) < 0 ||
+        rpc_read(conn, beta, sizeof(const void*)) < 0 ||
         rpc_read(conn, &C, sizeof(const void*)) < 0 ||
         rpc_read(conn, &Cdesc, sizeof(cublasLtMatrixLayout_t)) < 0 ||
         rpc_read(conn, &D, sizeof(void*)) < 0 ||
@@ -1090,8 +1090,8 @@ int handle_cublasLtMatmul(conn_t *conn)
         goto ERROR_0;
     // scuda_intercept_result = cublasLtMatmul(lightHandle, computeDesc, &alpha, A, Adesc, B, Bdesc, &beta, C, Cdesc, D, Ddesc, algo, workspace, workspaceSizeInBytes, stream);
     scuda_intercept_result = cublasLtMatmul(lightHandle, computeDesc, 
-      &alpha, A, Adesc, 
-      B, Bdesc, &beta, 
+      alpha, A, Adesc, 
+      B, Bdesc, beta, 
       C, Cdesc, 
       D, Ddesc, 
       &algo, workspace, workspaceSizeInBytes, stream);

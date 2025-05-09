@@ -592,7 +592,10 @@ class OpaqueTypeOperation:
 
     @property
     def server_declaration(self) -> str:
-        if isinstance(self.type_, Pointer) and self.recv:
+        # for void pointer, we should allocate memory space before writing it
+        if isinstance(self.type_, Pointer) and "void" in self.type_.format():
+            return f"   void* {self.parameter.name}=malloc(sizeof{self.type_});\n"    
+        elif isinstance(self.type_, Pointer) and self.recv:
             return f"    {self.type_.ptr_to.format()} {self.parameter.name};\n"
         # ensure we don't have a const struct, otherwise we can't initialise it properly; ex: "const cudnnTensorDescriptor_t xDesc;" is invalid...
         # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
@@ -1095,6 +1098,7 @@ def main():
         # "cudaMalloc",
         # "cublasSgetrfBatched",
         "cublasLtMatmulAlgoGetHeuristic",
+        "cudaGetKernel",
         ]
 
     for function in functions:
@@ -1174,6 +1178,9 @@ def main():
                 continue
 
             params = []
+            
+            if (function.name.segments[0].name in debug_list):
+                print("[debug]: invoke...")
 
             for param in function.parameters:
                 if param.name and "[]" in param.type.format():
@@ -1368,6 +1375,9 @@ def main():
             f.write("{\n")
 
             defers = []
+            
+            if (function.name.segments[0].name in debug_list):
+                print("[debug]: invoke...")
 
             for operation in operations:
                 f.write(operation.server_declaration)
