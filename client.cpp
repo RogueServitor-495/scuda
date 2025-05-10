@@ -108,12 +108,13 @@ int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind) {
   // now find the argument in the sub-map for this connection
   auto &devices = conn_it->second;
   auto device_it = devices.find(arg);
-  printf("copy unified pointer [%p]...\n", arg);
+  // printf("copy unified pointer [%p]...\n", arg);
   if (device_it != devices.end()) {
-    std::cout << "Found unified arg pointer; copying..." << std::endl;
 
     void *ptr = device_it->first;
     size_t size = device_it->second;
+
+    printf("Found unified arg pointer [%p]; copying size [%ld]...", ptr, size);
 
     cudaError_t res = cudaMemcpy(ptr, ptr, size, kind);
     if (res != cudaSuccess) {
@@ -124,7 +125,7 @@ int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind) {
       std::cout << "Successfully copied " << size << " bytes" << std::endl;
     }
   } else {
-    printf("arg is not unified managed...\n");
+    // printf("arg is not unified managed...\n");
   }
 
   return 0;
@@ -349,6 +350,7 @@ int rpc_size() { return nconns; }
 
 void allocate_unified_mem_pointer(conn_t *conn, void *dev_ptr, size_t size) {
   // allocate new space for pointer mapping
+  printf("[DEBUG] allocate unified pointer [%p], size = %ld...\n", dev_ptr, size);
   unified_devices[conn][dev_ptr] = size;
 }
 
@@ -370,19 +372,24 @@ cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, cudaMemcpyKind kind) {
 }
 
 void maybe_free_unified_mem(conn_t *conn, void *ptr) {
+  printf("[DEBUG] try to free ptr = [%p]...\n",ptr);
   auto conn_it = unified_devices.find(conn);
   if (conn_it == unified_devices.end()) {
+    printf("[DEBUG] unified map not found...\n");
     return;
   }
 
-  for (const auto &[dev_ptr, sz] : conn_it->second) {
-    size_t size = reinterpret_cast<size_t>(sz);
-
-    if (dev_ptr == ptr) {
-      munmap(dev_ptr, size);
-      return;
-    }
+  auto &devices = conn_it->second;
+  auto device_it = devices.find(ptr);
+  if (device_it != devices.end()){
+    size_t size = device_it->second;
+    munmap(ptr, size);
+    devices.erase(device_it);
+    printf("[DEBUG] free'd ptr = [%p] with size = %d and erased from map...\n",ptr,size);
+    return;
   }
+
+  printf("[DEBUG] ptr = [%p] not found...\n",ptr);
 }
 
 CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,

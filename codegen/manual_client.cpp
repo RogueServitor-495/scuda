@@ -201,13 +201,19 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count,
                        enum cudaMemcpyKind kind) {
   cudaError_t return_value;
 
+  printf("[DEBUG] client cudaMemcpy...\n");
   conn_t *conn = rpc_client_get_connection(0);
-  if (conn == NULL)
+  if (conn == NULL){
+    printf("[DEBUG] failed to get connection...\n");
     return cudaErrorDevicesUnavailable;
-
+  }
+  printf("[DEBUG] get connfd=%d...\n",conn->connfd);
   int request_id = rpc_write_start_request(conn, RPC_cudaMemcpy);
-  if (request_id < 0 || rpc_write(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
+  printf("[DEBUG] req_id = %d, rpc write started...\n",request_id);
+  if (request_id < 0 || rpc_write(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0){
+    printf("[DEBUG] failed to start rpc to server...\n");
     return cudaErrorDevicesUnavailable;
+  }
 
   // we need to swap device directions in this case
   switch (kind) {
@@ -218,6 +224,7 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count,
       return cudaErrorDevicesUnavailable;
     break;
   case cudaMemcpyHostToDevice:
+    printf("[DEBUG] host to device...\n");
     if (rpc_write(conn, &dst, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
         rpc_write(conn, src, count) < 0 || rpc_wait_for_response(conn) < 0)
@@ -231,7 +238,7 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count,
       return cudaErrorDevicesUnavailable;
     break;
   }
-
+  printf("[DEBUG] send success!\n");
   if (rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
       rpc_read_end(conn) < 0)
     return cudaErrorDevicesUnavailable;
@@ -1008,7 +1015,7 @@ cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags) {
   std::cout << "allocated unified device mem " << d_mem << " size: " << size
             << std::endl;
   
-  allocate_unified_mem_pointer(conn, d_mem, size);
+  allocate_unified_mem_pointer(conn, d_mem, size);  // register device ptr `d_mem` to a map
 
    printf("registered [%p] as unified pointer...\n", d_mem);
 

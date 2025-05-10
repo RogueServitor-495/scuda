@@ -47015,6 +47015,7 @@ cublasStatus_t cublasSgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
 cublasStatus_t cublasDgemmBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const double* alpha, const double* const Aarray[], int lda, const double* const Barray[], int ldb, const double* beta, double* const Carray[], int ldc, int batchCount)
 {
     conn_t *conn = rpc_client_get_connection(0);
+    printf("[debug] client start cublasDgemmBatched...\n");
     if (maybe_copy_unified_arg(conn, (void*)&batchCount, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyHostToDevice) < 0)

@@ -43375,7 +43375,11 @@ int handle_cublasDgemmBatched(conn_t *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
         rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0)
+    )
+        goto ERROR_0;
+
+    if (
         rpc_read(conn, &Aarray, sizeof(const double* const*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const double* const*)) < 0 ||
