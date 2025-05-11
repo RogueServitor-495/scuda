@@ -32,5 +32,12 @@ int handle_cublasLtMatmulPreferenceSetAttribute(conn_t *conn);
 int handle_cublasLtMatmul(conn_t *conn);
 int handle_cublasLtMatmulAlgoGetHeuristic(conn_t *conn);
 int handle_cublasLtMatmulDescGetAttribute(conn_t *conn);
+int handle_cublasLtMatmulDescSetAttribute(conn_t *conn);
+int handle_cublasGemmBatchedEx(conn_t *conn);
+int handle_cublasGemmBatchedEx_64(conn_t *conn);
+int handle_cublasGemmEx_64(conn_t *conn);
+int handle_cublasGemmEx(conn_t *conn);
+
+
 
 #endif

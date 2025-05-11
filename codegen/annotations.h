@@ -8322,7 +8322,7 @@ cublasStatus_t cublasSetVector(int n, int elemSize, const void *x, int incx,
  * @param elemSize SEND_ONLY
  * @param x SEND_ONLY
  * @param incx SEND_ONLY
- * @param devicePtr SEND_RECV
+ * @param devicePtr SEND_ONLY
  * @param incy SEND_ONLY
  */
 cublasStatus_t cublasSetVector_64(int64_t n, int64_t elemSize, const void *x,
@@ -8332,7 +8332,7 @@ cublasStatus_t cublasSetVector_64(int64_t n, int64_t elemSize, const void *x,
  * @param elemSize SEND_ONLY
  * @param x SEND_ONLY
  * @param incx SEND_ONLY
- * @param y RECV_ONLY
+ * @param y RECV_ONLY SHAPE:n,elemSize
  * @param incy SEND_ONLY
  */
 cublasStatus_t cublasGetVector(int n, int elemSize, const void *x, int incx,
@@ -8342,7 +8342,7 @@ cublasStatus_t cublasGetVector(int n, int elemSize, const void *x, int incx,
  * @param elemSize SEND_ONLY
  * @param x SEND_RECV
  * @param incx SEND_ONLY
- * @param y RECV_ONLY
+ * @param y RECV_ONLY SHAPE:n,elemSize
  * @param incy SEND_ONLY
  */
 cublasStatus_t cublasGetVector_64(int64_t n, int64_t elemSize, const void *x,
@@ -8376,7 +8376,7 @@ cublasStatus_t cublasSetMatrix_64(int64_t rows, int64_t cols, int64_t elemSize,
  * @param elemSize SEND_ONLY
  * @param A SEND_ONLY
  * @param lda SEND_ONLY
- * @param B RECV_ONLY
+ * @param B RECV_ONLY SHAPE:rows,cols,elemSize
  * @param ldb SEND_ONLY
  */
 cublasStatus_t cublasGetMatrix(int rows, int cols, int elemSize, const void *A,
@@ -8387,7 +8387,7 @@ cublasStatus_t cublasGetMatrix(int rows, int cols, int elemSize, const void *A,
  * @param elemSize SEND_ONLY
  * @param A SEND_ONLY
  * @param lda SEND_ONLY
- * @param B RECV_ONLY
+ * @param B RECV_ONLY SHAPE:rows,cols,elemSize
  * @param ldb SEND_ONLY
  */
 cublasStatus_t cublasGetMatrix_64(int64_t rows, int64_t cols, int64_t elemSize,
@@ -8423,7 +8423,7 @@ cublasStatus_t cublasSetVectorAsync_64(int64_t n, int64_t elemSize,
  * @param elemSize SEND_ONLY
  * @param devicePtr SEND_ONLY
  * @param incx SEND_ONLY
- * @param hostPtr RECV_ONLY
+ * @param hostPtr RECV_ONLY SHAPE:n,elemSize
  * @param incy SEND_ONLY
  * @param stream SEND_ONLY
  */
@@ -8435,7 +8435,7 @@ cublasStatus_t cublasGetVectorAsync(int n, int elemSize, const void *devicePtr,
  * @param elemSize SEND_ONLY
  * @param devicePtr SEND_ONLY
  * @param incx SEND_ONLY
- * @param hostPtr RECV_ONLY
+ * @param hostPtr RECV_ONLY SHAPE:n,elemSize
  * @param incy SEND_ONLY
  * @param stream SEND_ONLY
  */
@@ -13408,10 +13408,10 @@ cublasStatus_t cublasSgemmEx_64(cublasHandle_t handle, cublasOperation_t transa,
  * @param n SEND_ONLY
  * @param k SEND_ONLY
  * @param alpha SEND_ONLY
- * @param A SEND_RECV
+ * @param A SEND_ONLY
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
- * @param B SEND_RECV
+ * @param B SEND_ONLY
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param beta SEND_ONLY
@@ -15598,6 +15598,7 @@ cublasStatus_t cublasGemmBatchedEx(
     int ldc, int batchCount, cublasComputeType_t computeType,
     cublasGemmAlgo_t algo);
 /**
+ * @disabled
  * @param batchCount SEND_ONLY
  * @param handle SEND_ONLY
  * @param transa SEND_ONLY
@@ -16635,6 +16636,7 @@ cublasStatus_t cublasMigrateComputeType(cublasHandle_t handle,
                                         cudaDataType_t dataType,
                                         cublasComputeType_t *computeType);
 /**
+ * @disabled
  * @param handle SEND_ONLY
  * @param transa SEND_ONLY
  * @param transb SEND_ONLY
@@ -17398,6 +17400,7 @@ cublasStatus_t cublasLtMatmulDescCreate(cublasLtMatmulDesc_t* matmulDesc, cublas
  */
 cublasStatus_t cublasLtMatmulDescDestroy(cublasLtMatmulDesc_t matmulDesc);
 /**
+ * @disabled
  * @param matmulDesc SEND_ONLY
  * @param attr SEND_ONLY
  * @param buf SEND_ONLY
