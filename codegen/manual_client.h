@@ -69,5 +69,7 @@ cublasStatus_t cublasLtMatmulAlgoGetHeuristic(cublasLtHandle_t lightHandle,
 cublasStatus_t cublasLtMatmulDescGetAttribute(cublasLtMatmulDesc_t matmulDesc, 
     cublasLtMatmulDescAttributes_t attr, void* buf, size_t sizeInBytes, size_t* sizeWritten);
 
+cudaError_t cudaHostAlloc(void** pHost, size_t size, unsigned int flags);
+
 extern "C" void* dlopen(const char* filename, int flag);
 

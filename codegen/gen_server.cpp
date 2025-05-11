@@ -11736,7 +11736,7 @@ ERROR_0:
 
 int handle_cuMemFreeHost(conn_t *conn)
 {
-    void* p;
+   void* p=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     int request_id;
     CUresult scuda_intercept_result;
     if (
@@ -11791,7 +11791,7 @@ ERROR_0:
 int handle_cuMemHostGetDevicePointer_v2(conn_t *conn)
 {
     CUdeviceptr pdptr;
-    void* p;
+   void* p=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     unsigned int Flags;
     int request_id;
     CUresult scuda_intercept_result;
@@ -11821,7 +11821,7 @@ ERROR_0:
 int handle_cuMemHostGetFlags(conn_t *conn)
 {
     unsigned int pFlags;
-    void* p;
+   void* p=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     int request_id;
     CUresult scuda_intercept_result;
     if (
@@ -12175,7 +12175,7 @@ ERROR_0:
 int handle_cuMemcpyHtoD_v2(conn_t *conn)
 {
     CUdeviceptr dstDevice;
-    const void* srcHost;
+   void* srcHost=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t ByteCount;
     int request_id;
     CUresult scuda_intercept_result;
@@ -12294,7 +12294,7 @@ ERROR_0:
 
 int handle_cuMemcpyAtoH_v2(conn_t *conn)
 {
-    void* dstHost;
+   void* dstHost=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     CUarray srcArray;
     size_t srcOffset;
     size_t ByteCount;
@@ -12425,7 +12425,7 @@ ERROR_0:
 int handle_cuMemcpyHtoDAsync_v2(conn_t *conn)
 {
     CUdeviceptr dstDevice;
-    const void* srcHost;
+   void* srcHost=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t ByteCount;
     CUstream hStream;
     int request_id;
@@ -14201,7 +14201,7 @@ ERROR_0:
 
 int handle_cuPointerSetAttribute(conn_t *conn)
 {
-    const void* value;
+   void* value=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     CUpointer_attribute attribute;
     CUdeviceptr ptr;
     int request_id;
@@ -15717,8 +15717,8 @@ int handle_cuLaunchKernel(conn_t *conn)
     unsigned int blockDimZ;
     unsigned int sharedMemBytes;
     CUstream hStream;
-    void** kernelParams;
-    void** extra;
+   void* kernelParams=malloc(sizeofPointer(ptr_to=Pointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False), const=False, volatile=False));
+   void* extra=malloc(sizeofPointer(ptr_to=Pointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False), const=False, volatile=False));
     int request_id;
     CUresult scuda_intercept_result;
     if (
@@ -22633,7 +22633,7 @@ ERROR_0:
 int handle_cudaLaunchKernelExC(conn_t *conn)
 {
     const cudaLaunchConfig_t* config;
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     void* args;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -22662,7 +22662,7 @@ ERROR_0:
 
 int handle_cudaLaunchCooperativeKernel(conn_t *conn)
 {
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     dim3 gridDim;
     dim3 blockDim;
     void* args;
@@ -22728,7 +22728,7 @@ ERROR_0:
 
 int handle_cudaFuncSetCacheConfig(conn_t *conn)
 {
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     enum cudaFuncCache cacheConfig;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -22756,7 +22756,7 @@ ERROR_0:
 int handle_cudaFuncGetAttributes(conn_t *conn)
 {
     struct cudaFuncAttributes attr;
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -22783,7 +22783,7 @@ ERROR_0:
 
 int handle_cudaFuncSetAttribute(conn_t *conn)
 {
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     enum cudaFuncAttribute attr;
     int value;
     int request_id;
@@ -22813,7 +22813,7 @@ ERROR_0:
 int handle_cudaFuncGetName(conn_t *conn)
 {
     const char* name;
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -22840,7 +22840,7 @@ ERROR_0:
 
 int handle_cudaFuncGetParamInfo(conn_t *conn)
 {
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t paramIndex;
     size_t paramOffset;
     size_t paramSize;
@@ -22925,7 +22925,7 @@ ERROR_0:
 
 int handle_cudaFuncSetSharedMemConfig(conn_t *conn)
 {
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     enum cudaSharedMemConfig config;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -22953,7 +22953,7 @@ ERROR_0:
 int handle_cudaOccupancyMaxActiveBlocksPerMultiprocessor(conn_t *conn)
 {
     int numBlocks;
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int blockSize;
     size_t dynamicSMemSize;
     int request_id;
@@ -22985,7 +22985,7 @@ ERROR_0:
 int handle_cudaOccupancyAvailableDynamicSMemPerBlock(conn_t *conn)
 {
     size_t dynamicSmemSize;
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int numBlocks;
     int blockSize;
     int request_id;
@@ -23017,7 +23017,7 @@ ERROR_0:
 int handle_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(conn_t *conn)
 {
     int numBlocks;
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int blockSize;
     size_t dynamicSMemSize;
     unsigned int flags;
@@ -23051,7 +23051,7 @@ ERROR_0:
 int handle_cudaOccupancyMaxPotentialClusterSize(conn_t *conn)
 {
     int clusterSize;
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     const cudaLaunchConfig_t* launchConfig;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -23081,7 +23081,7 @@ ERROR_0:
 int handle_cudaOccupancyMaxActiveClusters(conn_t *conn)
 {
     int numClusters;
-    const void* func;
+   void* func=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     const cudaLaunchConfig_t* launchConfig;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -23204,7 +23204,7 @@ ERROR_0:
 
 int handle_cudaFreeHost(conn_t *conn)
 {
-    void* ptr;
+   void* ptr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -23719,7 +23719,7 @@ int handle_cudaMemcpy2DToArray(conn_t *conn)
     cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
-    const void* src;
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t spitch;
     size_t width;
     size_t height;
@@ -23796,8 +23796,8 @@ ERROR_0:
 
 int handle_cudaMemcpyToSymbol(conn_t *conn)
 {
-    const void* symbol;
-    const void* src;
+   void* symbol=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -23832,7 +23832,7 @@ int handle_cudaMemcpy2DToArrayAsync(conn_t *conn)
     cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
-    const void* src;
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t spitch;
     size_t width;
     size_t height;
@@ -23870,8 +23870,8 @@ ERROR_0:
 
 int handle_cudaMemcpyToSymbolAsync(conn_t *conn)
 {
-    const void* symbol;
-    const void* src;
+   void* symbol=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -23905,7 +23905,7 @@ ERROR_0:
 
 int handle_cudaMemset(conn_t *conn)
 {
-    void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     int value;
     size_t count;
     int request_id;
@@ -23934,7 +23934,7 @@ ERROR_0:
 
 int handle_cudaMemset2D(conn_t *conn)
 {
-    void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     size_t pitch;
     int value;
     size_t width;
@@ -23996,7 +23996,7 @@ ERROR_0:
 
 int handle_cudaMemsetAsync(conn_t *conn)
 {
-    void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     int value;
     size_t count;
     cudaStream_t stream;
@@ -24027,7 +24027,7 @@ ERROR_0:
 
 int handle_cudaMemset2DAsync(conn_t *conn)
 {
-    void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     size_t pitch;
     int value;
     size_t width;
@@ -24094,7 +24094,7 @@ ERROR_0:
 int handle_cudaGetSymbolAddress(conn_t *conn)
 {
     void* devPtr;
-    const void* symbol;
+   void* symbol=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -24122,7 +24122,7 @@ ERROR_0:
 int handle_cudaGetSymbolSize(conn_t *conn)
 {
     size_t size;
-    const void* symbol;
+   void* symbol=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -24149,7 +24149,7 @@ ERROR_0:
 
 int handle_cudaMemPrefetchAsync(conn_t *conn)
 {
-    const void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     int dstDevice;
     cudaStream_t stream;
@@ -24180,7 +24180,7 @@ ERROR_0:
 
 int handle_cudaMemPrefetchAsync_v2(conn_t *conn)
 {
-    const void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     struct cudaMemLocation location;
     unsigned int flags;
@@ -24213,7 +24213,7 @@ ERROR_0:
 
 int handle_cudaMemAdvise(conn_t *conn)
 {
-    const void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     enum cudaMemoryAdvise advice;
     int device;
@@ -24244,7 +24244,7 @@ ERROR_0:
 
 int handle_cudaMemAdvise_v2(conn_t *conn)
 {
-    const void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     enum cudaMemoryAdvise advice;
     struct cudaMemLocation location;
@@ -24279,7 +24279,7 @@ int handle_cudaMemRangeGetAttributes(conn_t *conn)
     size_t dataSizes;
     enum cudaMemRangeAttribute attributes;
     size_t numAttributes;
-    const void* devPtr;
+   void* devPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -24316,7 +24316,7 @@ int handle_cudaMemcpyToArray(conn_t *conn)
     cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
-    const void* src;
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     enum cudaMemcpyKind kind;
     int request_id;
@@ -24390,7 +24390,7 @@ int handle_cudaMemcpyToArrayAsync(conn_t *conn)
     cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
-    const void* src;
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     enum cudaMemcpyKind kind;
     cudaStream_t stream;
@@ -24658,7 +24658,7 @@ ERROR_0:
 int handle_cudaPointerGetAttributes(conn_t *conn)
 {
     struct cudaPointerAttributes attributes;
-    const void* ptr;
+   void* ptr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -25445,8 +25445,8 @@ int handle_cudaGraphAddMemcpyNodeToSymbol(conn_t *conn)
     cudaGraphNode_t pGraphNode;
     cudaGraph_t graph;
     std::vector<cudaGraphNode_t> pDependencies;
-    const void* symbol;
-    const void* src;
+   void* symbol=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -25546,8 +25546,8 @@ ERROR_0:
 int handle_cudaGraphMemcpyNodeSetParamsToSymbol(conn_t *conn)
 {
     cudaGraphNode_t node;
-    const void* symbol;
-    const void* src;
+   void* symbol=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -26931,8 +26931,8 @@ int handle_cudaGraphExecMemcpyNodeSetParamsToSymbol(conn_t *conn)
 {
     cudaGraphExec_t hGraphExec;
     cudaGraphNode_t node;
-    const void* symbol;
-    const void* src;
+   void* symbol=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* src=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -27574,7 +27574,7 @@ ERROR_0:
 int handle_cudaGetFuncBySymbol(conn_t *conn)
 {
     cudaFunction_t functionPtr;
-    const void* symbolPtr;
+   void* symbolPtr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -27602,7 +27602,7 @@ ERROR_0:
 int handle_cudaGetKernel(conn_t *conn)
 {
     cudaKernel_t kernelPtr;
-    const void* entryFuncAddr;
+   void* entryFuncAddr=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -27736,7 +27736,7 @@ ERROR_0:
 int handle_cublasSetWorkspace_v2(conn_t *conn)
 {
     cublasHandle_t handle;
-    void* workspace;
+   void* workspace=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     size_t workspaceSizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -27949,6 +27949,7 @@ int handle_cublasGetMathMode(conn_t *conn)
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
+
     return 0;
 ERROR_0:
     return -1;
@@ -27975,7 +27976,7 @@ int handle_cublasSetMathMode(conn_t *conn)
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
-    printf("[DEBUG]setMathMode finished...\n");
+
     return 0;
 ERROR_0:
     return -1;
@@ -30418,7 +30419,7 @@ int handle_cublasIamaxEx(conn_t *conn)
 {
     cublasHandle_t handle;
     int n;
-    const void* x;
+   void* x=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     cudaDataType xType;
     int incx;
     int result;
@@ -30454,7 +30455,7 @@ int handle_cublasIamaxEx_64(conn_t *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    const void* x;
+   void* x=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     cudaDataType xType;
     int64_t incx;
     int64_t result;
@@ -30762,7 +30763,7 @@ int handle_cublasIaminEx(conn_t *conn)
 {
     cublasHandle_t handle;
     int n;
-    const void* x;
+   void* x=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     cudaDataType xType;
     int incx;
     int result;
@@ -30798,7 +30799,7 @@ int handle_cublasIaminEx_64(conn_t *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    const void* x;
+   void* x=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     cudaDataType xType;
     int64_t incx;
     int64_t result;
@@ -39981,6 +39982,128 @@ ERROR_0:
     return -1;
 }
 
+int handle_cublasGemmEx(conn_t *conn)
+{
+    cublasHandle_t handle;
+    cublasOperation_t transa;
+    cublasOperation_t transb;
+    int m;
+    int n;
+    int k;
+   void* alpha=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* A=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+    cudaDataType Atype;
+    int lda;
+   void* B=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+    cudaDataType Btype;
+    int ldb;
+   void* beta=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* C=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
+    cudaDataType Ctype;
+    int ldc;
+    cublasComputeType_t computeType;
+    cublasGemmAlgo_t algo;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &m, sizeof(int)) < 0 ||
+        rpc_read(conn, &n, sizeof(int)) < 0 ||
+        rpc_read(conn, &k, sizeof(int)) < 0 ||
+        rpc_read(conn, &alpha, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &Atype, sizeof(cudaDataType)) < 0 ||
+        rpc_read(conn, &lda, sizeof(int)) < 0 ||
+        rpc_read(conn, &B, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &Btype, sizeof(cudaDataType)) < 0 ||
+        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &C, sizeof(void*)) < 0 ||
+        rpc_read(conn, &Ctype, sizeof(cudaDataType)) < 0 ||
+        rpc_read(conn, &ldc, sizeof(int)) < 0 ||
+        rpc_read(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
+        rpc_read(conn, &algo, sizeof(cublasGemmAlgo_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasGemmEx(handle, transa, transb, m, n, k, alpha, A, Atype, lda, B, Btype, ldb, beta, C, Ctype, ldc, computeType, algo);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cublasGemmEx_64(conn_t *conn)
+{
+    cublasHandle_t handle;
+    cublasOperation_t transa;
+    cublasOperation_t transb;
+    int64_t m;
+    int64_t n;
+    int64_t k;
+   void* alpha=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* A=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+    cudaDataType Atype;
+    int64_t lda;
+   void* B=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+    cudaDataType Btype;
+    int64_t ldb;
+   void* beta=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
+   void* C=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
+    cudaDataType Ctype;
+    int64_t ldc;
+    cublasComputeType_t computeType;
+    cublasGemmAlgo_t algo;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &alpha, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &Atype, sizeof(cudaDataType)) < 0 ||
+        rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &B, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &Btype, sizeof(cudaDataType)) < 0 ||
+        rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &C, sizeof(void*)) < 0 ||
+        rpc_read(conn, &Ctype, sizeof(cudaDataType)) < 0 ||
+        rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
+        rpc_read(conn, &algo, sizeof(cublasGemmAlgo_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasGemmEx_64(handle, transa, transb, m, n, k, alpha, A, Atype, lda, B, Btype, ldb, beta, C, Ctype, ldc, computeType, algo);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cublasSsyrk_v2(conn_t *conn)
 {
     cublasHandle_t handle;
@@ -43375,11 +43498,7 @@ int handle_cublasDgemmBatched(conn_t *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
         rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0)
-    )
-        goto ERROR_0;
-
-    if (
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const double* const*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const double* const*)) < 0 ||
@@ -47547,7 +47666,7 @@ int handle_cudnnBackendSetAttribute(conn_t *conn)
     cudnnBackendAttributeName_t attributeName;
     cudnnBackendAttributeType_t attributeType;
     int64_t elementCount;
-    const void* arrayOfElements;
+   void* arrayOfElements=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     int request_id;
     cudnnStatus_t scuda_intercept_result;
     if (
@@ -48724,11 +48843,11 @@ int handle_cudnnActivationForward(conn_t *conn)
     void* alpha_null_check;
     void* alpha;
     cudnnTensorDescriptor_t xDesc;
-    const void* x;
+   void* x=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     void* beta_null_check;
     void* beta;
     cudnnTensorDescriptor_t yDesc;
-    void* y;
+   void* y=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=False, volatile=False), const=False, volatile=False));
     int request_id;
     cudnnStatus_t scuda_intercept_result;
     if (
@@ -49780,7 +49899,7 @@ int handle_cublasLtMatrixLayoutSetAttribute(conn_t *conn)
 {
     cublasLtMatrixLayout_t matLayout;
     cublasLtMatrixLayoutAttribute_t attr;
-    const void* buf;
+   void* buf=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t sizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -49925,14 +50044,14 @@ int handle_cublasLtMatmulDescSetAttribute(conn_t *conn)
 {
     cublasLtMatmulDesc_t matmulDesc;
     cublasLtMatmulDescAttributes_t attr;
-    void* buf = (void *)malloc(sizeof(const void*));
+   void* buf=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t sizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
         rpc_read(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
         rpc_read(conn, &attr, sizeof(cublasLtMatmulDescAttributes_t)) < 0 ||
-        rpc_read(conn, buf, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &buf, sizeof(const void*)) < 0 ||
         rpc_read(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
         false)
         goto ERROR_0;
@@ -50065,7 +50184,7 @@ int handle_cublasLtMatrixTransformDescSetAttribute(conn_t *conn)
 {
     cublasLtMatrixTransformDesc_t transformDesc;
     cublasLtMatrixTransformDescAttributes_t attr;
-    const void* buf;
+   void* buf=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t sizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -50281,7 +50400,7 @@ int handle_cublasLtMatmulAlgoConfigSetAttribute(conn_t *conn)
 {
     cublasLtMatmulAlgo_t algo;
     cublasLtMatmulAlgoConfigAttributes_t attr;
-    const void* buf;
+   void* buf=malloc(sizeofPointer(ptr_to=Type(typename=PQName(segments=[FundamentalSpecifier(name='void')], classkey=None, has_typename=False), const=True, volatile=False), const=False, volatile=False));
     size_t sizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -51295,7 +51414,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaFreeHost,
     handle_cudaFreeArray,
     handle_cudaFreeMipmappedArray,
-    handle_cudaHostAlloc,
+    nullptr,
     handle_cudaMalloc3D,
     handle_cudaMalloc3DArray,
     handle_cudaMallocMipmappedArray,
@@ -51758,6 +51877,8 @@ static RequestHandler opHandlers[] = {
     handle_cublasZgemm3m_64,
     handle_cublasHgemm,
     handle_cublasHgemm_64,
+    handle_cublasGemmEx,
+    handle_cublasGemmEx_64,
     handle_cublasSsyrk_v2,
     handle_cublasSsyrk_v2_64,
     handle_cublasDsyrk_v2,
