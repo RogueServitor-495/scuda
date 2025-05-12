@@ -464,6 +464,6 @@ void *dlsym(void *handle, const char *name) __THROW {
 
   // std::cout << "[dlsym] Falling back to real_dlsym for name: " << name <<
   // std::endl;
-  printf("[dlsym] fall back to real dlsym...\n");
+  printf("[dlsym] fall back to real dlsym [%s]...\n");
   return real_dlsym(handle, name);
 }

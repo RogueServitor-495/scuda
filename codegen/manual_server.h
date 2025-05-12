@@ -37,6 +37,9 @@ int handle_cublasGemmBatchedEx(conn_t *conn);
 int handle_cublasGemmBatchedEx_64(conn_t *conn);
 int handle_cublasGemmEx_64(conn_t *conn);
 int handle_cublasGemmEx(conn_t *conn);
+int handle_cublasSgemmStridedBatched(conn_t *conn);
+int handle_cublasSgemmStridedBatched_64(conn_t *conn);
+
 
 
 

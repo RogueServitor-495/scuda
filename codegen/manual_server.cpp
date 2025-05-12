@@ -1505,3 +1505,131 @@ int handle_cublasGemmEx_64(conn_t *conn)
 ERROR_0:
     return -1;
 }
+
+int handle_cublasSgemmStridedBatched(conn_t *conn)
+{
+    cublasHandle_t handle;
+    cublasOperation_t transa;
+    cublasOperation_t transb;
+    int m;
+    int n;
+    int k;
+    float* alpha_null_check;
+    float alpha;
+    const float* A;
+    int lda;
+    long long int strideA;
+    const float* B;
+    int ldb;
+    long long int strideB;
+    float* beta_null_check;
+    float beta;
+    float* C;
+    int ldc;
+    long long int strideC;
+    int batchCount;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &m, sizeof(int)) < 0 ||
+        rpc_read(conn, &n, sizeof(int)) < 0 ||
+        rpc_read(conn, &k, sizeof(int)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
+        rpc_read(conn, &A, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &lda, sizeof(int)) < 0 ||
+        rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
+        rpc_read(conn, &B, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
+        rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
+        rpc_read(conn, &C, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &ldc, sizeof(int)) < 0 ||
+        rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
+        rpc_read(conn, &batchCount, sizeof(int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasSgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(const float*)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cublasSgemmStridedBatched_64(conn_t *conn)
+{
+    cublasHandle_t handle;
+    cublasOperation_t transa;
+    cublasOperation_t transb;
+    int64_t m;
+    int64_t n;
+    int64_t k;
+    float* alpha_null_check;
+    float alpha;
+    const float* A;
+    int64_t lda;
+    long long int strideA;
+    const float* B;
+    int64_t ldb;
+    long long int strideB;
+    float* beta_null_check;
+    float beta;
+    float C;
+    int64_t ldc;
+    long long int strideC;
+    int64_t batchCount;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
+        rpc_read(conn, &A, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
+        rpc_read(conn, &B, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
+        rpc_read(conn, &C, sizeof(float*)) < 0 ||
+        rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
+        rpc_read(conn, &batchCount, sizeof(int64_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasSgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(float)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}

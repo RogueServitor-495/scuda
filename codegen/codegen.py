@@ -93,6 +93,8 @@ MANUAL_IMPLEMENTATIONS = [
     "cublasGemmBatchedEx",
     "cublasGemmEx",
     "cublasGemmEx_64",
+    "cublasSgemmStridedBatched",
+    "cublasSgemmStridedBatched_64",
 ]
 
 # some functions in cublasLt.h is statically inlined, we can not hook them
@@ -233,7 +235,7 @@ class ArrayOperation:
     
     def parse_shape_str(self):
         # TODO: only str is parsed now, we should check whether shape is a pointer
-        return "1".join(f" * {p}" for p in self.shape)
+        return "1" + "".join(f" * {p}" for p in self.shape)
 
     def client_rpc_write(self, f):
         if self.iter:
@@ -331,7 +333,7 @@ class ArrayOperation:
                 )
             )
             f.write(
-                "      if (maybe_copy_unified_arg(conn, (void*)&{name}[i], {direction}) < 0 )\n".format(
+                "      if (maybe_copy_unified_arg(conn, (void*)({name}+i), {direction}) < 0 )\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
@@ -427,7 +429,9 @@ class ArrayOperation:
             return
         # if a void point, we should malloc space for it
         if "void" in self.parameter.type.format():
-            if isinstance(self.length, int):
+            if self.shape:
+                byteCount = None
+            elif isinstance(self.length, int):
                 byteCount = self.length
             else:
                 byteCount = self.length.name.format() + " * sizeof(void*)"
@@ -513,18 +517,30 @@ class ArrayOperation:
                 )
             )
         else:
+            if self.shape:
+                typeName = None
+            elif isinstance(self.parameter.type, Pointer):
+                typeName = self.ptr.ptr_to.format()
+            else: 
+                typeName = self.parameter.type.array_of.typename.format()
             f.write(
-                "        rpc_write(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                "        rpc_write(conn, {param_name}, {byteCount}) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type= self.parameter.type.array_of.typename.format() if isinstance(self.parameter.type, Array) else self.ptr.ptr_to.format(),
-                    length=self.length.name,
+                    byteCount = self.parse_shape_str() if self.shape else (f"{self.length.name} * sizeof({typeName})")
                 )
             )
 
     def client_rpc_read(self, f):
         if not self.recv:
             return
-        if isinstance(self.length, int):
+        if self.shape:
+            f.write(
+                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
+                    param_name=self.parameter.name,
+                    size=self.parse_shape_str(),
+                )
+            )
+        elif isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,

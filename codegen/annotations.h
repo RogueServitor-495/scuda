@@ -15635,16 +15635,16 @@ cublasStatus_t cublasGemmBatchedEx_64(
  * @param n SEND_ONLY
  * @param k SEND_ONLY
  * @param alpha SEND_ONLY NULLABLE
- * @param A SEND_RECV
+ * @param A SEND_ONLY
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
- * @param B SEND_RECV
+ * @param B SEND_ONLY
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
  * @param beta SEND_ONLY NULLABLE
- * @param C SEND_RECV
+ * @param C SEND_ONLY
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -16672,16 +16672,16 @@ cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa,
  * @param n SEND_ONLY
  * @param k SEND_ONLY
  * @param alpha SEND_ONLY NULLABLE
- * @param A SEND_RECV
+ * @param A SEND_ONLY LENGTH:batchCount
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
- * @param B SEND_RECV
+ * @param B SEND_ONLY LENGTH:batchCount
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
  * @param beta SEND_ONLY NULLABLE
- * @param C SEND_RECV
+ * @param C SEND_ONLY LENGTH:batchCount
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
