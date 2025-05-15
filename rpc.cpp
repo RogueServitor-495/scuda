@@ -207,7 +207,7 @@ int rpc_write_end(conn_t *conn) {
       fprintf(stderr, "writev failed: %s (errno=%d)\n", strerror(errno), errno);
     }
     check_write_iov(conn);
-    printf("[FATAL] current iov count is [%d]\n",conn->write_iov_count);
+    printf("[FATAL] total iov size is [%d]\n",conn->write_iov_count);
 
     return-1;
   }

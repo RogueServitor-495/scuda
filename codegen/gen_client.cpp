@@ -48898,12 +48898,11 @@ cublasStatus_t cublasHgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const __half*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const __half)) < 0) ||
-        rpc_write(conn, C, sizeof(__half)) < 0 ||
+        rpc_write(conn, &C, sizeof(__half*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(__half)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49003,12 +49002,11 @@ cublasStatus_t cublasSgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const float*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const float)) < 0) ||
-        rpc_write(conn, C, sizeof(float)) < 0 ||
+        rpc_write(conn, &C, sizeof(float*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(float)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49108,12 +49106,11 @@ cublasStatus_t cublasSgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const float*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const float)) < 0) ||
-        rpc_write(conn, C, sizeof(float)) < 0 ||
+        rpc_write(conn, &C, sizeof(float*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(float)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49213,12 +49210,11 @@ cublasStatus_t cublasDgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const double*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const double)) < 0) ||
-        rpc_write(conn, C, sizeof(double)) < 0 ||
+        rpc_write(conn, &C, sizeof(double*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(double)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49318,12 +49314,11 @@ cublasStatus_t cublasDgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const double*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const double)) < 0) ||
-        rpc_write(conn, C, sizeof(double)) < 0 ||
+        rpc_write(conn, &C, sizeof(double*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(double)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49423,12 +49418,11 @@ cublasStatus_t cublasCgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuComplex*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const cuComplex)) < 0) ||
-        rpc_write(conn, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49528,12 +49522,11 @@ cublasStatus_t cublasCgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuComplex*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const cuComplex)) < 0) ||
-        rpc_write(conn, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49633,12 +49626,11 @@ cublasStatus_t cublasCgemm3mStridedBatched(cublasHandle_t handle, cublasOperatio
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuComplex*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const cuComplex)) < 0) ||
-        rpc_write(conn, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49738,12 +49730,11 @@ cublasStatus_t cublasCgemm3mStridedBatched_64(cublasHandle_t handle, cublasOpera
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuComplex*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const cuComplex)) < 0) ||
-        rpc_write(conn, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49843,12 +49834,11 @@ cublasStatus_t cublasZgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const cuDoubleComplex)) < 0) ||
-        rpc_write(conn, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(conn, &C, sizeof(cuDoubleComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -49948,12 +49938,11 @@ cublasStatus_t cublasZgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
         (beta != nullptr && rpc_write(conn, beta, sizeof(const cuDoubleComplex)) < 0) ||
-        rpc_write(conn, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(conn, &C, sizeof(cuDoubleComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;

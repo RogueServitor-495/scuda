@@ -1745,7 +1745,7 @@ cublasStatus_t cublasGemmBatchedEx(cublasHandle_t handle, cublasOperation_t tran
     if (maybe_copy_unified_arg(conn, (void*)&algo, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     cublasStatus_t return_value;
-    if (rpc_write_start_request(conn, RPC_cublasGemmBatchedEx_64) < 0 ||
+    if (rpc_write_start_request(conn, RPC_cublasGemmBatchedEx) < 0 ||
         rpc_write(conn, &batchCount, sizeof(int)) < 0 ||
         rpc_write(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
