@@ -21,7 +21,6 @@ int is_unified_pointer(conn_t *conn, void *arg);
 int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind);
 extern void rpc_close(conn_t *conn);
 
-
 nvmlReturn_t nvmlInit_v2()
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -41106,7 +41105,7 @@ cublasStatus_t cublasTSSgemvStridedBatched_64(cublasHandle_t handle, cublasOpera
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&n, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41137,6 +41136,7 @@ cublasStatus_t cublasTSSgemvStridedBatched_64(cublasHandle_t handle, cublasOpera
         rpc_write(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const float)) < 0) ||
         rpc_write(conn, &A, sizeof(const __nv_bfloat16*)) < 0 ||
         rpc_write(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &strideA, sizeof(long long int)) < 0 ||
@@ -41287,7 +41287,7 @@ cublasStatus_t cublasSgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41297,7 +41297,7 @@ cublasStatus_t cublasSgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41312,15 +41312,16 @@ cublasStatus_t cublasSgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
         rpc_write(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &k, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const float)) < 0) ||
         rpc_write(conn, &A, sizeof(const float*)) < 0 ||
         rpc_write(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &B, sizeof(const float*)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &beta, sizeof(const float*)) < 0 ||
-        rpc_write(conn, C, sizeof(float)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const float)) < 0) ||
+        rpc_write(conn, &C, sizeof(float*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(float)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41370,7 +41371,7 @@ cublasStatus_t cublasDgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41380,7 +41381,7 @@ cublasStatus_t cublasDgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41395,15 +41396,16 @@ cublasStatus_t cublasDgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
         rpc_write(conn, &n, sizeof(int)) < 0 ||
         rpc_write(conn, &k, sizeof(int)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const double)) < 0) ||
         rpc_write(conn, &A, sizeof(const double*)) < 0 ||
         rpc_write(conn, &lda, sizeof(int)) < 0 ||
         rpc_write(conn, &B, sizeof(const double*)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const double*)) < 0 ||
-        rpc_write(conn, C, sizeof(double)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const double)) < 0) ||
+        rpc_write(conn, &C, sizeof(double*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(double)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41455,6 +41457,9 @@ cublasStatus_t cublasDgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
+    for (int i = 0; i < 8 && is_unified_pointer(conn, (void*)alpha); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&alpha[i], cudaMemcpyHostToDevice) < 0 )
+        return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&lda, cudaMemcpyHostToDevice) < 0)
@@ -41465,6 +41470,9 @@ cublasStatus_t cublasDgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
+    for (int i = 0; i < 8 && is_unified_pointer(conn, (void*)beta); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&beta[i], cudaMemcpyHostToDevice) < 0 )
+        return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldc, cudaMemcpyHostToDevice) < 0)
@@ -41477,16 +41485,15 @@ cublasStatus_t cublasDgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
         rpc_write(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(conn, alpha, 8) < 0 ||
         rpc_write(conn, &A, sizeof(const double*)) < 0 ||
         rpc_write(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &B, sizeof(const double*)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_write(conn, &beta, sizeof(const double*)) < 0 ||
-        rpc_write(conn, C, sizeof(double)) < 0 ||
+        rpc_write(conn, beta, 8) < 0 ||
+        rpc_write(conn, &C, sizeof(double*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(double)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41504,6 +41511,9 @@ cublasStatus_t cublasDgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
+    for (int i = 0; i < 8 && is_unified_pointer(conn, (void*)alpha); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&alpha[i], cudaMemcpyDeviceToHost) < 0 )
+        return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&lda, cudaMemcpyDeviceToHost) < 0)
@@ -41514,6 +41524,9 @@ cublasStatus_t cublasDgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
+    for (int i = 0; i < 8 && is_unified_pointer(conn, (void*)beta); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&beta[i], cudaMemcpyDeviceToHost) < 0 )
+        return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldc, cudaMemcpyDeviceToHost) < 0)
@@ -41536,7 +41549,7 @@ cublasStatus_t cublasCgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41546,7 +41559,7 @@ cublasStatus_t cublasCgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41561,15 +41574,16 @@ cublasStatus_t cublasCgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
         rpc_write(conn, &n, sizeof(int)) < 0 ||
         rpc_write(conn, &k, sizeof(int)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(conn, &lda, sizeof(int)) < 0 ||
         rpc_write(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuComplex*)) < 0 ||
-        rpc_write(conn, C, sizeof(cuComplex)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const cuComplex)) < 0) ||
+        rpc_write(conn, &C, sizeof(cuComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41619,7 +41633,7 @@ cublasStatus_t cublasCgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41629,7 +41643,7 @@ cublasStatus_t cublasCgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41644,15 +41658,16 @@ cublasStatus_t cublasCgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
         rpc_write(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &k, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuComplex*)) < 0 ||
-        rpc_write(conn, C, sizeof(cuComplex)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const cuComplex)) < 0) ||
+        rpc_write(conn, &C, sizeof(cuComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41868,7 +41883,7 @@ cublasStatus_t cublasZgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41878,7 +41893,7 @@ cublasStatus_t cublasZgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41893,15 +41908,16 @@ cublasStatus_t cublasZgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
         rpc_write(conn, &n, sizeof(int)) < 0 ||
         rpc_write(conn, &k, sizeof(int)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(conn, &lda, sizeof(int)) < 0 ||
         rpc_write(conn, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
-        rpc_write(conn, C, sizeof(cuDoubleComplex)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const cuDoubleComplex)) < 0) ||
+        rpc_write(conn, &C, sizeof(cuDoubleComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41951,7 +41967,7 @@ cublasStatus_t cublasZgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41961,7 +41977,7 @@ cublasStatus_t cublasZgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -41976,15 +41992,16 @@ cublasStatus_t cublasZgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
         rpc_write(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &k, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
-        rpc_write(conn, C, sizeof(cuDoubleComplex)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const cuDoubleComplex)) < 0) ||
+        rpc_write(conn, &C, sizeof(cuDoubleComplex*)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -42366,7 +42383,7 @@ cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa, cub
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -42380,7 +42397,7 @@ cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa, cub
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -42401,6 +42418,7 @@ cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa, cub
         rpc_write(conn, &n, sizeof(int)) < 0 ||
         rpc_write(conn, &k, sizeof(int)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const void*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const void*)) < 0) ||
         rpc_write(conn, &A, sizeof(const void*)) < 0 ||
         rpc_write(conn, &Atype, sizeof(cudaDataType)) < 0 ||
         rpc_write(conn, &lda, sizeof(int)) < 0 ||
@@ -42408,6 +42426,7 @@ cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa, cub
         rpc_write(conn, &Btype, sizeof(cudaDataType)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const void*)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const void*)) < 0) ||
         rpc_write(conn, &C, sizeof(void*)) < 0 ||
         rpc_write(conn, &Ctype, sizeof(cudaDataType)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
@@ -42473,7 +42492,7 @@ cublasStatus_t cublasGemmEx_64(cublasHandle_t handle, cublasOperation_t transa, 
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -42487,7 +42506,7 @@ cublasStatus_t cublasGemmEx_64(cublasHandle_t handle, cublasOperation_t transa, 
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -42508,6 +42527,7 @@ cublasStatus_t cublasGemmEx_64(cublasHandle_t handle, cublasOperation_t transa, 
         rpc_write(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &k, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const void*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const void*)) < 0) ||
         rpc_write(conn, &A, sizeof(const void*)) < 0 ||
         rpc_write(conn, &Atype, sizeof(cudaDataType)) < 0 ||
         rpc_write(conn, &lda, sizeof(int64_t)) < 0 ||
@@ -42515,6 +42535,7 @@ cublasStatus_t cublasGemmEx_64(cublasHandle_t handle, cublasOperation_t transa, 
         rpc_write(conn, &Btype, sizeof(cudaDataType)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(conn, &beta, sizeof(const void*)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const void*)) < 0) ||
         rpc_write(conn, &C, sizeof(void*)) < 0 ||
         rpc_write(conn, &Ctype, sizeof(cudaDataType)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
@@ -47454,7 +47475,7 @@ cublasStatus_t cublasHgemmBatched(cublasHandle_t handle, cublasOperation_t trans
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)Aarray, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -47470,7 +47491,7 @@ cublasStatus_t cublasHgemmBatched(cublasHandle_t handle, cublasOperation_t trans
         return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
-    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyHostToDevice) < 0)
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
     if (maybe_copy_unified_arg(conn, (void*)Carray, cudaMemcpyHostToDevice) < 0)
       return CUBLAS_STATUS_NOT_INITIALIZED;
@@ -47489,11 +47510,13 @@ cublasStatus_t cublasHgemmBatched(cublasHandle_t handle, cublasOperation_t trans
         rpc_write(conn, &n, sizeof(int)) < 0 ||
         rpc_write(conn, &k, sizeof(int)) < 0 ||
         rpc_write(conn, &alpha, sizeof(const __half*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const __half)) < 0) ||
         rpc_write(conn, &Aarray, sizeof(const __half* const)) < 0 ||
         rpc_write(conn, &lda, sizeof(int)) < 0 ||
         rpc_write(conn, &Barray, sizeof(const __half* const)) < 0 ||
         rpc_write(conn, &ldb, sizeof(int)) < 0 ||
         rpc_write(conn, &beta, sizeof(const __half*)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const __half)) < 0) ||
         rpc_write(conn, &Carray, sizeof(__half* const)) < 0 ||
         rpc_write(conn, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -48881,6 +48904,216 @@ cublasStatus_t cublasHgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(conn, &batchCount, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, C, sizeof(__half)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transa, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transb, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&m, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&n, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&lda, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideA, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)B, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideB, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ldc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideC, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&batchCount, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const float* alpha, const float* A, int lda, long long int strideA, const float* B, int ldb, long long int strideB, const float* beta, float* C, int ldc, long long int strideC, int batchCount)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transa, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transb, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&m, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&n, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&lda, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideA, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)B, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideB, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ldc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideC, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&batchCount, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    if (rpc_write_start_request(conn, RPC_cublasSgemmStridedBatched) < 0 ||
+        rpc_write(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(conn, &m, sizeof(int)) < 0 ||
+        rpc_write(conn, &n, sizeof(int)) < 0 ||
+        rpc_write(conn, &k, sizeof(int)) < 0 ||
+        rpc_write(conn, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const float)) < 0) ||
+        rpc_write(conn, &A, sizeof(const float*)) < 0 ||
+        rpc_write(conn, &lda, sizeof(int)) < 0 ||
+        rpc_write(conn, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(conn, &B, sizeof(const float*)) < 0 ||
+        rpc_write(conn, &ldb, sizeof(int)) < 0 ||
+        rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(conn, &beta, sizeof(const float*)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const float)) < 0) ||
+        rpc_write(conn, C, sizeof(float)) < 0 ||
+        rpc_write(conn, &ldc, sizeof(int)) < 0 ||
+        rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(conn, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, C, sizeof(float)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transa, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transb, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&m, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&n, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&lda, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideA, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)B, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideB, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ldc, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideC, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&batchCount, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, long long int strideA, const float* B, int64_t ldb, long long int strideB, const float* beta, float* C, int64_t ldc, long long int strideC, int64_t batchCount)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&handle, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transa, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&transb, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&m, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&n, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&k, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)alpha, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)A, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&lda, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideA, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)B, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ldb, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideB, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)beta, cudaMemcpyDeviceToHost) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)C, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&ldc, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&strideC, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    if (maybe_copy_unified_arg(conn, (void*)&batchCount, cudaMemcpyHostToDevice) < 0)
+      return CUBLAS_STATUS_NOT_INITIALIZED;
+    cublasStatus_t return_value;
+    if (rpc_write_start_request(conn, RPC_cublasSgemmStridedBatched_64) < 0 ||
+        rpc_write(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(conn, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(conn, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(conn, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(conn, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(conn, alpha, sizeof(const float)) < 0) ||
+        rpc_write(conn, &A, sizeof(const float*)) < 0 ||
+        rpc_write(conn, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(conn, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(conn, &B, sizeof(const float*)) < 0 ||
+        rpc_write(conn, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(conn, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(conn, &beta, sizeof(const float*)) < 0 ||
+        (beta != nullptr && rpc_write(conn, beta, sizeof(const float)) < 0) ||
+        rpc_write(conn, C, sizeof(float)) < 0 ||
+        rpc_write(conn, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_write(conn, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(conn, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, C, sizeof(float)) < 0 ||
         rpc_read(conn, &return_value, sizeof(cublasStatus_t)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;

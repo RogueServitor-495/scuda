@@ -91,10 +91,13 @@ MANUAL_IMPLEMENTATIONS = [
     "cublasLtMatmulDescSetAttribute",
     "cublasGemmBatchedEx_64",
     "cublasGemmBatchedEx",
+]
+
+OVERRIDE_IMPLS = [
     "cublasGemmEx",
-    "cublasGemmEx_64",
-    "cublasSgemmStridedBatched",
-    "cublasSgemmStridedBatched_64",
+    "cublasGemmBatchedEx",
+    "cublasGemmStridedBatchedEx",
+    # "cublasSgemmStridedBatched",
 ]
 
 # some functions in cublasLt.h is statically inlined, we can not hook them
@@ -1401,14 +1404,16 @@ def main():
         for function, _, _, disabled in functions_with_annotations:
             if disabled:
                 continue
-
+            name = function.name.format()
             if function.name.format() in INLINED_FUNCTIONS:
-                print(f"skipping static inline function {function.name}")
+                print(f"skipping static inline function {name}")
                 continue
-            
+            if name in OVERRIDE_IMPLS:
+                print(f"overriding function {name}")
             f.write(
-                '    {{"{name}", (void *){name}}},\n'.format(
-                    name=function.name.format()
+                '    {{"{name}", (void *){override}}},\n'.format(
+                    name=name,
+                    override=f"static_cast<{name}_t>({name})"if name in OVERRIDE_IMPLS else name
                 )
             )
         # write manual overrides
@@ -1430,8 +1435,9 @@ def main():
             )
         for x in MANUAL_IMPLEMENTATIONS:
             f.write(
-                '    {{"{x}", (void *){x}}},\n'.format(
+                '    {{"{x}", (void *){override}}},\n'.format(
                     x=x,
+                    override=f"static_cast<{x}_t>({x})"if x in OVERRIDE_IMPLS else x
                 )
             )
         f.write("\t};\n")
