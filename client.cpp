@@ -325,9 +325,6 @@ int rpc_open() {
       return -1;
     }
 
-    // pthread_create(&conns[nconns].read_thread, NULL, rpc_client_dispatch_thread,
-    //                (void *)&conns[nconns]);
-
     std::thread client_dispatcher(rpc_client_dispatch_thread,(void *)&conns[nconns]);
     client_dispatcher.detach();
     nconns++;

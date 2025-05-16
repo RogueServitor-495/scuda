@@ -15,13 +15,11 @@ void *_rpc_read_id_dispatch(void *p) {
   while (1) {
     while (conn->read_id != 0)
       pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
-    // printf("[DEBUG] LOCK [%d]...\n", conn->connfd);
     // the read id is zero so it's our turn to read the next int which is the
     // request id of the next request.
     if (rpc_read(conn, &conn->read_id, sizeof(int)) < 0 || conn->read_id == 0 ||
         pthread_cond_broadcast(&conn->read_cond) < 0)
       break;
-    // printf("[DEBUG] UNLOCK [%d]...\n", conn->connfd);
   }
   pthread_mutex_unlock(&conn->read_mutex);
   conn->read_thread = 0;
@@ -129,8 +127,6 @@ int rpc_write_start_request(conn_t *conn, const int op) {
     return -1;
   }
 
-  // printf("[DEBUG] lock write mutex for op = %d...\n",op);
-
   conn->write_iov_count = 2;               // skip 2 for the header
   conn->request_id = conn->request_id + 2; // leave the last bit the same
   conn->write_id = conn->request_id;
@@ -170,22 +166,20 @@ void check_write_iov(conn_t *conn){
       return;
   }
 
-  // 检查 write_iov_count 是否合法
+  // check write_iov_count
   if (conn->write_iov_count <= 0 || conn->write_iov_count > 1024) {
       fprintf(stderr, "Error: invalid write_iov_count=%zu\n", conn->write_iov_count);
       return;
   }
 
-  // 检查每个 iov_base 是否有效
+  // check iov_base
   for (size_t i = 0; i < conn->write_iov_count; i++) {
     if (conn->write_iov[i].iov_base == NULL) {
         fprintf(stderr, "Error: write_iov[%zu].iov_base is NULL\n", i);
         return;
     }
-    // 可选：检查 iov_base 是否指向可读内存（仅调试用）
-    // 注意：直接访问可能触发段错误，需谨慎！
+    // Optional：check whether iov_base is readable
   }
-  printf("[DEBUG] check finished...\n");
 }
 
 // rpc_write_end finalizes the current request builder on the given connection
@@ -215,7 +209,6 @@ int rpc_write_end(conn_t *conn) {
     printf("[WARN] failed to unlock write mutex for op=%d!\n", conn->write_op);
     return -1;
   }
-  // printf("[DEBUG] unlock write mutex for op = %d...\n", conn->write_op);
   return conn->write_id;
 }
 
