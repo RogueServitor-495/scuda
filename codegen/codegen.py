@@ -235,6 +235,7 @@ class ArrayOperation:
     length: Union[int, Parameter]
     # if a matrix or specified elemSize, we should parse length of it as (m * n * ... * elemSize)
     shape: list[str] = None
+    shallFree: bool = False
     
     def parse_shape_str(self):
         # TODO: only str is parsed now, we should check whether shape is a pointer
@@ -432,6 +433,7 @@ class ArrayOperation:
             return
         # if a void point, we should malloc space for it
         if "void" in self.parameter.type.format():
+            self.shallFree = True   # explicitly free it
             if self.shape:
                 byteCount = None
             elif isinstance(self.length, int):
@@ -1562,8 +1564,10 @@ def main():
             f.write("\n")
             # if a void array opertaion with length/shape, we should manually free it
             for operation in operations:
-                if isinstance(operation, ArrayOperation) and "void" in operation.parameter.type.format():
+                if hasattr(operation,"shallFree") and operation.shallFree:
                     f.write(f"    free({operation.parameter.name});\n")
+            for _, defer in enumerate(defers):
+                f.write("    free((void *) {param_name});\n".format(param_name=defer))
             f.write("    return 0;\n")
 
             for i, defer in enumerate(defers):

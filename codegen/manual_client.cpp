@@ -264,21 +264,21 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count,
   // we need to swap device directions in this case
   switch (kind) {
   case cudaMemcpyDeviceToHost:
-    // printf("[DEBUG] copy size=%d from device=[%p] to host...\n", count, src);
+    printf("[DEBUG] copy size=%d from device=[%p] to host...\n", count, src);
     if (rpc_write(conn, &src, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 || rpc_read(conn, dst, count) < 0)
       return cudaErrorDevicesUnavailable;
     break;
   case cudaMemcpyHostToDevice:
-    // printf("[DEBUG] copy size=%d from host to device=[%p]...\n", count, dst);
+    printf("[DEBUG] copy size=%d from host to device=[%p]...\n", count, dst);
     if (rpc_write(conn, &dst, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
         rpc_write(conn, src, count) < 0 || rpc_wait_for_response(conn) < 0)
       return cudaErrorDevicesUnavailable;
     break;
   case cudaMemcpyDeviceToDevice:
-    // printf("[DEBUG] copy size=%d from device=[%p] to device=[%p]...\n", count, src, dst);
+    printf("[DEBUG] copy size=%d from device=[%p] to device=[%p]...\n", count, src, dst);
     if (rpc_write(conn, &dst, sizeof(void *)) < 0 ||
         rpc_write(conn, &src, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
@@ -552,7 +552,7 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
 
   if (f == nullptr || rpc_write(conn, &f->arg_count, sizeof(int)) < 0)
     return cudaErrorDevicesUnavailable;
-  printf("[DEBUG] launch kernel : %s\n", f->name);
+  // printf("[DEBUG] launch kernel : %s\n", f->name);
   // printf("sending args to server...\n");
   for (int i = 0; i < f->arg_count; ++i) {
     // printf("sending arg: [%d/%d], arg size=%d ...\n",i,f->arg_count, f->arg_sizes[i]);

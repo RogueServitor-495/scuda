@@ -124,6 +124,7 @@ int handle_nvmlSystemGetDriverVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -156,6 +157,7 @@ int handle_nvmlSystemGetNVMLVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -240,6 +242,7 @@ int handle_nvmlSystemGetProcessName(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -273,6 +276,7 @@ int handle_nvmlSystemGetHicVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) hwbcEntries);
     return 0;
 ERROR_1:
     free((void *) hwbcEntries);
@@ -308,6 +312,7 @@ int handle_nvmlSystemGetTopologyGpuSet(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) deviceArray);
     return 0;
 ERROR_1:
     free((void *) deviceArray);
@@ -532,6 +537,7 @@ int handle_nvmlUnitGetDevices(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) devices);
     return 0;
 ERROR_1:
     free((void *) devices);
@@ -644,6 +650,7 @@ int handle_nvmlDeviceGetHandleBySerial(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) serial);
     return 0;
 ERROR_1:
     free((void *) serial);
@@ -677,6 +684,7 @@ int handle_nvmlDeviceGetHandleByUUID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -710,6 +718,7 @@ int handle_nvmlDeviceGetHandleByPciBusId_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) pciBusId);
     return 0;
 ERROR_1:
     free((void *) pciBusId);
@@ -744,6 +753,7 @@ int handle_nvmlDeviceGetName(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -832,6 +842,7 @@ int handle_nvmlDeviceGetSerial(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) serial);
     return 0;
 ERROR_1:
     free((void *) serial);
@@ -924,6 +935,7 @@ int handle_nvmlDeviceGetMemoryAffinity(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) nodeSet);
     return 0;
 ERROR_1:
     free((void *) nodeSet);
@@ -960,6 +972,7 @@ int handle_nvmlDeviceGetCpuAffinityWithinScope(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) cpuSet);
     return 0;
 ERROR_1:
     free((void *) cpuSet);
@@ -994,6 +1007,7 @@ int handle_nvmlDeviceGetCpuAffinity(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) cpuSet);
     return 0;
 ERROR_1:
     free((void *) cpuSet);
@@ -1138,6 +1152,7 @@ int handle_nvmlDeviceGetTopologyNearestGpus(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) deviceArray);
     return 0;
 ERROR_1:
     free((void *) deviceArray);
@@ -1203,6 +1218,7 @@ int handle_nvmlDeviceGetUUID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -1264,6 +1280,7 @@ int handle_nvmlDeviceGetBoardPartNumber(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) partNumber);
     return 0;
 ERROR_1:
     free((void *) partNumber);
@@ -1300,6 +1317,7 @@ int handle_nvmlDeviceGetInforomVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -1334,6 +1352,7 @@ int handle_nvmlDeviceGetInforomImageVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -1982,6 +2001,7 @@ int handle_nvmlDeviceGetSupportedMemoryClocks(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) clocksMHz);
     return 0;
 ERROR_1:
     free((void *) clocksMHz);
@@ -2019,6 +2039,7 @@ int handle_nvmlDeviceGetSupportedGraphicsClocks(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) clocksMHz);
     return 0;
 ERROR_1:
     free((void *) clocksMHz);
@@ -2590,6 +2611,7 @@ int handle_nvmlDeviceGetSupportedPerformanceStates(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) pstates);
     return 0;
 ERROR_1:
     free((void *) pstates);
@@ -3334,6 +3356,7 @@ int handle_nvmlDeviceGetEncoderSessions(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) sessionInfos);
     return 0;
 ERROR_1:
     free((void *) sessionInfos);
@@ -3487,6 +3510,7 @@ int handle_nvmlDeviceGetFBCSessions(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) sessionInfo);
     return 0;
 ERROR_1:
     free((void *) sessionInfo);
@@ -3550,6 +3574,7 @@ int handle_nvmlDeviceGetVbiosVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -3612,6 +3637,7 @@ int handle_nvmlDeviceGetComputeRunningProcesses_v3(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) infos);
     return 0;
 ERROR_1:
     free((void *) infos);
@@ -3647,6 +3673,7 @@ int handle_nvmlDeviceGetGraphicsRunningProcesses_v3(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) infos);
     return 0;
 ERROR_1:
     free((void *) infos);
@@ -3682,6 +3709,7 @@ int handle_nvmlDeviceGetMPSComputeRunningProcesses_v3(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) infos);
     return 0;
 ERROR_1:
     free((void *) infos);
@@ -3809,6 +3837,7 @@ int handle_nvmlDeviceGetSamples(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) samples);
     return 0;
 ERROR_1:
     free((void *) samples);
@@ -4525,6 +4554,7 @@ int handle_nvmlDeviceGetAccountingPids(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) pids);
     return 0;
 ERROR_1:
     free((void *) pids);
@@ -4589,6 +4619,7 @@ int handle_nvmlDeviceGetRetiredPages(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) addresses);
     return 0;
 ERROR_1:
     free((void *) addresses);
@@ -4631,6 +4662,8 @@ int handle_nvmlDeviceGetRetiredPages_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_2;
 
+    free((void *) addresses);
+    free((void *) timestamps);
     return 0;
 ERROR_2:
     free((void *) addresses);
@@ -4811,6 +4844,7 @@ int handle_nvmlDeviceGetProcessUtilization(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) utilization);
     return 0;
 ERROR_1:
     free((void *) utilization);
@@ -6246,6 +6280,7 @@ int handle_nvmlDeviceGetFieldValues(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) values);
     return 0;
 ERROR_1:
     free((void *) values);
@@ -6280,6 +6315,7 @@ int handle_nvmlDeviceClearFieldValues(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) values);
     return 0;
 ERROR_1:
     free((void *) values);
@@ -6707,6 +6743,7 @@ int handle_nvmlDeviceGetSupportedVgpus(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vgpuTypeIds);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeIds);
@@ -6742,6 +6779,7 @@ int handle_nvmlDeviceGetCreatableVgpus(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vgpuTypeIds);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeIds);
@@ -6776,6 +6814,7 @@ int handle_nvmlVgpuTypeGetClass(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vgpuTypeClass);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeClass);
@@ -6811,6 +6850,7 @@ int handle_nvmlVgpuTypeGetName(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vgpuTypeName);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeName);
@@ -6986,6 +7026,7 @@ int handle_nvmlVgpuTypeGetLicense(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vgpuTypeLicenseString);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeLicenseString);
@@ -7104,6 +7145,7 @@ int handle_nvmlDeviceGetActiveVgpus(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vgpuInstances);
     return 0;
 ERROR_1:
     free((void *) vgpuInstances);
@@ -7140,6 +7182,7 @@ int handle_nvmlVgpuInstanceGetVmID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vmId);
     return 0;
 ERROR_1:
     free((void *) vmId);
@@ -7174,6 +7217,7 @@ int handle_nvmlVgpuInstanceGetUUID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -7208,6 +7252,7 @@ int handle_nvmlVgpuInstanceGetVmDriverVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -7463,6 +7508,7 @@ int handle_nvmlVgpuInstanceGetEncoderSessions(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) sessionInfo);
     return 0;
 ERROR_1:
     free((void *) sessionInfo);
@@ -7525,6 +7571,7 @@ int handle_nvmlVgpuInstanceGetFBCSessions(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) sessionInfo);
     return 0;
 ERROR_1:
     free((void *) sessionInfo);
@@ -7587,6 +7634,7 @@ int handle_nvmlVgpuInstanceGetGpuPciId(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vgpuPciId);
     return 0;
 ERROR_1:
     free((void *) vgpuPciId);
@@ -7650,6 +7698,7 @@ int handle_nvmlVgpuInstanceGetMdevUUID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) mdevUuid);
     return 0;
 ERROR_1:
     free((void *) mdevUuid);
@@ -7685,6 +7734,7 @@ int handle_nvmlVgpuInstanceGetMetadata(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) vgpuMetadata);
     return 0;
 ERROR_1:
     free((void *) vgpuMetadata);
@@ -7720,6 +7770,7 @@ int handle_nvmlDeviceGetVgpuMetadata(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) pgpuMetadata);
     return 0;
 ERROR_1:
     free((void *) pgpuMetadata);
@@ -7785,6 +7836,7 @@ int handle_nvmlDeviceGetPgpuMetadataString(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) pgpuMetadata);
     return 0;
 ERROR_1:
     free((void *) pgpuMetadata);
@@ -7986,6 +8038,7 @@ int handle_nvmlDeviceGetVgpuUtilization(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) utilizationSamples);
     return 0;
 ERROR_1:
     free((void *) utilizationSamples);
@@ -8051,6 +8104,7 @@ int handle_nvmlDeviceGetVgpuProcessUtilization(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) utilizationSamples);
     return 0;
 ERROR_1:
     free((void *) utilizationSamples);
@@ -8141,6 +8195,7 @@ int handle_nvmlVgpuInstanceGetAccountingPids(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) pids);
     return 0;
 ERROR_1:
     free((void *) pids);
@@ -8427,6 +8482,7 @@ int handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) placements);
     return 0;
 ERROR_1:
     free((void *) placements);
@@ -8547,6 +8603,7 @@ int handle_nvmlDeviceGetGpuInstances(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) gpuInstances);
     return 0;
 ERROR_1:
     free((void *) gpuInstances);
@@ -8731,6 +8788,7 @@ int handle_nvmlGpuInstanceGetComputeInstancePossiblePlacements(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) placements);
     return 0;
 ERROR_1:
     free((void *) placements);
@@ -8822,6 +8880,7 @@ int handle_nvmlGpuInstanceGetComputeInstances(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) computeInstances);
     return 0;
 ERROR_1:
     free((void *) computeInstances);
@@ -9525,6 +9584,7 @@ int handle_cuDeviceGetName(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -9557,6 +9617,7 @@ int handle_cuDeviceGetUuid(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -9589,6 +9650,7 @@ int handle_cuDeviceGetUuid_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -10100,6 +10162,7 @@ int handle_cuCtxCreate_v3(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) paramsArray);
     return 0;
 ERROR_1:
     free((void *) paramsArray);
@@ -10693,6 +10756,7 @@ int handle_cuModuleLoad(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) fname);
     return 0;
 ERROR_1:
     free((void *) fname);
@@ -10779,6 +10843,7 @@ int handle_cuModuleGetFunction(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -10874,6 +10939,7 @@ int handle_cuModuleGetGlobal_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -10953,6 +11019,7 @@ int handle_cuLinkAddFile_v2(conn_t *conn)
         goto ERROR_1;
 
     free(optionValues);
+    free((void *) path);
     return 0;
 ERROR_1:
     free((void *) path);
@@ -11042,6 +11109,7 @@ int handle_cuModuleGetTexRef(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11077,6 +11145,7 @@ int handle_cuModuleGetSurfRef(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11130,6 +11199,7 @@ int handle_cuLibraryLoadFromFile(conn_t *conn)
 
     free(jitOptionsValues);
     free(libraryOptionValues);
+    free((void *) fileName);
     return 0;
 ERROR_1:
     free((void *) fileName);
@@ -11190,6 +11260,7 @@ int handle_cuLibraryGetKernel(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11339,6 +11410,7 @@ int handle_cuLibraryGetGlobal(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11376,6 +11448,7 @@ int handle_cuLibraryGetManaged(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11411,6 +11484,7 @@ int handle_cuLibraryGetUnifiedFunction(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) symbol);
     return 0;
 ERROR_1:
     free((void *) symbol);
@@ -11942,6 +12016,7 @@ int handle_cuDeviceGetByPCIBusId(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) pciBusId);
     return 0;
 ERROR_1:
     free((void *) pciBusId);
@@ -11976,6 +12051,7 @@ int handle_cuDeviceGetPCIBusId(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) pciBusId);
     return 0;
 ERROR_1:
     free((void *) pciBusId);
@@ -22115,6 +22191,7 @@ int handle_cudaStreamGetCaptureInfo_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    free((void *) dependencies_out);
     return 0;
 ERROR_1:
     free((void *) dependencies_out);
@@ -28235,6 +28312,7 @@ int handle_cublasGetVector(conn_t *conn)
         goto ERROR_1;
 
     free(y);
+    free((void *) y);
     return 0;
 ERROR_1:
     free((void *) y);
@@ -28276,6 +28354,7 @@ int handle_cublasGetVector_64(conn_t *conn)
         goto ERROR_1;
 
     free(y);
+    free((void *) y);
     return 0;
 ERROR_1:
     free((void *) y);
@@ -28393,6 +28472,7 @@ int handle_cublasGetMatrix(conn_t *conn)
         goto ERROR_1;
 
     free(B);
+    free((void *) B);
     return 0;
 ERROR_1:
     free((void *) B);
@@ -28436,6 +28516,7 @@ int handle_cublasGetMatrix_64(conn_t *conn)
         goto ERROR_1;
 
     free(B);
+    free((void *) B);
     return 0;
 ERROR_1:
     free((void *) B);
@@ -28553,6 +28634,7 @@ int handle_cublasGetVectorAsync(conn_t *conn)
         goto ERROR_1;
 
     free(hostPtr);
+    free((void *) hostPtr);
     return 0;
 ERROR_1:
     free((void *) hostPtr);
@@ -28596,6 +28678,7 @@ int handle_cublasGetVectorAsync_64(conn_t *conn)
         goto ERROR_1;
 
     free(hostPtr);
+    free((void *) hostPtr);
     return 0;
 ERROR_1:
     free((void *) hostPtr);
