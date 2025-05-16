@@ -83,29 +83,7 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaGraphAddHostNode",
     "cudaGraphAddMemFreeNode",
     "cudaGraphAddMemAllocNode",
-    "cudaDeviceGetGraphMemAttribute",
-    "cublasLtMatmulPreferenceSetAttribute",
-    "cublasLtMatmul",
-    "cublasLtMatmulAlgoGetHeuristic",
-    "cublasLtMatmulDescGetAttribute",
-    "cublasLtMatmulDescSetAttribute",
-    "cublasGemmBatchedEx_64",
-    "cublasGemmBatchedEx",
-]
-
-OVERRIDE_IMPLS = [
-    "cublasGemmEx",
-    "cublasGemmBatchedEx",
-    "cublasGemmStridedBatchedEx",
-    # "cublasSgemmStridedBatched",
-]
-
-# some functions in cublasLt.h is statically inlined, we can not hook them
-INLINED_FUNCTIONS = [
-    "cublasLtMatrixLayoutInit",
-    "cublasLtMatmulDescInit",
-    "cublasLtMatrixTransformDescInit",
-    "cublasLtMatmulPreferenceInit",
+    "cudaDeviceGetGraphMemAttribute"
 ]
 
 
@@ -231,15 +209,8 @@ class ArrayOperation:
     iter: bool
     parameter: Parameter
     ptr: Pointer
-    # if int, it's a constant length (bytes), if Parameter, it's a variable length (type_counts).
+    # if int, it's a constant length, if Parameter, it's a variable length.
     length: Union[int, Parameter]
-    # if a matrix or specified elemSize, we should parse length of it as (m * n * ... * elemSize)
-    shape: list[str] = None
-    shallFree: bool = False
-    
-    def parse_shape_str(self):
-        # TODO: only str is parsed now, we should check whether shape is a pointer
-        return "1" + "".join(f" * {p}" for p in self.shape)
 
     def client_rpc_write(self, f):
         if self.iter:
@@ -264,15 +235,6 @@ class ArrayOperation:
 
         if not self.send:
             return
-        # if a void ptr with size/length, we should send the context of it instead of addr of it
-        elif "void" in self.parameter.type.format():
-            f.write(
-                "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
-                    param_name=self.parameter.name,
-                    size=self.parse_shape_str() if self.shape else (self.length if isinstance(self.length, int) else self.length.name.format()),
-                )
-            )
-            
         elif isinstance(self.length, int):
             f.write(
                 "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
@@ -286,13 +248,6 @@ class ArrayOperation:
                 "        rpc_write(conn, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     param_type=self.ptr.array_of.format(),
-                )
-            )
-        elif self.shape:
-            f.write(
-                "       rpc_write(conn, {param_name}, {shape} < 0 || \n)".format(
-                    param_name=self.parameter.name,
-                    shape=self.parse_shape_str()
                 )
             )
         else:
@@ -324,20 +279,6 @@ class ArrayOperation:
             )
             f.write(
                 "      if (maybe_copy_unified_arg(conn, (void*)&{name}[i], {direction}) < 0 )\n".format(
-                    name=self.parameter.name, direction=direction
-                )
-            )
-            f.write("        return {error};\n".format(error=error))
-
-            return
-        if self.shape:
-            f.write(
-                "    for (int i = 0; i < {byteCount} && is_unified_pointer(conn, (void*){param}); i++)\n".format(
-                    param=self.parameter.name, byteCount=self.parse_shape_str()
-                )
-            )
-            f.write(
-                "      if (maybe_copy_unified_arg(conn, (void*)({name}+i), {direction}) < 0 )\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
@@ -389,20 +330,12 @@ class ArrayOperation:
         if isinstance(self.ptr, Array):
             c = self.ptr.array_of.const
             self.ptr.array_of.const = False
-            s = "    {arrayType}* {name} = nullptr;\n".format(
-                arrayType = "void*" if "void" in self.parameter.type.format() else self.ptr.array_of.format(),
-                name = self.parameter.name
-            )
+            s = f"    {self.ptr.array_of.format()}* {self.parameter.name} = nullptr;\n"
             self.ptr.array_of.const = c
         elif self.iter:
             c = self.ptr.ptr_to.const
             self.ptr.ptr_to.const = False
             s = f"    std::vector<{self.ptr.ptr_to.format()}> {self.parameter.name};\n"
-            self.ptr.ptr_to.const = c
-        elif "void" in self.parameter.type.format():
-            c = self.ptr.ptr_to.const
-            self.ptr.ptr_to.const = False
-            s = f"    {self.ptr.ptr_to.format()}* {self.parameter.name};\n"
             self.ptr.ptr_to.const = c
         else:
             c = self.ptr.ptr_to.const
@@ -431,47 +364,20 @@ class ArrayOperation:
                 param_type=self.ptr.ptr_to.format(),
             ))
             return
-        # if a void point, we should malloc space for it
-        if "void" in self.parameter.type.format():
-            self.shallFree = True   # explicitly free it
-            if self.shape:
-                byteCount = None
-            elif isinstance(self.length, int):
-                byteCount = self.length
-            else:
-                byteCount = self.length.name.format() + " * sizeof(void*)"
-            f.write("        false)\n")
-            f.write("        goto ERROR_{index};\n".format(index=index))
-            f.write(
-                "    {param_name} = ({server_type})malloc({size});\n".format(
-                    param_name=self.parameter.name,
-                    server_type= self.parameter.type.format(),
-                    size = self.parse_shape_str() if self.shape else byteCount
-                )
-            )
-            f.write("    if(")
-            if not self.send:
-                return self.parameter.name
-            f.write(
-                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
-                    param_name=self.parameter.name,
-                    size = self.parse_shape_str() if self.shape else f"{byteCount}"
-                )
-            )
-            return
+
         if not self.send:
             # if this parameter is recv only and it's a type pointer, it needs to be malloc'd.
             if isinstance(self.ptr, Pointer):
                 f.write("        false)\n")
                 f.write("        goto ERROR_{index};\n".format(index=index))
                 f.write(
-                    "    {param_name} = ({server_type})malloc({length});\n".format(
+                    "    {param_name} = ({server_type})malloc({length} * sizeof({param_type}));\n".format(
                         param_name=self.parameter.name,
-                        # param_type=self.ptr.ptr_to.format(),
+                        param_type=self.ptr.ptr_to.format(),
                         server_type=self.ptr.format(),
                         length=self.length
                         if isinstance(self.length, int)
-                        else self.length.name.format() + f" * sizeof({self.ptr.ptr_to.format()})",
+                        else self.length.name,
                     )
                 )
                 f.write("    if(")
@@ -522,30 +428,18 @@ class ArrayOperation:
                 )
             )
         else:
-            if self.shape:
-                typeName = None
-            elif isinstance(self.parameter.type, Pointer):
-                typeName = self.ptr.ptr_to.format()
-            else: 
-                typeName = self.parameter.type.array_of.typename.format()
             f.write(
-                "        rpc_write(conn, {param_name}, {byteCount}) < 0 ||\n".format(
+                "        rpc_write(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    byteCount = self.parse_shape_str() if self.shape else (f"{self.length.name} * sizeof({typeName})")
+                    param_type=self.ptr.ptr_to.format(),
+                    length=self.length.name,
                 )
             )
 
     def client_rpc_read(self, f):
         if not self.recv:
             return
-        if self.shape:
-            f.write(
-                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
-                    param_name=self.parameter.name,
-                    size=self.parse_shape_str(),
-                )
-            )
-        elif isinstance(self.length, int):
+        if isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
@@ -560,7 +454,7 @@ class ArrayOperation:
             f.write(
                 "        rpc_read(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type= self.parameter.type.array_of.typename.format() if isinstance(self.parameter.type, Array) else self.ptr.ptr_to.format(),
+                    param_type=self.ptr.ptr_to.format(),
                     length=length,
                 )
             )
@@ -686,12 +580,7 @@ class OpaqueTypeOperation:
 
     @property
     def server_declaration(self) -> str:
-        # for void pointer, we should allocate memory space before writing it
-        if isinstance(self.type_, Pointer) and "void**" in self.type_.format():
-            return f"    void** {self.parameter.name} = (void**)malloc(sizeof(void*));\n"   
-        elif isinstance(self.type_, Pointer) and "void" in self.type_.format():
-             return f"    void* {self.parameter.name} = (void*)malloc(sizeof(void*));\n"  
-        elif isinstance(self.type_, Pointer) and self.recv:
+        if isinstance(self.type_, Pointer) and self.recv:
             return f"    {self.type_.ptr_to.format()} {self.parameter.name};\n"
         # ensure we don't have a const struct, otherwise we can't initialise it properly; ex: "const cudnnTensorDescriptor_t xDesc;" is invalid...
         # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
@@ -870,9 +759,8 @@ def parse_annotation(
             send = parts[2] == "SEND_ONLY" or parts[2] == "SEND_RECV"
             recv = parts[2] == "RECV_ONLY" or parts[2] == "SEND_RECV"
 
-            # if there's a length or shape arg, use the type, otherwise use the ptr_to type
+            # if there's a length or size arg, use the type, otherwise use the ptr_to type
             length_arg = next((arg for arg in args if arg.startswith("LENGTH:")), None)
-            shape_arg = next((arg for arg in args if arg.startswith("SHAPE:")), None)
 
             if isinstance(param.type, Pointer):
                 if param.type.ptr_to.const:
@@ -904,20 +792,6 @@ def parse_annotation(
                             parameter=param,
                             ptr=param.type,
                             length=length_param,
-                            iter=False
-                        )
-                    )
-                elif shape_arg:
-                    # if it has a shap, it is an array/matrix operation with variable length
-                    shape_args = shape_arg.split(":")[1].split(",")
-                    operations.append(
-                        ArrayOperation(
-                            send=send,
-                            recv=recv,
-                            parameter=param,
-                            ptr=param.type,
-                            length=None,
-                            shape=shape_args,
                             iter=False
                         )
                     )
@@ -1115,15 +989,15 @@ def error_const(return_type: str) -> str:
     if return_type == "cudnnStatus_t":
         return "CUDNN_STATUS_NOT_INITIALIZED"
     if return_type == "size_t":
-        return "-1"
+        return "size_t"
     if return_type == "const char*":
-        return "nullptr"
+        return "const char*"
     if return_type == "void":
-        return ""
+        return "void"
     if return_type == "struct cudaChannelFormatDesc":
         return "struct cudaChannelFormatDesc"
     if return_type == "unsigned":
-        return "-1"
+        return "unsigned"
     raise NotImplementedError("Unknown return type: %s" % return_type)
 
 
@@ -1171,7 +1045,7 @@ def main():
         cudart_header = find_header_file("cuda_runtime_api.h")
         annotations_header = find_header_file("annotations.h")
         cublasLt_header = find_header_file("cublasLt.h")
-        nvml_header = find_header_file("/usr/local/cuda-12.4/targets/x86_64-linux/include/nvml.h")
+        nvml_header = find_header_file("nvml.h")
     except FileNotFoundError as e:
         print(e)
         return
@@ -1207,10 +1081,7 @@ def main():
         # "cublasSetWorkspace_v2",
         # "cuDeviceGetNvSciSyncAttributes",
         # "cudaMalloc",
-        # "cublasSgetrfBatched",
-        # "cublasLtMatmulAlgoGetHeuristic",
-        # "cudaGetKernel",
-        "cublasGemmEx"
+        "cublasSgetrfBatched",
         ]
 
     for function in functions:
@@ -1267,7 +1138,6 @@ def main():
             "#include <cuda.h>\n"
             "#include <cudnn.h>\n"
             "#include <cublas_v2.h>\n"
-            "#include <cublasLt.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -1285,14 +1155,8 @@ def main():
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
             if disabled:
                 continue
-            if function.name.format() in INLINED_FUNCTIONS:
-                print(f"skipping static inline function {function.name}")
-                continue
 
             params = []
-            
-            if (function.name.segments[0].name in debug_list):
-                print("[debug]: invoke...")
 
             for param in function.parameters:
                 if param.name and "[]" in param.type.format():
@@ -1406,16 +1270,10 @@ def main():
         for function, _, _, disabled in functions_with_annotations:
             if disabled:
                 continue
-            name = function.name.format()
-            if function.name.format() in INLINED_FUNCTIONS:
-                print(f"skipping static inline function {name}")
-                continue
-            if name in OVERRIDE_IMPLS:
-                print(f"overriding function {name}")
+
             f.write(
-                '    {{"{name}", (void *){override}}},\n'.format(
-                    name=name,
-                    override=f"static_cast<{name}_t>({name})"if name in OVERRIDE_IMPLS else name
+                '    {{"{name}", (void *){name}}},\n'.format(
+                    name=function.name.format()
                 )
             )
         # write manual overrides
@@ -1437,9 +1295,8 @@ def main():
             )
         for x in MANUAL_IMPLEMENTATIONS:
             f.write(
-                '    {{"{x}", (void *){override}}},\n'.format(
+                '    {{"{x}", (void *){x}}},\n'.format(
                     x=x,
-                    override=f"static_cast<{x}_t>({x})"if x in OVERRIDE_IMPLS else x
                 )
             )
         f.write("\t};\n")
@@ -1462,7 +1319,6 @@ def main():
             "#include <cuda.h>\n"
             "#include <cudnn.h>\n"
             "#include <cublas_v2.h>\n"
-            "#include <cublasLt.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -1490,9 +1346,6 @@ def main():
             f.write("{\n")
 
             defers = []
-            
-            if (function.name.segments[0].name in debug_list):
-                print("[debug]: invoke...")
 
             for operation in operations:
                 f.write(operation.server_declaration)
@@ -1562,12 +1415,6 @@ def main():
             f.write("        rpc_write_end(conn) < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
             f.write("\n")
-            # if a void array opertaion with length/shape, we should manually free it
-            for operation in operations:
-                if hasattr(operation,"shallFree") and operation.shallFree:
-                    f.write(f"    free({operation.parameter.name});\n")
-            for _, defer in enumerate(defers):
-                f.write("    free((void *) {param_name});\n".format(param_name=defer))
             f.write("    return 0;\n")
 
             for i, defer in enumerate(defers):

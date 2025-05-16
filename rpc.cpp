@@ -5,7 +5,6 @@
 #include <string.h>
 #include <unistd.h>
 
-pthread_t tid;
 
 void *_rpc_read_id_dispatch(void *p) {
   conn_t *conn = (conn_t *)p;
@@ -16,7 +15,6 @@ void *_rpc_read_id_dispatch(void *p) {
   while (1) {
     while (conn->read_id != 0)
       pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
-
     // the read id is zero so it's our turn to read the next int which is the
     // request id of the next request.
     if (rpc_read(conn, &conn->read_id, sizeof(int)) < 0 || conn->read_id == 0 ||
@@ -24,7 +22,8 @@ void *_rpc_read_id_dispatch(void *p) {
       break;
   }
   pthread_mutex_unlock(&conn->read_mutex);
-  tid = 0;
+  conn->read_thread = 0;
+  conn->isAlive = false;
   printf("rpc readID dispatcher exit...\n");
   return NULL;
 }
@@ -37,11 +36,10 @@ void *_rpc_read_id_dispatch(void *p) {
 // the sequence because by convention, the handler owns the read lock on
 // entry.
 int rpc_dispatch(conn_t *conn, int parity) {
-  if (tid == 0 &&
-      pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+  if (conn->read_thread == 0 &&
+      pthread_create(&conn->read_thread, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
     return -1;
   }
-
 
   if (pthread_mutex_lock(&conn->read_mutex) < 0) {
     return -1;
@@ -49,9 +47,13 @@ int rpc_dispatch(conn_t *conn, int parity) {
 
   int op;
 
-  while (conn->read_id < 2 || conn->read_id % 2 != parity)
+  while (conn->isAlive && (conn->read_id < 2 || conn->read_id % 2 != parity))
     pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
 
+  if (!conn->isAlive) {
+    printf("connection [%d] is not alive, dispatcher exit...\n",conn->connfd);
+    return -1;
+  }
   if (rpc_read(conn, &op, sizeof(int)) < 0) {
     pthread_mutex_unlock(&conn->read_mutex);
     return -1;
@@ -157,6 +159,29 @@ int rpc_write(conn_t *conn, const void *data, const size_t size) {
   return 0;
 }
 
+void check_write_iov(conn_t *conn){
+  // 检查 conn->write_iov 是否为 NULL 或野指针
+  if (conn->write_iov == NULL) {
+      fprintf(stderr, "Error: write_iov is NULL\n");
+      return;
+  }
+
+  // check write_iov_count
+  if (conn->write_iov_count <= 0 || conn->write_iov_count > 1024) {
+      fprintf(stderr, "Error: invalid write_iov_count=%zu\n", conn->write_iov_count);
+      return;
+  }
+
+  // check iov_base
+  for (size_t i = 0; i < conn->write_iov_count; i++) {
+    if (conn->write_iov[i].iov_base == NULL) {
+        fprintf(stderr, "Error: write_iov[%zu].iov_base is NULL\n", i);
+        return;
+    }
+    // Optional：check whether iov_base is readable
+  }
+}
+
 // rpc_write_end finalizes the current request builder on the given connection
 // index and sends the request to the server.
 //
@@ -169,8 +194,21 @@ int rpc_write_end(conn_t *conn) {
   }
 
   // write the request to the server
-  if (writev(conn->connfd, conn->write_iov, conn->write_iov_count) < 0 ||
-      pthread_mutex_unlock(&conn->write_mutex) < 0)
+  ssize_t write_status = writev(conn->connfd, conn->write_iov, conn->write_iov_count);
+  if (write_status < 0){
+    printf("[FATAL] [code=%ld] failed to write for op=%d!\n",write_status, conn->write_op);
+    if (write_status == -1){
+      fprintf(stderr, "writev failed: %s (errno=%d)\n", strerror(errno), errno);
+    }
+    check_write_iov(conn);
+    printf("[FATAL] total iov size is [%d]\n",conn->write_iov_count);
+
+    return-1;
+  }
+  if(pthread_mutex_unlock(&conn->write_mutex) < 0){
+    printf("[WARN] failed to unlock write mutex for op=%d!\n", conn->write_op);
     return -1;
+  }
   return conn->write_id;
 }
+

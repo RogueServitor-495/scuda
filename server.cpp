@@ -240,6 +240,7 @@ static void set_segfault_handlers() {
 void client_handler(int connfd) {
   conn_t conn = {connfd, 1};
   conn.request_id = 1;
+  conn.isAlive = true;
   if (pthread_mutex_init(&conn.read_mutex, NULL) < 0 ||
       pthread_mutex_init(&conn.write_mutex, NULL) < 0) {
     std::cerr << "Error initializing mutex." << std::endl;
@@ -253,6 +254,10 @@ void client_handler(int connfd) {
 
     auto opHandler = get_handler(op);
     printf("resolved handler for op=%d\n",op);
+    if (op == -1) {
+      printf("failed to fetch op due to invalid connection...\n");
+      break;
+    }
     if (opHandler(&conn) < 0) {
       std::cerr << "Error handling request." << std::endl;
     }
@@ -262,6 +267,7 @@ void client_handler(int connfd) {
       pthread_mutex_destroy(&conn.write_mutex) < 0)
     std::cerr << "Error destroying mutex." << std::endl;
 
+  printf("client handler for connfd=%d exit...\n",connfd);
   close(connfd);
 }
 

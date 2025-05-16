@@ -3,7 +3,6 @@
 #include <cuda.h>
 #include <cudnn.h>
 #include <cublas_v2.h>
-#include <cublasLt.h>
 #include <cuda_runtime_api.h>
 
 #include <cstring>
@@ -124,7 +123,6 @@ int handle_nvmlSystemGetDriverVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -157,7 +155,6 @@ int handle_nvmlSystemGetNVMLVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -242,80 +239,9 @@ int handle_nvmlSystemGetProcessName(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemGetHicVersion(conn_t *conn)
-{
-    unsigned int hwbcCount;
-    nvmlHwbcEntry_t* hwbcEntries;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &hwbcCount, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-    hwbcEntries = (nvmlHwbcEntry_t*)malloc(hwbcCount * sizeof(nvmlHwbcEntry_t));
-    if(        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlSystemGetHicVersion(&hwbcCount, hwbcEntries);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &hwbcCount, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, hwbcEntries, hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) hwbcEntries);
-    return 0;
-ERROR_1:
-    free((void *) hwbcEntries);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemGetTopologyGpuSet(conn_t *conn)
-{
-    unsigned int cpuNumber;
-    unsigned int count;
-    nvmlDevice_t* deviceArray;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &cpuNumber, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-    deviceArray = (nvmlDevice_t*)malloc(count * sizeof(nvmlDevice_t));
-    if(        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlSystemGetTopologyGpuSet(cpuNumber, &count, deviceArray);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, deviceArray, count * sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) deviceArray);
-    return 0;
-ERROR_1:
-    free((void *) deviceArray);
 ERROR_0:
     return -1;
 }
@@ -537,10 +463,42 @@ int handle_nvmlUnitGetDevices(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) devices);
     return 0;
 ERROR_1:
     free((void *) devices);
+ERROR_0:
+    return -1;
+}
+
+int handle_nvmlSystemGetHicVersion(conn_t *conn)
+{
+    unsigned int hwbcCount;
+    nvmlHwbcEntry_t* hwbcEntries;
+    int request_id;
+    nvmlReturn_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &hwbcCount, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+    hwbcEntries = (nvmlHwbcEntry_t*)malloc(hwbcCount * sizeof(nvmlHwbcEntry_t));
+    if(        false)
+        goto ERROR_1;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_1;
+    scuda_intercept_result = nvmlSystemGetHicVersion(&hwbcCount, hwbcEntries);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &hwbcCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, hwbcEntries, hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_1;
+
+    return 0;
+ERROR_1:
+    free((void *) hwbcEntries);
 ERROR_0:
     return -1;
 }
@@ -650,7 +608,6 @@ int handle_nvmlDeviceGetHandleBySerial(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) serial);
     return 0;
 ERROR_1:
     free((void *) serial);
@@ -684,7 +641,6 @@ int handle_nvmlDeviceGetHandleByUUID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -718,7 +674,6 @@ int handle_nvmlDeviceGetHandleByPciBusId_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) pciBusId);
     return 0;
 ERROR_1:
     free((void *) pciBusId);
@@ -753,7 +708,6 @@ int handle_nvmlDeviceGetName(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -842,66 +796,9 @@ int handle_nvmlDeviceGetSerial(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) serial);
     return 0;
 ERROR_1:
     free((void *) serial);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetModuleId(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int moduleId;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &moduleId, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetModuleId(device, &moduleId);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &moduleId, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetC2cModeInfoV(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlC2cModeInfo_v1_t c2cModeInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &c2cModeInfo, sizeof(nvmlC2cModeInfo_v1_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetC2cModeInfoV(device, &c2cModeInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &c2cModeInfo, sizeof(nvmlC2cModeInfo_v1_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
 ERROR_0:
     return -1;
 }
@@ -935,7 +832,6 @@ int handle_nvmlDeviceGetMemoryAffinity(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) nodeSet);
     return 0;
 ERROR_1:
     free((void *) nodeSet);
@@ -972,7 +868,6 @@ int handle_nvmlDeviceGetCpuAffinityWithinScope(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) cpuSet);
     return 0;
 ERROR_1:
     free((void *) cpuSet);
@@ -1007,7 +902,6 @@ int handle_nvmlDeviceGetCpuAffinity(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) cpuSet);
     return 0;
 ERROR_1:
     free((void *) cpuSet);
@@ -1056,34 +950,6 @@ int handle_nvmlDeviceClearCpuAffinity(conn_t *conn)
     scuda_intercept_result = nvmlDeviceClearCpuAffinity(device);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetNumaNodeId(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int node;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &node, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetNumaNodeId(device, &node);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &node, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -1152,7 +1018,41 @@ int handle_nvmlDeviceGetTopologyNearestGpus(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
+    return 0;
+ERROR_1:
     free((void *) deviceArray);
+ERROR_0:
+    return -1;
+}
+
+int handle_nvmlSystemGetTopologyGpuSet(conn_t *conn)
+{
+    unsigned int cpuNumber;
+    unsigned int count;
+    nvmlDevice_t* deviceArray;
+    int request_id;
+    nvmlReturn_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &cpuNumber, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+    deviceArray = (nvmlDevice_t*)malloc(count * sizeof(nvmlDevice_t));
+    if(        false)
+        goto ERROR_1;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_1;
+    scuda_intercept_result = nvmlSystemGetTopologyGpuSet(cpuNumber, &count, deviceArray);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, deviceArray, count * sizeof(nvmlDevice_t)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_1;
+
     return 0;
 ERROR_1:
     free((void *) deviceArray);
@@ -1218,10 +1118,43 @@ int handle_nvmlDeviceGetUUID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
+ERROR_0:
+    return -1;
+}
+
+int handle_nvmlVgpuInstanceGetMdevUUID(conn_t *conn)
+{
+    nvmlVgpuInstance_t vgpuInstance;
+    unsigned int size;
+    char* mdevUuid;
+    int request_id;
+    nvmlReturn_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+    mdevUuid = (char*)malloc(size * sizeof(char));
+    if(        false)
+        goto ERROR_1;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_1;
+    scuda_intercept_result = nvmlVgpuInstanceGetMdevUUID(vgpuInstance, mdevUuid, size);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, mdevUuid, size * sizeof(char)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_1;
+
+    return 0;
+ERROR_1:
+    free((void *) mdevUuid);
 ERROR_0:
     return -1;
 }
@@ -1280,7 +1213,6 @@ int handle_nvmlDeviceGetBoardPartNumber(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) partNumber);
     return 0;
 ERROR_1:
     free((void *) partNumber);
@@ -1317,7 +1249,6 @@ int handle_nvmlDeviceGetInforomVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -1352,7 +1283,6 @@ int handle_nvmlDeviceGetInforomImageVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -1403,37 +1333,6 @@ int handle_nvmlDeviceValidateInforom(conn_t *conn)
     scuda_intercept_result = nvmlDeviceValidateInforom(device);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetLastBBXFlushTime(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned long long timestamp;
-    unsigned long durationUs;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &timestamp, sizeof(unsigned long long)) < 0 ||
-        rpc_read(conn, &durationUs, sizeof(unsigned long)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetLastBBXFlushTime(device, &timestamp, &durationUs);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &timestamp, sizeof(unsigned long long)) < 0 ||
-        rpc_write(conn, &durationUs, sizeof(unsigned long)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -1524,34 +1423,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetPciInfoExt(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlPciInfoExt_t pci;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &pci, sizeof(nvmlPciInfoExt_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetPciInfoExt(device, &pci);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pci, sizeof(nvmlPciInfoExt_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_nvmlDeviceGetPciInfo_v3(conn_t *conn)
 {
     nvmlDevice_t device;
@@ -1597,33 +1468,6 @@ int handle_nvmlDeviceGetMaxPcieLinkGeneration(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &maxLinkGen, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetGpuMaxPcieLinkGeneration(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int maxLinkGenDevice;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetGpuMaxPcieLinkGeneration(device, &maxLinkGenDevice);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &maxLinkGenDevice, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -1828,33 +1672,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetGpcClkVfOffset(conn_t *conn)
-{
-    nvmlDevice_t device;
-    int offset;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetGpcClkVfOffset(device, &offset);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &offset, sizeof(int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_nvmlDeviceGetApplicationsClock(conn_t *conn)
 {
     nvmlDevice_t device;
@@ -1904,6 +1721,31 @@ int handle_nvmlDeviceGetDefaultApplicationsClock(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &clockMHz, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_nvmlDeviceResetApplicationsClocks(conn_t *conn)
+{
+    nvmlDevice_t device;
+    int request_id;
+    nvmlReturn_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = nvmlDeviceResetApplicationsClocks(device);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -2001,7 +1843,6 @@ int handle_nvmlDeviceGetSupportedMemoryClocks(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) clocksMHz);
     return 0;
 ERROR_1:
     free((void *) clocksMHz);
@@ -2039,7 +1880,6 @@ int handle_nvmlDeviceGetSupportedGraphicsClocks(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) clocksMHz);
     return 0;
 ERROR_1:
     free((void *) clocksMHz);
@@ -2067,6 +1907,62 @@ int handle_nvmlDeviceGetAutoBoostedClocksEnabled(conn_t *conn)
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &isEnabled, sizeof(nvmlEnableState_t)) < 0 ||
         rpc_write(conn, &defaultIsEnabled, sizeof(nvmlEnableState_t)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_nvmlDeviceSetAutoBoostedClocksEnabled(conn_t *conn)
+{
+    nvmlDevice_t device;
+    nvmlEnableState_t enabled;
+    int request_id;
+    nvmlReturn_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = nvmlDeviceSetAutoBoostedClocksEnabled(device, enabled);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_nvmlDeviceSetDefaultAutoBoostedClocksEnabled(conn_t *conn)
+{
+    nvmlDevice_t device;
+    nvmlEnableState_t enabled;
+    unsigned int flags;
+    int request_id;
+    nvmlReturn_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = nvmlDeviceSetDefaultAutoBoostedClocksEnabled(device, enabled, flags);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -2123,120 +2019,6 @@ int handle_nvmlDeviceGetFanSpeed_v2(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &speed, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetTargetFanSpeed(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int fan;
-    unsigned int targetSpeed;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetTargetFanSpeed(device, fan, &targetSpeed);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &targetSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetMinMaxFanSpeed(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int minSpeed;
-    unsigned int maxSpeed;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetMinMaxFanSpeed(device, &minSpeed, &maxSpeed);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &minSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &maxSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetFanControlPolicy_v2(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int fan;
-    nvmlFanControlPolicy_t policy;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetFanControlPolicy_v2(device, fan, &policy);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &policy, sizeof(nvmlFanControlPolicy_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetNumFans(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int numFans;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetNumFans(device, &numFans);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &numFans, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -2304,26 +2086,27 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetThermalSettings(conn_t *conn)
+int handle_nvmlDeviceSetTemperatureThreshold(conn_t *conn)
 {
     nvmlDevice_t device;
-    unsigned int sensorIndex;
-    nvmlGpuThermalSettings_t pThermalSettings;
+    nvmlTemperatureThresholds_t thresholdType;
+    int temp;
     int request_id;
     nvmlReturn_t scuda_intercept_result;
     if (
         rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &sensorIndex, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
+        rpc_read(conn, &temp, sizeof(int)) < 0 ||
         false)
         goto ERROR_0;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetThermalSettings(device, sensorIndex, &pThermalSettings);
+    scuda_intercept_result = nvmlDeviceSetTemperatureThreshold(device, thresholdType, &temp);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pThermalSettings, sizeof(nvmlGpuThermalSettings_t)) < 0 ||
+        rpc_write(conn, &temp, sizeof(int)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -2360,34 +2143,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetCurrentClocksEventReasons(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned long long clocksEventReasons;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &clocksEventReasons, sizeof(unsigned long long)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetCurrentClocksEventReasons(device, &clocksEventReasons);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &clocksEventReasons, sizeof(unsigned long long)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_nvmlDeviceGetCurrentClocksThrottleReasons(conn_t *conn)
 {
     nvmlDevice_t device;
@@ -2406,34 +2161,6 @@ int handle_nvmlDeviceGetCurrentClocksThrottleReasons(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &clocksThrottleReasons, sizeof(unsigned long long)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetSupportedClocksEventReasons(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned long long supportedClocksEventReasons;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &supportedClocksEventReasons, sizeof(unsigned long long)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetSupportedClocksEventReasons(device, &supportedClocksEventReasons);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &supportedClocksEventReasons, sizeof(unsigned long long)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -2488,186 +2215,6 @@ int handle_nvmlDeviceGetPowerState(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pState, sizeof(nvmlPstates_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetDynamicPstatesInfo(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlGpuDynamicPstatesInfo_t pDynamicPstatesInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetDynamicPstatesInfo(device, &pDynamicPstatesInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pDynamicPstatesInfo, sizeof(nvmlGpuDynamicPstatesInfo_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetMemClkVfOffset(conn_t *conn)
-{
-    nvmlDevice_t device;
-    int offset;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetMemClkVfOffset(device, &offset);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &offset, sizeof(int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetMinMaxClockOfPState(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlClockType_t type;
-    nvmlPstates_t pstate;
-    unsigned int minClockMHz;
-    unsigned int maxClockMHz;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &type, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_read(conn, &pstate, sizeof(nvmlPstates_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetMinMaxClockOfPState(device, type, pstate, &minClockMHz, &maxClockMHz);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &minClockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &maxClockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetSupportedPerformanceStates(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int size;
-    nvmlPstates_t* pstates;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-    pstates = (nvmlPstates_t*)malloc(size * sizeof(nvmlPstates_t));
-    if(        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlDeviceGetSupportedPerformanceStates(device, pstates, size);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, pstates, size * sizeof(nvmlPstates_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) pstates);
-    return 0;
-ERROR_1:
-    free((void *) pstates);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetGpcClkMinMaxVfOffset(conn_t *conn)
-{
-    nvmlDevice_t device;
-    int minOffset;
-    int maxOffset;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetGpcClkMinMaxVfOffset(device, &minOffset, &maxOffset);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &minOffset, sizeof(int)) < 0 ||
-        rpc_write(conn, &maxOffset, sizeof(int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetMemClkMinMaxVfOffset(conn_t *conn)
-{
-    nvmlDevice_t device;
-    int minOffset;
-    int maxOffset;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetMemClkMinMaxVfOffset(device, &minOffset, &maxOffset);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &minOffset, sizeof(int)) < 0 ||
-        rpc_write(conn, &maxOffset, sizeof(int)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -2924,33 +2471,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetMemoryInfo_v2(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlMemory_v2_t memory;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetMemoryInfo_v2(device, &memory);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &memory, sizeof(nvmlMemory_v2_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_nvmlDeviceGetComputeMode(conn_t *conn)
 {
     nvmlDevice_t device;
@@ -3027,33 +2547,6 @@ int handle_nvmlDeviceGetEccMode(conn_t *conn)
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &current, sizeof(nvmlEnableState_t)) < 0 ||
         rpc_write(conn, &pending, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetDefaultEccMode(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlEnableState_t defaultMode;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetDefaultEccMode(device, &defaultMode);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &defaultMode, sizeof(nvmlEnableState_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -3356,7 +2849,6 @@ int handle_nvmlDeviceGetEncoderSessions(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) sessionInfos);
     return 0;
 ERROR_1:
     free((void *) sessionInfos);
@@ -3380,68 +2872,6 @@ int handle_nvmlDeviceGetDecoderUtilization(conn_t *conn)
     if (request_id < 0)
         goto ERROR_0;
     scuda_intercept_result = nvmlDeviceGetDecoderUtilization(device, &utilization, &samplingPeriodUs);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &utilization, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetJpgUtilization(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int utilization;
-    unsigned int samplingPeriodUs;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &utilization, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetJpgUtilization(device, &utilization, &samplingPeriodUs);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &utilization, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetOfaUtilization(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int utilization;
-    unsigned int samplingPeriodUs;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &utilization, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetOfaUtilization(device, &utilization, &samplingPeriodUs);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &utilization, sizeof(unsigned int)) < 0 ||
@@ -3510,7 +2940,6 @@ int handle_nvmlDeviceGetFBCSessions(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) sessionInfo);
     return 0;
 ERROR_1:
     free((void *) sessionInfo);
@@ -3574,7 +3003,6 @@ int handle_nvmlDeviceGetVbiosVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -3609,133 +3037,90 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetComputeRunningProcesses_v3(conn_t *conn)
+int handle_nvmlDeviceGetComputeRunningProcesses_v2(conn_t *conn)
 {
     nvmlDevice_t device;
     unsigned int infoCount;
-    nvmlProcessInfo_t* infos;
+    nvmlProcessInfo_t infos;
     int request_id;
     nvmlReturn_t scuda_intercept_result;
     if (
         rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         false)
         goto ERROR_0;
-    infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
-    if(        false)
-        goto ERROR_1;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlDeviceGetComputeRunningProcesses_v3(device, &infoCount, infos);
+        goto ERROR_0;
+    scuda_intercept_result = nvmlDeviceGetComputeRunningProcesses_v2(device, &infoCount, &infos);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
+        rpc_write(conn, &infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
-    free((void *) infos);
     return 0;
-ERROR_1:
-    free((void *) infos);
 ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetGraphicsRunningProcesses_v3(conn_t *conn)
+int handle_nvmlDeviceGetGraphicsRunningProcesses_v2(conn_t *conn)
 {
     nvmlDevice_t device;
     unsigned int infoCount;
-    nvmlProcessInfo_t* infos;
+    nvmlProcessInfo_t infos;
     int request_id;
     nvmlReturn_t scuda_intercept_result;
     if (
         rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         false)
         goto ERROR_0;
-    infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
-    if(        false)
-        goto ERROR_1;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlDeviceGetGraphicsRunningProcesses_v3(device, &infoCount, infos);
+        goto ERROR_0;
+    scuda_intercept_result = nvmlDeviceGetGraphicsRunningProcesses_v2(device, &infoCount, &infos);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
+        rpc_write(conn, &infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
-    free((void *) infos);
     return 0;
-ERROR_1:
-    free((void *) infos);
 ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetMPSComputeRunningProcesses_v3(conn_t *conn)
+int handle_nvmlDeviceGetMPSComputeRunningProcesses_v2(conn_t *conn)
 {
     nvmlDevice_t device;
     unsigned int infoCount;
-    nvmlProcessInfo_t* infos;
+    nvmlProcessInfo_t infos;
     int request_id;
     nvmlReturn_t scuda_intercept_result;
     if (
         rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         false)
         goto ERROR_0;
-    infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
-    if(        false)
-        goto ERROR_1;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlDeviceGetMPSComputeRunningProcesses_v3(device, &infoCount, infos);
+        goto ERROR_0;
+    scuda_intercept_result = nvmlDeviceGetMPSComputeRunningProcesses_v2(device, &infoCount, &infos);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) infos);
-    return 0;
-ERROR_1:
-    free((void *) infos);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetRunningProcessDetailList(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlProcessDetailList_t plist;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &plist, sizeof(nvmlProcessDetailList_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetRunningProcessDetailList(device, &plist);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &plist, sizeof(nvmlProcessDetailList_t)) < 0 ||
+        rpc_write(conn, &infos, sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -3837,7 +3222,6 @@ int handle_nvmlDeviceGetSamples(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) samples);
     return 0;
 ERROR_1:
     free((void *) samples);
@@ -3919,548 +3303,6 @@ int handle_nvmlDeviceGetIrqNum(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &irqNum, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetNumGpuCores(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int numCores;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetNumGpuCores(device, &numCores);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &numCores, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetPowerSource(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlPowerSource_t powerSource;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetPowerSource(device, &powerSource);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &powerSource, sizeof(nvmlPowerSource_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetMemoryBusWidth(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int busWidth;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetMemoryBusWidth(device, &busWidth);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &busWidth, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetPcieLinkMaxSpeed(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int maxSpeed;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetPcieLinkMaxSpeed(device, &maxSpeed);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &maxSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetPcieSpeed(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int pcieSpeed;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetPcieSpeed(device, &pcieSpeed);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pcieSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetAdaptiveClockInfoStatus(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int adaptiveClockStatus;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetAdaptiveClockInfoStatus(device, &adaptiveClockStatus);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &adaptiveClockStatus, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetBusType(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlBusType_t type;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetBusType(device, &type);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &type, sizeof(nvmlBusType_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetGpuFabricInfo(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlGpuFabricInfo_t gpuFabricInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetGpuFabricInfo(device, &gpuFabricInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &gpuFabricInfo, sizeof(nvmlGpuFabricInfo_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetGpuFabricInfoV(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlGpuFabricInfoV_t gpuFabricInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &gpuFabricInfo, sizeof(nvmlGpuFabricInfoV_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetGpuFabricInfoV(device, &gpuFabricInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &gpuFabricInfo, sizeof(nvmlGpuFabricInfoV_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemGetConfComputeCapabilities(conn_t *conn)
-{
-    nvmlConfComputeSystemCaps_t capabilities;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &capabilities, sizeof(nvmlConfComputeSystemCaps_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemGetConfComputeCapabilities(&capabilities);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &capabilities, sizeof(nvmlConfComputeSystemCaps_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemGetConfComputeState(conn_t *conn)
-{
-    nvmlConfComputeSystemState_t state;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &state, sizeof(nvmlConfComputeSystemState_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemGetConfComputeState(&state);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &state, sizeof(nvmlConfComputeSystemState_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetConfComputeMemSizeInfo(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlConfComputeMemSizeInfo_t memInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &memInfo, sizeof(nvmlConfComputeMemSizeInfo_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetConfComputeMemSizeInfo(device, &memInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &memInfo, sizeof(nvmlConfComputeMemSizeInfo_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemGetConfComputeGpusReadyState(conn_t *conn)
-{
-    unsigned int isAcceptingWork;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &isAcceptingWork, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemGetConfComputeGpusReadyState(&isAcceptingWork);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &isAcceptingWork, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetConfComputeProtectedMemoryUsage(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlMemory_t memory;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &memory, sizeof(nvmlMemory_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetConfComputeProtectedMemoryUsage(device, &memory);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &memory, sizeof(nvmlMemory_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetConfComputeGpuCertificate(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlConfComputeGpuCertificate_t gpuCert;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &gpuCert, sizeof(nvmlConfComputeGpuCertificate_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetConfComputeGpuCertificate(device, &gpuCert);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &gpuCert, sizeof(nvmlConfComputeGpuCertificate_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetConfComputeGpuAttestationReport(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlConfComputeGpuAttestationReport_t gpuAtstReport;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &gpuAtstReport, sizeof(nvmlConfComputeGpuAttestationReport_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetConfComputeGpuAttestationReport(device, &gpuAtstReport);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &gpuAtstReport, sizeof(nvmlConfComputeGpuAttestationReport_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemGetConfComputeKeyRotationThresholdInfo(conn_t *conn)
-{
-    nvmlConfComputeGetKeyRotationThresholdInfo_t pKeyRotationThrInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &pKeyRotationThrInfo, sizeof(nvmlConfComputeGetKeyRotationThresholdInfo_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemGetConfComputeKeyRotationThresholdInfo(&pKeyRotationThrInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pKeyRotationThrInfo, sizeof(nvmlConfComputeGetKeyRotationThresholdInfo_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemGetConfComputeSettings(conn_t *conn)
-{
-    nvmlSystemConfComputeSettings_t settings;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &settings, sizeof(nvmlSystemConfComputeSettings_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemGetConfComputeSettings(&settings);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &settings, sizeof(nvmlSystemConfComputeSettings_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetGspFirmwareVersion(conn_t *conn)
-{
-    nvmlDevice_t device;
-    char version;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetGspFirmwareVersion(device, &version);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &version, sizeof(char)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetGspFirmwareMode(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int isEnabled;
-    unsigned int defaultMode;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetGspFirmwareMode(device, &isEnabled, &defaultMode);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &isEnabled, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &defaultMode, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -4554,7 +3396,6 @@ int handle_nvmlDeviceGetAccountingPids(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) pids);
     return 0;
 ERROR_1:
     free((void *) pids);
@@ -4619,7 +3460,6 @@ int handle_nvmlDeviceGetRetiredPages(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) addresses);
     return 0;
 ERROR_1:
     free((void *) addresses);
@@ -4662,8 +3502,6 @@ int handle_nvmlDeviceGetRetiredPages_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_2;
 
-    free((void *) addresses);
-    free((void *) timestamps);
     return 0;
 ERROR_2:
     free((void *) addresses);
@@ -4778,99 +3616,6 @@ int handle_nvmlDeviceGetArchitecture(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &arch, sizeof(nvmlDeviceArchitecture_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetClkMonStatus(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlClkMonStatus_t status;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetClkMonStatus(device, &status);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &status, sizeof(nvmlClkMonStatus_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetProcessUtilization(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int processSamplesCount;
-    nvmlProcessUtilizationSample_t* utilization;
-    unsigned long long lastSeenTimeStamp;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &processSamplesCount, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-    utilization = (nvmlProcessUtilizationSample_t*)malloc(processSamplesCount * sizeof(nvmlProcessUtilizationSample_t));
-    if(        rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlDeviceGetProcessUtilization(device, utilization, &processSamplesCount, lastSeenTimeStamp);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &processSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, utilization, processSamplesCount * sizeof(nvmlProcessUtilizationSample_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) utilization);
-    return 0;
-ERROR_1:
-    free((void *) utilization);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetProcessesUtilizationInfo(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlProcessesUtilizationInfo_t procesesUtilInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &procesesUtilInfo, sizeof(nvmlProcessesUtilizationInfo_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetProcessesUtilizationInfo(device, &procesesUtilInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &procesesUtilInfo, sizeof(nvmlProcessesUtilizationInfo_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -5181,9 +3926,10 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceResetApplicationsClocks(conn_t *conn)
+int handle_nvmlDeviceGetClkMonStatus(conn_t *conn)
 {
     nvmlDevice_t device;
+    nvmlClkMonStatus_t status;
     int request_id;
     nvmlReturn_t scuda_intercept_result;
     if (
@@ -5194,151 +3940,10 @@ int handle_nvmlDeviceResetApplicationsClocks(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceResetApplicationsClocks(device);
+    scuda_intercept_result = nvmlDeviceGetClkMonStatus(device, &status);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetAutoBoostedClocksEnabled(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlEnableState_t enabled;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetAutoBoostedClocksEnabled(device, enabled);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetDefaultAutoBoostedClocksEnabled(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlEnableState_t enabled;
-    unsigned int flags;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetDefaultAutoBoostedClocksEnabled(device, enabled, flags);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetDefaultFanSpeed_v2(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int fan;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetDefaultFanSpeed_v2(device, fan);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetFanControlPolicy(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int fan;
-    nvmlFanControlPolicy_t policy;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &policy, sizeof(nvmlFanControlPolicy_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetFanControlPolicy(device, fan, policy);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetTemperatureThreshold(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlTemperatureThresholds_t thresholdType;
-    int temp;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
-        rpc_read(conn, &temp, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetTemperatureThreshold(device, thresholdType, &temp);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &temp, sizeof(int)) < 0 ||
+        rpc_write(conn, &status, sizeof(nvmlClkMonStatus_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -5422,167 +4027,6 @@ int handle_nvmlDeviceSetAPIRestriction(conn_t *conn)
     scuda_intercept_result = nvmlDeviceSetAPIRestriction(device, apiType, isRestricted);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetFanSpeed_v2(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int fan;
-    unsigned int speed;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &speed, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetFanSpeed_v2(device, fan, speed);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetGpcClkVfOffset(conn_t *conn)
-{
-    nvmlDevice_t device;
-    int offset;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &offset, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetGpcClkVfOffset(device, offset);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetMemClkVfOffset(conn_t *conn)
-{
-    nvmlDevice_t device;
-    int offset;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &offset, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetMemClkVfOffset(device, offset);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetConfComputeUnprotectedMemSize(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned long long sizeKiB;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &sizeKiB, sizeof(unsigned long long)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetConfComputeUnprotectedMemSize(device, sizeKiB);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemSetConfComputeGpusReadyState(conn_t *conn)
-{
-    unsigned int isAcceptingWork;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &isAcceptingWork, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemSetConfComputeGpusReadyState(isAcceptingWork);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemSetConfComputeKeyRotationThresholdInfo(conn_t *conn)
-{
-    nvmlConfComputeSetKeyRotationThresholdInfo_t pKeyRotationThrInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &pKeyRotationThrInfo, sizeof(nvmlConfComputeSetKeyRotationThresholdInfo_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemSetConfComputeKeyRotationThresholdInfo(&pKeyRotationThrInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pKeyRotationThrInfo, sizeof(nvmlConfComputeSetKeyRotationThresholdInfo_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -6280,42 +4724,6 @@ int handle_nvmlDeviceGetFieldValues(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) values);
-    return 0;
-ERROR_1:
-    free((void *) values);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceClearFieldValues(conn_t *conn)
-{
-    nvmlDevice_t device;
-    int valuesCount;
-    nvmlFieldValue_t* values;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &valuesCount, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-    values = (nvmlFieldValue_t*)malloc(valuesCount * sizeof(nvmlFieldValue_t));
-    if(        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlDeviceClearFieldValues(device, valuesCount, values);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, values, valuesCount * sizeof(nvmlFieldValue_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) values);
     return 0;
 ERROR_1:
     free((void *) values);
@@ -6404,234 +4812,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetVgpuHeterogeneousMode(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuHeterogeneousMode_t pHeterogeneousMode;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &pHeterogeneousMode, sizeof(nvmlVgpuHeterogeneousMode_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuHeterogeneousMode(device, &pHeterogeneousMode);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pHeterogeneousMode, sizeof(nvmlVgpuHeterogeneousMode_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetVgpuHeterogeneousMode(conn_t *conn)
-{
-    nvmlDevice_t device;
-    const nvmlVgpuHeterogeneousMode_t* pHeterogeneousMode;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &pHeterogeneousMode, sizeof(const nvmlVgpuHeterogeneousMode_t*)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetVgpuHeterogeneousMode(device, pHeterogeneousMode);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlVgpuInstanceGetPlacementId(conn_t *conn)
-{
-    nvmlVgpuInstance_t vgpuInstance;
-    nvmlVgpuPlacementId_t pPlacement;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_read(conn, &pPlacement, sizeof(nvmlVgpuPlacementId_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlVgpuInstanceGetPlacementId(vgpuInstance, &pPlacement);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pPlacement, sizeof(nvmlVgpuPlacementId_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetVgpuTypeSupportedPlacements(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuTypeId_t vgpuTypeId;
-    nvmlVgpuPlacementList_t pPlacementList;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_read(conn, &pPlacementList, sizeof(nvmlVgpuPlacementList_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuTypeSupportedPlacements(device, vgpuTypeId, &pPlacementList);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pPlacementList, sizeof(nvmlVgpuPlacementList_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetVgpuTypeCreatablePlacements(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuTypeId_t vgpuTypeId;
-    nvmlVgpuPlacementList_t pPlacementList;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_read(conn, &pPlacementList, sizeof(nvmlVgpuPlacementList_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuTypeCreatablePlacements(device, vgpuTypeId, &pPlacementList);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pPlacementList, sizeof(nvmlVgpuPlacementList_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlVgpuTypeGetGspHeapSize(conn_t *conn)
-{
-    nvmlVgpuTypeId_t vgpuTypeId;
-    unsigned long long gspHeapSize;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_read(conn, &gspHeapSize, sizeof(unsigned long long)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlVgpuTypeGetGspHeapSize(vgpuTypeId, &gspHeapSize);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &gspHeapSize, sizeof(unsigned long long)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlVgpuTypeGetFbReservation(conn_t *conn)
-{
-    nvmlVgpuTypeId_t vgpuTypeId;
-    unsigned long long fbReservation;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_read(conn, &fbReservation, sizeof(unsigned long long)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlVgpuTypeGetFbReservation(vgpuTypeId, &fbReservation);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &fbReservation, sizeof(unsigned long long)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetVgpuCapabilities(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlDeviceVgpuCapability_t capability;
-    nvmlEnableState_t state;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &capability, sizeof(nvmlDeviceVgpuCapability_t)) < 0 ||
-        rpc_read(conn, &state, sizeof(nvmlEnableState_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetVgpuCapabilities(device, capability, state);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_nvmlDeviceGetGridLicensableFeatures_v4(conn_t *conn)
 {
     nvmlDevice_t device;
@@ -6659,58 +4839,39 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlGetVgpuDriverCapabilities(conn_t *conn)
-{
-    nvmlVgpuDriverCapability_t capability;
-    unsigned int capResult;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &capability, sizeof(nvmlVgpuDriverCapability_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGetVgpuDriverCapabilities(capability, &capResult);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &capResult, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetVgpuCapabilities(conn_t *conn)
+int handle_nvmlDeviceGetProcessUtilization(conn_t *conn)
 {
     nvmlDevice_t device;
-    nvmlDeviceVgpuCapability_t capability;
-    unsigned int capResult;
+    unsigned int processSamplesCount;
+    nvmlProcessUtilizationSample_t* utilization;
+    unsigned long long lastSeenTimeStamp;
     int request_id;
     nvmlReturn_t scuda_intercept_result;
     if (
         rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &capability, sizeof(nvmlDeviceVgpuCapability_t)) < 0 ||
+        rpc_read(conn, &processSamplesCount, sizeof(unsigned int)) < 0 ||
         false)
         goto ERROR_0;
+    utilization = (nvmlProcessUtilizationSample_t*)malloc(processSamplesCount * sizeof(nvmlProcessUtilizationSample_t));
+    if(        rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
+        false)
+        goto ERROR_1;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuCapabilities(device, capability, &capResult);
+        goto ERROR_1;
+    scuda_intercept_result = nvmlDeviceGetProcessUtilization(device, utilization, &processSamplesCount, lastSeenTimeStamp);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &capResult, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, &processSamplesCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, utilization, processSamplesCount * sizeof(nvmlProcessUtilizationSample_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
-        goto ERROR_0;
+        goto ERROR_1;
 
     return 0;
+ERROR_1:
+    free((void *) utilization);
 ERROR_0:
     return -1;
 }
@@ -6743,7 +4904,6 @@ int handle_nvmlDeviceGetSupportedVgpus(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) vgpuTypeIds);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeIds);
@@ -6779,7 +4939,6 @@ int handle_nvmlDeviceGetCreatableVgpus(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) vgpuTypeIds);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeIds);
@@ -6814,7 +4973,6 @@ int handle_nvmlVgpuTypeGetClass(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) vgpuTypeClass);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeClass);
@@ -6850,7 +5008,6 @@ int handle_nvmlVgpuTypeGetName(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) vgpuTypeName);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeName);
@@ -7026,7 +5183,6 @@ int handle_nvmlVgpuTypeGetLicense(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) vgpuTypeLicenseString);
     return 0;
 ERROR_1:
     free((void *) vgpuTypeLicenseString);
@@ -7145,7 +5301,6 @@ int handle_nvmlDeviceGetActiveVgpus(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) vgpuInstances);
     return 0;
 ERROR_1:
     free((void *) vgpuInstances);
@@ -7182,7 +5337,6 @@ int handle_nvmlVgpuInstanceGetVmID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) vmId);
     return 0;
 ERROR_1:
     free((void *) vmId);
@@ -7217,7 +5371,6 @@ int handle_nvmlVgpuInstanceGetUUID(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -7252,7 +5405,6 @@ int handle_nvmlVgpuInstanceGetVmDriverVersion(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) version);
     return 0;
 ERROR_1:
     free((void *) version);
@@ -7508,7 +5660,6 @@ int handle_nvmlVgpuInstanceGetEncoderSessions(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) sessionInfo);
     return 0;
 ERROR_1:
     free((void *) sessionInfo);
@@ -7571,7 +5722,6 @@ int handle_nvmlVgpuInstanceGetFBCSessions(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) sessionInfo);
     return 0;
 ERROR_1:
     free((void *) sessionInfo);
@@ -7606,106 +5756,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlVgpuInstanceGetGpuPciId(conn_t *conn)
-{
-    nvmlVgpuInstance_t vgpuInstance;
-    unsigned int length;
-    char* vgpuPciId;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-    vgpuPciId = (char*)malloc(length * sizeof(char));
-    if(        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlVgpuInstanceGetGpuPciId(vgpuInstance, vgpuPciId, &length);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &length, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, vgpuPciId, length * sizeof(char)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) vgpuPciId);
-    return 0;
-ERROR_1:
-    free((void *) vgpuPciId);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlVgpuTypeGetCapabilities(conn_t *conn)
-{
-    nvmlVgpuTypeId_t vgpuTypeId;
-    nvmlVgpuCapability_t capability;
-    unsigned int capResult;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_read(conn, &capability, sizeof(nvmlVgpuCapability_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlVgpuTypeGetCapabilities(vgpuTypeId, capability, &capResult);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &capResult, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlVgpuInstanceGetMdevUUID(conn_t *conn)
-{
-    nvmlVgpuInstance_t vgpuInstance;
-    unsigned int size;
-    char* mdevUuid;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-    mdevUuid = (char*)malloc(size * sizeof(char));
-    if(        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlVgpuInstanceGetMdevUUID(vgpuInstance, mdevUuid, size);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, mdevUuid, size * sizeof(char)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) mdevUuid);
-    return 0;
-ERROR_1:
-    free((void *) mdevUuid);
-ERROR_0:
-    return -1;
-}
-
 int handle_nvmlVgpuInstanceGetMetadata(conn_t *conn)
 {
     nvmlVgpuInstance_t vgpuInstance;
@@ -7734,7 +5784,6 @@ int handle_nvmlVgpuInstanceGetMetadata(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) vgpuMetadata);
     return 0;
 ERROR_1:
     free((void *) vgpuMetadata);
@@ -7770,7 +5819,6 @@ int handle_nvmlDeviceGetVgpuMetadata(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) pgpuMetadata);
     return 0;
 ERROR_1:
     free((void *) pgpuMetadata);
@@ -7836,119 +5884,9 @@ int handle_nvmlDeviceGetPgpuMetadataString(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) pgpuMetadata);
     return 0;
 ERROR_1:
     free((void *) pgpuMetadata);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetVgpuSchedulerLog(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuSchedulerLog_t pSchedulerLog;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuSchedulerLog(device, &pSchedulerLog);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pSchedulerLog, sizeof(nvmlVgpuSchedulerLog_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetVgpuSchedulerState(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuSchedulerGetState_t pSchedulerState;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuSchedulerState(device, &pSchedulerState);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pSchedulerState, sizeof(nvmlVgpuSchedulerGetState_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetVgpuSchedulerCapabilities(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuSchedulerCapabilities_t pCapabilities;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuSchedulerCapabilities(device, &pCapabilities);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pCapabilities, sizeof(nvmlVgpuSchedulerCapabilities_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetVgpuSchedulerState(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuSchedulerSetState_t pSchedulerState;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &pSchedulerState, sizeof(nvmlVgpuSchedulerSetState_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetVgpuSchedulerState(device, &pSchedulerState);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pSchedulerState, sizeof(nvmlVgpuSchedulerSetState_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
 ERROR_0:
     return -1;
 }
@@ -8038,38 +5976,9 @@ int handle_nvmlDeviceGetVgpuUtilization(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) utilizationSamples);
     return 0;
 ERROR_1:
     free((void *) utilizationSamples);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetVgpuInstancesUtilizationInfo(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuInstancesUtilizationInfo_t vgpuUtilInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &vgpuUtilInfo, sizeof(nvmlVgpuInstancesUtilizationInfo_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuInstancesUtilizationInfo(device, &vgpuUtilInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &vgpuUtilInfo, sizeof(nvmlVgpuInstancesUtilizationInfo_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
 ERROR_0:
     return -1;
 }
@@ -8104,38 +6013,9 @@ int handle_nvmlDeviceGetVgpuProcessUtilization(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) utilizationSamples);
     return 0;
 ERROR_1:
     free((void *) utilizationSamples);
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetVgpuProcessesUtilizationInfo(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlVgpuProcessesUtilizationInfo_t vgpuProcUtilInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &vgpuProcUtilInfo, sizeof(nvmlVgpuProcessesUtilizationInfo_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetVgpuProcessesUtilizationInfo(device, &vgpuProcUtilInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &vgpuProcUtilInfo, sizeof(nvmlVgpuProcessesUtilizationInfo_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
 ERROR_0:
     return -1;
 }
@@ -8195,7 +6075,6 @@ int handle_nvmlVgpuInstanceGetAccountingPids(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) pids);
     return 0;
 ERROR_1:
     free((void *) pids);
@@ -8248,33 +6127,6 @@ int handle_nvmlVgpuInstanceClearAccountingPids(conn_t *conn)
     scuda_intercept_result = nvmlVgpuInstanceClearAccountingPids(vgpuInstance);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlVgpuInstanceGetLicenseInfo_v2(conn_t *conn)
-{
-    nvmlVgpuInstance_t vgpuInstance;
-    nvmlVgpuLicenseInfo_t licenseInfo;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlVgpuInstanceGetLicenseInfo_v2(vgpuInstance, &licenseInfo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &licenseInfo, sizeof(nvmlVgpuLicenseInfo_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -8423,35 +6275,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlDeviceGetGpuInstanceProfileInfoV(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int profile;
-    nvmlGpuInstanceProfileInfo_v2_t info;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &profile, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetGpuInstanceProfileInfoV(device, profile, &info);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &info, sizeof(nvmlGpuInstanceProfileInfo_v2_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2(conn_t *conn)
 {
     nvmlDevice_t device;
@@ -8482,7 +6305,6 @@ int handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) placements);
     return 0;
 ERROR_1:
     free((void *) placements);
@@ -8603,7 +6425,6 @@ int handle_nvmlDeviceGetGpuInstances(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) gpuInstances);
     return 0;
 ERROR_1:
     free((void *) gpuInstances);
@@ -8698,37 +6519,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlGpuInstanceGetComputeInstanceProfileInfoV(conn_t *conn)
-{
-    nvmlGpuInstance_t gpuInstance;
-    unsigned int profile;
-    unsigned int engProfile;
-    nvmlComputeInstanceProfileInfo_v2_t info;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_read(conn, &profile, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &engProfile, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGpuInstanceGetComputeInstanceProfileInfoV(gpuInstance, profile, engProfile, &info);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &info, sizeof(nvmlComputeInstanceProfileInfo_v2_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_nvmlGpuInstanceGetComputeInstanceRemainingCapacity(conn_t *conn)
 {
     nvmlGpuInstance_t gpuInstance;
@@ -8754,44 +6544,6 @@ int handle_nvmlGpuInstanceGetComputeInstanceRemainingCapacity(conn_t *conn)
         goto ERROR_0;
 
     return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlGpuInstanceGetComputeInstancePossiblePlacements(conn_t *conn)
-{
-    nvmlGpuInstance_t gpuInstance;
-    unsigned int profileId;
-    unsigned int count;
-    nvmlComputeInstancePlacement_t* placements;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-    placements = (nvmlComputeInstancePlacement_t*)malloc(count * sizeof(nvmlComputeInstancePlacement_t));
-    if(        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = nvmlGpuInstanceGetComputeInstancePossiblePlacements(gpuInstance, profileId, placements, &count);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, placements, count * sizeof(nvmlComputeInstancePlacement_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free((void *) placements);
-    return 0;
-ERROR_1:
-    free((void *) placements);
 ERROR_0:
     return -1;
 }
@@ -8880,7 +6632,6 @@ int handle_nvmlGpuInstanceGetComputeInstances(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) computeInstances);
     return 0;
 ERROR_1:
     free((void *) computeInstances);
@@ -9108,141 +6859,10 @@ ERROR_0:
     return -1;
 }
 
-int handle_nvmlGpmMetricsGet(conn_t *conn)
-{
-    nvmlGpmMetricsGet_t metricsGet;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGpmMetricsGet(&metricsGet);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &metricsGet, sizeof(nvmlGpmMetricsGet_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlGpmSampleFree(conn_t *conn)
-{
-    nvmlGpmSample_t gpmSample;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGpmSampleFree(gpmSample);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlGpmSampleAlloc(conn_t *conn)
-{
-    nvmlGpmSample_t gpmSample;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGpmSampleAlloc(&gpmSample);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlGpmSampleGet(conn_t *conn)
+int handle_nvmlDeviceGetBusType(conn_t *conn)
 {
     nvmlDevice_t device;
-    nvmlGpmSample_t gpmSample;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGpmSampleGet(device, gpmSample);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlGpmMigSampleGet(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int gpuInstanceId;
-    nvmlGpmSample_t gpmSample;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &gpuInstanceId, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGpmMigSampleGet(device, gpuInstanceId, gpmSample);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlGpmQueryDeviceSupport(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlGpmSupport_t gpmSupport;
+    nvmlBusType_t type;
     int request_id;
     nvmlReturn_t scuda_intercept_result;
     if (
@@ -9253,199 +6873,10 @@ int handle_nvmlGpmQueryDeviceSupport(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = nvmlGpmQueryDeviceSupport(device, &gpmSupport);
+    scuda_intercept_result = nvmlDeviceGetBusType(device, &type);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &gpmSupport, sizeof(nvmlGpmSupport_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlGpmQueryIfStreamingEnabled(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int state;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &state, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGpmQueryIfStreamingEnabled(device, &state);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &state, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlGpmSetStreamingEnabled(conn_t *conn)
-{
-    nvmlDevice_t device;
-    unsigned int state;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &state, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlGpmSetStreamingEnabled(device, state);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlNvLinkPowerThres_t info;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetNvLinkDeviceLowPowerThreshold(device, &info);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &info, sizeof(nvmlNvLinkPowerThres_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemSetNvlinkBwMode(conn_t *conn)
-{
-    unsigned int nvlinkBwMode;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &nvlinkBwMode, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemSetNvlinkBwMode(nvlinkBwMode);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlSystemGetNvlinkBwMode(conn_t *conn)
-{
-    unsigned int nvlinkBwMode;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &nvlinkBwMode, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlSystemGetNvlinkBwMode(&nvlinkBwMode);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &nvlinkBwMode, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceSetPowerManagementLimit_v2(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlPowerValue_v2_t powerValue;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &powerValue, sizeof(nvmlPowerValue_v2_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceSetPowerManagementLimit_v2(device, &powerValue);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &powerValue, sizeof(nvmlPowerValue_v2_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_nvmlDeviceGetSramEccErrorStatus(conn_t *conn)
-{
-    nvmlDevice_t device;
-    nvmlEccSramErrorStatus_t status;
-    int request_id;
-    nvmlReturn_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_read(conn, &status, sizeof(nvmlEccSramErrorStatus_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = nvmlDeviceGetSramEccErrorStatus(device, &status);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &status, sizeof(nvmlEccSramErrorStatus_t)) < 0 ||
+        rpc_write(conn, &type, sizeof(nvmlBusType_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(nvmlReturn_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -9584,7 +7015,6 @@ int handle_cuDeviceGetName(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -9601,7 +7031,7 @@ int handle_cuDeviceGetUuid(conn_t *conn)
     if (
         false)
         goto ERROR_0;
-    uuid = (CUuuid*)malloc(16);
+    uuid = (CUuuid*)malloc(16 * sizeof(CUuuid));
     if(        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
         false)
         goto ERROR_1;
@@ -9617,7 +7047,6 @@ int handle_cuDeviceGetUuid(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -9634,7 +7063,7 @@ int handle_cuDeviceGetUuid_v2(conn_t *conn)
     if (
         false)
         goto ERROR_0;
-    uuid = (CUuuid*)malloc(16);
+    uuid = (CUuuid*)malloc(16 * sizeof(CUuuid));
     if(        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
         false)
         goto ERROR_1;
@@ -9650,7 +7079,6 @@ int handle_cuDeviceGetUuid_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) uuid);
     return 0;
 ERROR_1:
     free((void *) uuid);
@@ -10162,7 +7590,6 @@ int handle_cuCtxCreate_v3(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) paramsArray);
     return 0;
 ERROR_1:
     free((void *) paramsArray);
@@ -10756,7 +8183,6 @@ int handle_cuModuleLoad(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) fname);
     return 0;
 ERROR_1:
     free((void *) fname);
@@ -10843,7 +8269,6 @@ int handle_cuModuleGetFunction(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -10939,7 +8364,6 @@ int handle_cuModuleGetGlobal_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11001,10 +8425,7 @@ int handle_cuLinkAddFile_v2(conn_t *conn)
     if (rpc_read(conn, (void *)path, path_len) < 0 ||
         rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0 ||
         rpc_read(conn, options, numOptions * sizeof(CUjit_option)) < 0 ||
-        false)
-        goto ERROR_1;
-    optionValues = (void**)malloc(numOptions * sizeof(void*));
-    if(        rpc_read(conn, optionValues, numOptions * sizeof(void*)) < 0 ||
+        rpc_read(conn, optionValues, numOptions * sizeof(void*)) < 0 ||
         false)
         goto ERROR_1;
 
@@ -11018,8 +8439,6 @@ int handle_cuLinkAddFile_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free(optionValues);
-    free((void *) path);
     return 0;
 ERROR_1:
     free((void *) path);
@@ -11109,7 +8528,6 @@ int handle_cuModuleGetTexRef(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11145,7 +8563,6 @@ int handle_cuModuleGetSurfRef(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11173,16 +8590,10 @@ int handle_cuLibraryLoadFromFile(conn_t *conn)
     if (rpc_read(conn, (void *)fileName, fileName_len) < 0 ||
         rpc_read(conn, &numJitOptions, sizeof(unsigned int)) < 0 ||
         rpc_read(conn, jitOptions, numJitOptions * sizeof(CUjit_option)) < 0 ||
-        false)
-        goto ERROR_1;
-    jitOptionsValues = (void**)malloc(numJitOptions * sizeof(void*));
-    if(        rpc_read(conn, jitOptionsValues, numJitOptions * sizeof(void*)) < 0 ||
+        rpc_read(conn, jitOptionsValues, numJitOptions * sizeof(void*)) < 0 ||
         rpc_read(conn, &numLibraryOptions, sizeof(unsigned int)) < 0 ||
         rpc_read(conn, libraryOptions, numLibraryOptions * sizeof(CUlibraryOption)) < 0 ||
-        false)
-        goto ERROR_1;
-    libraryOptionValues = (void**)malloc(numLibraryOptions * sizeof(void*));
-    if(        rpc_read(conn, libraryOptionValues, numLibraryOptions * sizeof(void*)) < 0 ||
+        rpc_read(conn, libraryOptionValues, numLibraryOptions * sizeof(void*)) < 0 ||
         false)
         goto ERROR_1;
 
@@ -11197,9 +8608,6 @@ int handle_cuLibraryLoadFromFile(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free(jitOptionsValues);
-    free(libraryOptionValues);
-    free((void *) fileName);
     return 0;
 ERROR_1:
     free((void *) fileName);
@@ -11260,7 +8668,6 @@ int handle_cuLibraryGetKernel(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11410,7 +8817,6 @@ int handle_cuLibraryGetGlobal(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11448,7 +8854,6 @@ int handle_cuLibraryGetManaged(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) name);
     return 0;
 ERROR_1:
     free((void *) name);
@@ -11484,7 +8889,6 @@ int handle_cuLibraryGetUnifiedFunction(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) symbol);
     return 0;
 ERROR_1:
     free((void *) symbol);
@@ -11822,7 +9226,7 @@ ERROR_0:
 
 int handle_cuMemFreeHost(conn_t *conn)
 {
-    void* p = (void*)malloc(sizeof(void*));
+    void* p;
     int request_id;
     CUresult scuda_intercept_result;
     if (
@@ -11877,7 +9281,7 @@ ERROR_0:
 int handle_cuMemHostGetDevicePointer_v2(conn_t *conn)
 {
     CUdeviceptr pdptr;
-    void* p = (void*)malloc(sizeof(void*));
+    void* p;
     unsigned int Flags;
     int request_id;
     CUresult scuda_intercept_result;
@@ -11907,7 +9311,7 @@ ERROR_0:
 int handle_cuMemHostGetFlags(conn_t *conn)
 {
     unsigned int pFlags;
-    void* p = (void*)malloc(sizeof(void*));
+    void* p;
     int request_id;
     CUresult scuda_intercept_result;
     if (
@@ -12016,7 +9420,6 @@ int handle_cuDeviceGetByPCIBusId(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) pciBusId);
     return 0;
 ERROR_1:
     free((void *) pciBusId);
@@ -12051,7 +9454,6 @@ int handle_cuDeviceGetPCIBusId(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) pciBusId);
     return 0;
 ERROR_1:
     free((void *) pciBusId);
@@ -12263,7 +9665,7 @@ ERROR_0:
 int handle_cuMemcpyHtoD_v2(conn_t *conn)
 {
     CUdeviceptr dstDevice;
-    void* srcHost = (void*)malloc(sizeof(void*));
+    const void* srcHost;
     size_t ByteCount;
     int request_id;
     CUresult scuda_intercept_result;
@@ -12382,7 +9784,7 @@ ERROR_0:
 
 int handle_cuMemcpyAtoH_v2(conn_t *conn)
 {
-    void* dstHost = (void*)malloc(sizeof(void*));
+    void* dstHost;
     CUarray srcArray;
     size_t srcOffset;
     size_t ByteCount;
@@ -12513,7 +9915,7 @@ ERROR_0:
 int handle_cuMemcpyHtoDAsync_v2(conn_t *conn)
 {
     CUdeviceptr dstDevice;
-    void* srcHost = (void*)malloc(sizeof(void*));
+    const void* srcHost;
     size_t ByteCount;
     CUstream hStream;
     int request_id;
@@ -14289,7 +11691,7 @@ ERROR_0:
 
 int handle_cuPointerSetAttribute(conn_t *conn)
 {
-    void* value = (void*)malloc(sizeof(void*));
+    const void* value;
     CUpointer_attribute attribute;
     CUdeviceptr ptr;
     int request_id;
@@ -15805,8 +13207,8 @@ int handle_cuLaunchKernel(conn_t *conn)
     unsigned int blockDimZ;
     unsigned int sharedMemBytes;
     CUstream hStream;
-    void** kernelParams = (void**)malloc(sizeof(void*));
-    void** extra = (void**)malloc(sizeof(void*));
+    void** kernelParams;
+    void** extra;
     int request_id;
     CUresult scuda_intercept_result;
     if (
@@ -22191,7 +19593,6 @@ int handle_cudaStreamGetCaptureInfo_v2(conn_t *conn)
         rpc_write_end(conn) < 0)
         goto ERROR_1;
 
-    free((void *) dependencies_out);
     return 0;
 ERROR_1:
     free((void *) dependencies_out);
@@ -22722,7 +20123,7 @@ ERROR_0:
 int handle_cudaLaunchKernelExC(conn_t *conn)
 {
     const cudaLaunchConfig_t* config;
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     void* args;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -22751,7 +20152,7 @@ ERROR_0:
 
 int handle_cudaLaunchCooperativeKernel(conn_t *conn)
 {
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     dim3 gridDim;
     dim3 blockDim;
     void* args;
@@ -22817,7 +20218,7 @@ ERROR_0:
 
 int handle_cudaFuncSetCacheConfig(conn_t *conn)
 {
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     enum cudaFuncCache cacheConfig;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -22845,7 +20246,7 @@ ERROR_0:
 int handle_cudaFuncGetAttributes(conn_t *conn)
 {
     struct cudaFuncAttributes attr;
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -22872,7 +20273,7 @@ ERROR_0:
 
 int handle_cudaFuncSetAttribute(conn_t *conn)
 {
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     enum cudaFuncAttribute attr;
     int value;
     int request_id;
@@ -22902,7 +20303,7 @@ ERROR_0:
 int handle_cudaFuncGetName(conn_t *conn)
 {
     const char* name;
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -22929,7 +20330,7 @@ ERROR_0:
 
 int handle_cudaFuncGetParamInfo(conn_t *conn)
 {
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     size_t paramIndex;
     size_t paramOffset;
     size_t paramSize;
@@ -23014,7 +20415,7 @@ ERROR_0:
 
 int handle_cudaFuncSetSharedMemConfig(conn_t *conn)
 {
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     enum cudaSharedMemConfig config;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -23042,7 +20443,7 @@ ERROR_0:
 int handle_cudaOccupancyMaxActiveBlocksPerMultiprocessor(conn_t *conn)
 {
     int numBlocks;
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     int blockSize;
     size_t dynamicSMemSize;
     int request_id;
@@ -23074,7 +20475,7 @@ ERROR_0:
 int handle_cudaOccupancyAvailableDynamicSMemPerBlock(conn_t *conn)
 {
     size_t dynamicSmemSize;
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     int numBlocks;
     int blockSize;
     int request_id;
@@ -23106,7 +20507,7 @@ ERROR_0:
 int handle_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(conn_t *conn)
 {
     int numBlocks;
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     int blockSize;
     size_t dynamicSMemSize;
     unsigned int flags;
@@ -23140,7 +20541,7 @@ ERROR_0:
 int handle_cudaOccupancyMaxPotentialClusterSize(conn_t *conn)
 {
     int clusterSize;
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     const cudaLaunchConfig_t* launchConfig;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -23170,7 +20571,7 @@ ERROR_0:
 int handle_cudaOccupancyMaxActiveClusters(conn_t *conn)
 {
     int numClusters;
-    void* func = (void*)malloc(sizeof(void*));
+    const void* func;
     const cudaLaunchConfig_t* launchConfig;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -23293,7 +20694,7 @@ ERROR_0:
 
 int handle_cudaFreeHost(conn_t *conn)
 {
-    void* ptr = (void*)malloc(sizeof(void*));
+    void* ptr;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -23357,6 +20758,36 @@ int handle_cudaFreeMipmappedArray(conn_t *conn)
     scuda_intercept_result = cudaFreeMipmappedArray(mipmappedArray);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaHostAlloc(conn_t *conn)
+{
+    void* pHost;
+    size_t size;
+    unsigned int flags;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &pHost, sizeof(void*)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cudaHostAlloc(&pHost, size, flags);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pHost, sizeof(void*)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -23808,7 +21239,7 @@ int handle_cudaMemcpy2DToArray(conn_t *conn)
     cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
-    void* src = (void*)malloc(sizeof(void*));
+    const void* src;
     size_t spitch;
     size_t width;
     size_t height;
@@ -23885,8 +21316,8 @@ ERROR_0:
 
 int handle_cudaMemcpyToSymbol(conn_t *conn)
 {
-    void* symbol = (void*)malloc(sizeof(void*));
-    void* src = (void*)malloc(sizeof(void*));
+    const void* symbol;
+    const void* src;
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -23921,7 +21352,7 @@ int handle_cudaMemcpy2DToArrayAsync(conn_t *conn)
     cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
-    void* src = (void*)malloc(sizeof(void*));
+    const void* src;
     size_t spitch;
     size_t width;
     size_t height;
@@ -23959,8 +21390,8 @@ ERROR_0:
 
 int handle_cudaMemcpyToSymbolAsync(conn_t *conn)
 {
-    void* symbol = (void*)malloc(sizeof(void*));
-    void* src = (void*)malloc(sizeof(void*));
+    const void* symbol;
+    const void* src;
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -23994,7 +21425,7 @@ ERROR_0:
 
 int handle_cudaMemset(conn_t *conn)
 {
-    void* devPtr = (void*)malloc(sizeof(void*));
+    void* devPtr;
     int value;
     size_t count;
     int request_id;
@@ -24023,7 +21454,7 @@ ERROR_0:
 
 int handle_cudaMemset2D(conn_t *conn)
 {
-    void* devPtr = (void*)malloc(sizeof(void*));
+    void* devPtr;
     size_t pitch;
     int value;
     size_t width;
@@ -24085,7 +21516,7 @@ ERROR_0:
 
 int handle_cudaMemsetAsync(conn_t *conn)
 {
-    void* devPtr = (void*)malloc(sizeof(void*));
+    void* devPtr;
     int value;
     size_t count;
     cudaStream_t stream;
@@ -24116,7 +21547,7 @@ ERROR_0:
 
 int handle_cudaMemset2DAsync(conn_t *conn)
 {
-    void* devPtr = (void*)malloc(sizeof(void*));
+    void* devPtr;
     size_t pitch;
     int value;
     size_t width;
@@ -24183,7 +21614,7 @@ ERROR_0:
 int handle_cudaGetSymbolAddress(conn_t *conn)
 {
     void* devPtr;
-    void* symbol = (void*)malloc(sizeof(void*));
+    const void* symbol;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -24211,7 +21642,7 @@ ERROR_0:
 int handle_cudaGetSymbolSize(conn_t *conn)
 {
     size_t size;
-    void* symbol = (void*)malloc(sizeof(void*));
+    const void* symbol;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -24238,7 +21669,7 @@ ERROR_0:
 
 int handle_cudaMemPrefetchAsync(conn_t *conn)
 {
-    void* devPtr = (void*)malloc(sizeof(void*));
+    const void* devPtr;
     size_t count;
     int dstDevice;
     cudaStream_t stream;
@@ -24269,7 +21700,7 @@ ERROR_0:
 
 int handle_cudaMemPrefetchAsync_v2(conn_t *conn)
 {
-    void* devPtr = (void*)malloc(sizeof(void*));
+    const void* devPtr;
     size_t count;
     struct cudaMemLocation location;
     unsigned int flags;
@@ -24302,7 +21733,7 @@ ERROR_0:
 
 int handle_cudaMemAdvise(conn_t *conn)
 {
-    void* devPtr = (void*)malloc(sizeof(void*));
+    const void* devPtr;
     size_t count;
     enum cudaMemoryAdvise advice;
     int device;
@@ -24333,7 +21764,7 @@ ERROR_0:
 
 int handle_cudaMemAdvise_v2(conn_t *conn)
 {
-    void* devPtr = (void*)malloc(sizeof(void*));
+    const void* devPtr;
     size_t count;
     enum cudaMemoryAdvise advice;
     struct cudaMemLocation location;
@@ -24368,7 +21799,7 @@ int handle_cudaMemRangeGetAttributes(conn_t *conn)
     size_t dataSizes;
     enum cudaMemRangeAttribute attributes;
     size_t numAttributes;
-    void* devPtr = (void*)malloc(sizeof(void*));
+    const void* devPtr;
     size_t count;
     int request_id;
     cudaError_t scuda_intercept_result;
@@ -24405,7 +21836,7 @@ int handle_cudaMemcpyToArray(conn_t *conn)
     cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
-    void* src = (void*)malloc(sizeof(void*));
+    const void* src;
     size_t count;
     enum cudaMemcpyKind kind;
     int request_id;
@@ -24479,7 +21910,7 @@ int handle_cudaMemcpyToArrayAsync(conn_t *conn)
     cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
-    void* src = (void*)malloc(sizeof(void*));
+    const void* src;
     size_t count;
     enum cudaMemcpyKind kind;
     cudaStream_t stream;
@@ -24747,7 +22178,7 @@ ERROR_0:
 int handle_cudaPointerGetAttributes(conn_t *conn)
 {
     struct cudaPointerAttributes attributes;
-    void* ptr = (void*)malloc(sizeof(void*));
+    const void* ptr;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -25534,8 +22965,8 @@ int handle_cudaGraphAddMemcpyNodeToSymbol(conn_t *conn)
     cudaGraphNode_t pGraphNode;
     cudaGraph_t graph;
     std::vector<cudaGraphNode_t> pDependencies;
-    void* symbol = (void*)malloc(sizeof(void*));
-    void* src = (void*)malloc(sizeof(void*));
+    const void* symbol;
+    const void* src;
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -25635,8 +23066,8 @@ ERROR_0:
 int handle_cudaGraphMemcpyNodeSetParamsToSymbol(conn_t *conn)
 {
     cudaGraphNode_t node;
-    void* symbol = (void*)malloc(sizeof(void*));
-    void* src = (void*)malloc(sizeof(void*));
+    const void* symbol;
+    const void* src;
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -27020,8 +24451,8 @@ int handle_cudaGraphExecMemcpyNodeSetParamsToSymbol(conn_t *conn)
 {
     cudaGraphExec_t hGraphExec;
     cudaGraphNode_t node;
-    void* symbol = (void*)malloc(sizeof(void*));
-    void* src = (void*)malloc(sizeof(void*));
+    const void* symbol;
+    const void* src;
     size_t count;
     size_t offset;
     enum cudaMemcpyKind kind;
@@ -27567,6 +24998,136 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphAddNode(conn_t *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    struct cudaGraphNodeParams nodeParams;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cudaGraphAddNode(&pGraphNode, graph, pDependencies, numDependencies, &nodeParams);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(conn, &nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddNode_v2(conn_t *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    const cudaGraphEdgeData* dependencyData;
+    size_t numDependencies;
+    struct cudaGraphNodeParams nodeParams;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &dependencyData, sizeof(const cudaGraphEdgeData*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cudaGraphAddNode_v2(&pGraphNode, graph, pDependencies, dependencyData, numDependencies, &nodeParams);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(conn, &nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphNodeSetParams(conn_t *conn)
+{
+    cudaGraphNode_t node;
+    struct cudaGraphNodeParams nodeParams;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cudaGraphNodeSetParams(node, &nodeParams);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphExecNodeSetParams(conn_t *conn)
+{
+    cudaGraphExec_t graphExec;
+    cudaGraphNode_t node;
+    struct cudaGraphNodeParams nodeParams;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cudaGraphExecNodeSetParams(graphExec, node, &nodeParams);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &nodeParams, sizeof(struct cudaGraphNodeParams)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphConditionalHandleCreate(conn_t *conn)
 {
     cudaGraphConditionalHandle pHandle_out;
@@ -27663,7 +25224,7 @@ ERROR_0:
 int handle_cudaGetFuncBySymbol(conn_t *conn)
 {
     cudaFunction_t functionPtr;
-    void* symbolPtr = (void*)malloc(sizeof(void*));
+    const void* symbolPtr;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -27691,7 +25252,7 @@ ERROR_0:
 int handle_cudaGetKernel(conn_t *conn)
 {
     cudaKernel_t kernelPtr;
-    void* entryFuncAddr = (void*)malloc(sizeof(void*));
+    const void* entryFuncAddr;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
@@ -27813,35 +25374,6 @@ int handle_cublasGetProperty(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &value, sizeof(int)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasSetWorkspace_v2(conn_t *conn)
-{
-    cublasHandle_t handle;
-    void* workspace = (void*)malloc(sizeof(void*));
-    size_t workspaceSizeInBytes;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_read(conn, &workspace, sizeof(void*)) < 0 ||
-        rpc_read(conn, &workspaceSizeInBytes, sizeof(size_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasSetWorkspace_v2(handle, workspace, workspaceSizeInBytes);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -28199,523 +25731,6 @@ int handle_cublasGetLoggerCallback(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &userCallback, sizeof(cublasLogCallback)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasSetVector(conn_t *conn)
-{
-    int n;
-    int elemSize;
-    void* x = (void*)malloc(sizeof(void*));
-    int incx;
-    void* devicePtr = (void*)malloc(sizeof(void*));
-    int incy;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int)) < 0 ||
-        rpc_read(conn, &x, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &incx, sizeof(int)) < 0 ||
-        rpc_read(conn, &devicePtr, sizeof(void*)) < 0 ||
-        rpc_read(conn, &incy, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasSetVector(n, elemSize, x, incx, devicePtr, incy);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasSetVector_64(conn_t *conn)
-{
-    int64_t n;
-    int64_t elemSize;
-    void* x = (void*)malloc(sizeof(void*));
-    int64_t incx;
-    void* devicePtr = (void*)malloc(sizeof(void*));
-    int64_t incy;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &x, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &incx, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &devicePtr, sizeof(void*)) < 0 ||
-        rpc_read(conn, &incy, sizeof(int64_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasSetVector_64(n, elemSize, x, incx, devicePtr, incy);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasGetVector(conn_t *conn)
-{
-    int n;
-    int elemSize;
-    void* x = (void*)malloc(sizeof(void*));
-    int incx;
-    void* y;
-    int incy;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int)) < 0 ||
-        rpc_read(conn, &x, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &incx, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-    y = (void*)malloc(1 * n * elemSize);
-    if(        rpc_read(conn, &incy, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = cublasGetVector(n, elemSize, x, incx, y, incy);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, y, 1 * n * elemSize) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free(y);
-    free((void *) y);
-    return 0;
-ERROR_1:
-    free((void *) y);
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasGetVector_64(conn_t *conn)
-{
-    int64_t n;
-    int64_t elemSize;
-    void* x = (void*)malloc(sizeof(void*));
-    int64_t incx;
-    void* y;
-    int64_t incy;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &x, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &incx, sizeof(int64_t)) < 0 ||
-        false)
-        goto ERROR_0;
-    y = (void*)malloc(1 * n * elemSize);
-    if(        rpc_read(conn, &incy, sizeof(int64_t)) < 0 ||
-        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = cublasGetVector_64(n, elemSize, x, incx, y, incy);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, y, 1 * n * elemSize) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free(y);
-    free((void *) y);
-    return 0;
-ERROR_1:
-    free((void *) y);
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasSetMatrix(conn_t *conn)
-{
-    int rows;
-    int cols;
-    int elemSize;
-    void* A = (void*)malloc(sizeof(void*));
-    int lda;
-    void* B = (void*)malloc(sizeof(void*));
-    int ldb;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &rows, sizeof(int)) < 0 ||
-        rpc_read(conn, &cols, sizeof(int)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int)) < 0 ||
-        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &B, sizeof(void*)) < 0 ||
-        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasSetMatrix(rows, cols, elemSize, A, lda, B, ldb);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasSetMatrix_64(conn_t *conn)
-{
-    int64_t rows;
-    int64_t cols;
-    int64_t elemSize;
-    void* A = (void*)malloc(sizeof(void*));
-    int64_t lda;
-    void* B = (void*)malloc(sizeof(void*));
-    int64_t ldb;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &rows, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &cols, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &B, sizeof(void*)) < 0 ||
-        rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasSetMatrix_64(rows, cols, elemSize, A, lda, B, ldb);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasGetMatrix(conn_t *conn)
-{
-    int rows;
-    int cols;
-    int elemSize;
-    void* A = (void*)malloc(sizeof(void*));
-    int lda;
-    void* B;
-    int ldb;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &rows, sizeof(int)) < 0 ||
-        rpc_read(conn, &cols, sizeof(int)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int)) < 0 ||
-        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-    B = (void*)malloc(1 * rows * cols * elemSize);
-    if(        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = cublasGetMatrix(rows, cols, elemSize, A, lda, B, ldb);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, B, 1 * rows * cols * elemSize) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free(B);
-    free((void *) B);
-    return 0;
-ERROR_1:
-    free((void *) B);
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasGetMatrix_64(conn_t *conn)
-{
-    int64_t rows;
-    int64_t cols;
-    int64_t elemSize;
-    void* A = (void*)malloc(sizeof(void*));
-    int64_t lda;
-    void* B;
-    int64_t ldb;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &rows, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &cols, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        false)
-        goto ERROR_0;
-    B = (void*)malloc(1 * rows * cols * elemSize);
-    if(        rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = cublasGetMatrix_64(rows, cols, elemSize, A, lda, B, ldb);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, B, 1 * rows * cols * elemSize) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free(B);
-    free((void *) B);
-    return 0;
-ERROR_1:
-    free((void *) B);
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasSetVectorAsync(conn_t *conn)
-{
-    int n;
-    int elemSize;
-    void* hostPtr = (void*)malloc(sizeof(void*));
-    int incx;
-    void* devicePtr = (void*)malloc(sizeof(void*));
-    int incy;
-    cudaStream_t stream;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int)) < 0 ||
-        rpc_read(conn, &hostPtr, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &incx, sizeof(int)) < 0 ||
-        rpc_read(conn, &devicePtr, sizeof(void*)) < 0 ||
-        rpc_read(conn, &incy, sizeof(int)) < 0 ||
-        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasSetVectorAsync(n, elemSize, hostPtr, incx, devicePtr, incy, stream);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasSetVectorAsync_64(conn_t *conn)
-{
-    int64_t n;
-    int64_t elemSize;
-    void* hostPtr = (void*)malloc(sizeof(void*));
-    int64_t incx;
-    void* devicePtr = (void*)malloc(sizeof(void*));
-    int64_t incy;
-    cudaStream_t stream;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &hostPtr, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &incx, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &devicePtr, sizeof(void*)) < 0 ||
-        rpc_read(conn, &incy, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasSetVectorAsync_64(n, elemSize, hostPtr, incx, devicePtr, incy, stream);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasGetVectorAsync(conn_t *conn)
-{
-    int n;
-    int elemSize;
-    void* devicePtr = (void*)malloc(sizeof(void*));
-    int incx;
-    void* hostPtr;
-    int incy;
-    cudaStream_t stream;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int)) < 0 ||
-        rpc_read(conn, &devicePtr, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &incx, sizeof(int)) < 0 ||
-        false)
-        goto ERROR_0;
-    hostPtr = (void*)malloc(1 * n * elemSize);
-    if(        rpc_read(conn, &incy, sizeof(int)) < 0 ||
-        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = cublasGetVectorAsync(n, elemSize, devicePtr, incx, hostPtr, incy, stream);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, hostPtr, 1 * n * elemSize) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free(hostPtr);
-    free((void *) hostPtr);
-    return 0;
-ERROR_1:
-    free((void *) hostPtr);
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasGetVectorAsync_64(conn_t *conn)
-{
-    int64_t n;
-    int64_t elemSize;
-    void* devicePtr = (void*)malloc(sizeof(void*));
-    int64_t incx;
-    void* hostPtr;
-    int64_t incy;
-    cudaStream_t stream;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &devicePtr, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &incx, sizeof(int64_t)) < 0 ||
-        false)
-        goto ERROR_0;
-    hostPtr = (void*)malloc(1 * n * elemSize);
-    if(        rpc_read(conn, &incy, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-        false)
-        goto ERROR_1;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
-    scuda_intercept_result = cublasGetVectorAsync_64(n, elemSize, devicePtr, incx, hostPtr, incy, stream);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, hostPtr, 1 * n * elemSize) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
-
-    free(hostPtr);
-    free((void *) hostPtr);
-    return 0;
-ERROR_1:
-    free((void *) hostPtr);
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasSetMatrixAsync(conn_t *conn)
-{
-    int rows;
-    int cols;
-    int elemSize;
-    void* A = (void*)malloc(sizeof(void*));
-    int lda;
-    void* B = (void*)malloc(sizeof(void*));
-    int ldb;
-    cudaStream_t stream;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &rows, sizeof(int)) < 0 ||
-        rpc_read(conn, &cols, sizeof(int)) < 0 ||
-        rpc_read(conn, &elemSize, sizeof(int)) < 0 ||
-        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &B, sizeof(void*)) < 0 ||
-        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasSetMatrixAsync(rows, cols, elemSize, A, lda, B, ldb, stream);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -31025,7 +28040,7 @@ int handle_cublasIamaxEx(conn_t *conn)
 {
     cublasHandle_t handle;
     int n;
-    void* x = (void*)malloc(sizeof(void*));
+    const void* x;
     cudaDataType xType;
     int incx;
     int result;
@@ -31061,7 +28076,7 @@ int handle_cublasIamaxEx_64(conn_t *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    void* x = (void*)malloc(sizeof(void*));
+    const void* x;
     cudaDataType xType;
     int64_t incx;
     int64_t result;
@@ -31369,7 +28384,7 @@ int handle_cublasIaminEx(conn_t *conn)
 {
     cublasHandle_t handle;
     int n;
-    void* x = (void*)malloc(sizeof(void*));
+    const void* x;
     cudaDataType xType;
     int incx;
     int result;
@@ -31405,7 +28420,7 @@ int handle_cublasIaminEx_64(conn_t *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    void* x = (void*)malloc(sizeof(void*));
+    const void* x;
     cudaDataType xType;
     int64_t incx;
     int64_t result;
@@ -39807,8 +36822,7 @@ int handle_cublasTSSgemvStridedBatched_64(conn_t *conn)
     cublasOperation_t trans;
     int64_t m;
     int64_t n;
-    float* alpha_null_check;
-    float alpha;
+    const float* alpha;
     const __nv_bfloat16* A;
     int64_t lda;
     long long int strideA;
@@ -39827,8 +36841,7 @@ int handle_cublasTSSgemvStridedBatched_64(conn_t *conn)
         rpc_read(conn, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
+        rpc_read(conn, &alpha, sizeof(const float*)) < 0 ||
         rpc_read(conn, &A, sizeof(const __nv_bfloat16*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
@@ -39846,7 +36859,7 @@ int handle_cublasTSSgemvStridedBatched_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasTSSgemvStridedBatched_64(handle, trans, m, n, &alpha, A, lda, strideA, x, incx, stridex, beta, &y, incy, stridey, batchCount);
+    scuda_intercept_result = cublasTSSgemvStridedBatched_64(handle, trans, m, n, alpha, A, lda, strideA, x, incx, stridex, beta, &y, incy, stridey, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(float)) < 0 ||
@@ -39922,15 +36935,13 @@ int handle_cublasSgemm_v2_64(conn_t *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    float* alpha_null_check;
-    float alpha;
+    const float* alpha;
     const float* A;
     int64_t lda;
     const float* B;
     int64_t ldb;
-    float* beta_null_check;
-    float beta;
-    float* C;
+    const float* beta;
+    float C;
     int64_t ldc;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -39941,15 +36952,13 @@ int handle_cublasSgemm_v2_64(conn_t *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
+        rpc_read(conn, &alpha, sizeof(const float*)) < 0 ||
         rpc_read(conn, &A, sizeof(const float*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &B, sizeof(const float*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
-        rpc_read(conn, &C, sizeof(float*)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &C, sizeof(float)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         false)
         goto ERROR_0;
@@ -39957,9 +36966,10 @@ int handle_cublasSgemm_v2_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgemm_v2_64(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+    scuda_intercept_result = cublasSgemm_v2_64(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(float)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -39977,15 +36987,13 @@ int handle_cublasDgemm_v2(conn_t *conn)
     int m;
     int n;
     int k;
-    double* alpha_null_check;
-    double alpha;
+    const double* alpha;
     const double* A;
     int lda;
     const double* B;
     int ldb;
-    double* beta_null_check;
-    double beta;
-    double* C;
+    const double* beta;
+    double C;
     int ldc;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -39996,15 +37004,13 @@ int handle_cublasDgemm_v2(conn_t *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
+        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
         rpc_read(conn, &A, sizeof(const double*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &B, sizeof(const double*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
-        rpc_read(conn, &C, sizeof(double*)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &C, sizeof(double)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         false)
         goto ERROR_0;
@@ -40012,9 +37018,10 @@ int handle_cublasDgemm_v2(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemm_v2(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+    scuda_intercept_result = cublasDgemm_v2(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(double)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -40032,13 +37039,13 @@ int handle_cublasDgemm_v2_64(conn_t *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    double* alpha;
+    const double* alpha;
     const double* A;
     int64_t lda;
     const double* B;
     int64_t ldb;
-    double* beta;
-    double* C;
+    const double* beta;
+    double C;
     int64_t ldc;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -40049,13 +37056,13 @@ int handle_cublasDgemm_v2_64(conn_t *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, 8) < 0 ||
+        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
         rpc_read(conn, &A, sizeof(const double*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &B, sizeof(const double*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, 8) < 0 ||
-        rpc_read(conn, &C, sizeof(double*)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &C, sizeof(double)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         false)
         goto ERROR_0;
@@ -40063,9 +37070,10 @@ int handle_cublasDgemm_v2_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemm_v2_64(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+    scuda_intercept_result = cublasDgemm_v2_64(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(double)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -40083,15 +37091,13 @@ int handle_cublasCgemm_v2(conn_t *conn)
     int m;
     int n;
     int k;
-    cuComplex* alpha_null_check;
-    cuComplex alpha;
+    const cuComplex* alpha;
     const cuComplex* A;
     int lda;
     const cuComplex* B;
     int ldb;
-    cuComplex* beta_null_check;
-    cuComplex beta;
-    cuComplex* C;
+    const cuComplex* beta;
+    cuComplex C;
     int ldc;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -40102,15 +37108,13 @@ int handle_cublasCgemm_v2(conn_t *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
+        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuComplex*)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         false)
         goto ERROR_0;
@@ -40118,9 +37122,10 @@ int handle_cublasCgemm_v2(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemm_v2(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+    scuda_intercept_result = cublasCgemm_v2(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -40138,15 +37143,13 @@ int handle_cublasCgemm_v2_64(conn_t *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    cuComplex* alpha_null_check;
-    cuComplex alpha;
+    const cuComplex* alpha;
     const cuComplex* A;
     int64_t lda;
     const cuComplex* B;
     int64_t ldb;
-    cuComplex* beta_null_check;
-    cuComplex beta;
-    cuComplex* C;
+    const cuComplex* beta;
+    cuComplex C;
     int64_t ldc;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -40157,15 +37160,13 @@ int handle_cublasCgemm_v2_64(conn_t *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
+        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuComplex*)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         false)
         goto ERROR_0;
@@ -40173,9 +37174,10 @@ int handle_cublasCgemm_v2_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemm_v2_64(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+    scuda_intercept_result = cublasCgemm_v2_64(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -40297,15 +37299,13 @@ int handle_cublasZgemm_v2(conn_t *conn)
     int m;
     int n;
     int k;
-    cuDoubleComplex* alpha_null_check;
-    cuDoubleComplex alpha;
+    const cuDoubleComplex* alpha;
     const cuDoubleComplex* A;
     int lda;
     const cuDoubleComplex* B;
     int ldb;
-    cuDoubleComplex* beta_null_check;
-    cuDoubleComplex beta;
-    cuDoubleComplex* C;
+    const cuDoubleComplex* beta;
+    cuDoubleComplex C;
     int ldc;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -40316,15 +37316,13 @@ int handle_cublasZgemm_v2(conn_t *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
+        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         false)
         goto ERROR_0;
@@ -40332,9 +37330,10 @@ int handle_cublasZgemm_v2(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgemm_v2(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+    scuda_intercept_result = cublasZgemm_v2(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -40352,15 +37351,13 @@ int handle_cublasZgemm_v2_64(conn_t *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    cuDoubleComplex* alpha_null_check;
-    cuDoubleComplex alpha;
+    const cuDoubleComplex* alpha;
     const cuDoubleComplex* A;
     int64_t lda;
     const cuDoubleComplex* B;
     int64_t ldb;
-    cuDoubleComplex* beta_null_check;
-    cuDoubleComplex beta;
-    cuDoubleComplex* C;
+    const cuDoubleComplex* beta;
+    cuDoubleComplex C;
     int64_t ldc;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -40371,15 +37368,13 @@ int handle_cublasZgemm_v2_64(conn_t *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
+        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         false)
         goto ERROR_0;
@@ -40387,9 +37382,10 @@ int handle_cublasZgemm_v2_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgemm_v2_64(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+    scuda_intercept_result = cublasZgemm_v2_64(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -40598,136 +37594,6 @@ int handle_cublasHgemm_64(conn_t *conn)
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(__half)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasGemmEx(conn_t *conn)
-{
-    cublasHandle_t handle;
-    cublasOperation_t transa;
-    cublasOperation_t transb;
-    int m;
-    int n;
-    int k;
-    void* alpha_null_check;
-    void* alpha;
-    void* A = (void*)malloc(sizeof(void*));
-    cudaDataType Atype;
-    int lda;
-    void* B = (void*)malloc(sizeof(void*));
-    cudaDataType Btype;
-    int ldb;
-    void* beta_null_check;
-    void* beta;
-    void* C = (void*)malloc(sizeof(void*));
-    cudaDataType Ctype;
-    int ldc;
-    cublasComputeType_t computeType;
-    cublasGemmAlgo_t algo;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
-        rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
-        rpc_read(conn, &m, sizeof(int)) < 0 ||
-        rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const void*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const void*)) < 0) ||
-        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &Atype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &B, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &Btype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const void*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const void*)) < 0) ||
-        rpc_read(conn, &C, sizeof(void*)) < 0 ||
-        rpc_read(conn, &Ctype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &ldc, sizeof(int)) < 0 ||
-        rpc_read(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
-        rpc_read(conn, &algo, sizeof(cublasGemmAlgo_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasGemmEx(handle, transa, transb, m, n, k, &alpha, A, Atype, lda, B, Btype, ldb, &beta, C, Ctype, ldc, computeType, algo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cublasGemmEx_64(conn_t *conn)
-{
-    cublasHandle_t handle;
-    cublasOperation_t transa;
-    cublasOperation_t transb;
-    int64_t m;
-    int64_t n;
-    int64_t k;
-    void* alpha_null_check;
-    void* alpha;
-    void* A = (void*)malloc(sizeof(void*));
-    cudaDataType Atype;
-    int64_t lda;
-    void* B = (void*)malloc(sizeof(void*));
-    cudaDataType Btype;
-    int64_t ldb;
-    void* beta_null_check;
-    void* beta;
-    void* C = (void*)malloc(sizeof(void*));
-    cudaDataType Ctype;
-    int64_t ldc;
-    cublasComputeType_t computeType;
-    cublasGemmAlgo_t algo;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
-        rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
-        rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const void*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const void*)) < 0) ||
-        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &Atype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &B, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &Btype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const void*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const void*)) < 0) ||
-        rpc_read(conn, &C, sizeof(void*)) < 0 ||
-        rpc_read(conn, &Ctype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
-        rpc_read(conn, &algo, sizeof(cublasGemmAlgo_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasGemmEx_64(handle, transa, transb, m, n, k, &alpha, A, Atype, lda, B, Btype, ldb, &beta, C, Ctype, ldc, computeType, algo);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -43898,14 +40764,12 @@ int handle_cublasHgemmBatched(conn_t *conn)
     int m;
     int n;
     int k;
-    __half* alpha_null_check;
-    __half alpha;
+    const __half* alpha;
     const __half** Aarray = nullptr;
     int lda;
     const __half** Barray = nullptr;
     int ldb;
-    __half* beta_null_check;
-    __half beta;
+    const __half* beta;
     __half** Carray = nullptr;
     int ldc;
     int request_id;
@@ -43918,14 +40782,12 @@ int handle_cublasHgemmBatched(conn_t *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha_null_check, sizeof(const __half*)) < 0 ||
-        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const __half)) < 0) ||
+        rpc_read(conn, &alpha, sizeof(const __half*)) < 0 ||
         rpc_read(conn, &Aarray, sizeof(const __half* const*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const __half* const*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta_null_check, sizeof(const __half*)) < 0 ||
-        (beta_null_check && rpc_read(conn, &beta, sizeof(const __half)) < 0) ||
+        rpc_read(conn, &beta, sizeof(const __half*)) < 0 ||
         rpc_read(conn, &Carray, sizeof(__half* const*)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         false)
@@ -43934,7 +40796,7 @@ int handle_cublasHgemmBatched(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasHgemmBatched(handle, transa, transb, m, n, k, &alpha, Aarray, lda, Barray, ldb, &beta, Carray, ldc, batchCount);
+    scuda_intercept_result = cublasHgemmBatched(handle, transa, transb, m, n, k, alpha, Aarray, lda, Barray, ldb, beta, Carray, ldc, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
@@ -44643,7 +41505,7 @@ int handle_cublasHgemmStridedBatched_64(conn_t *conn)
     long long int strideB;
     __half* beta_null_check;
     __half beta;
-    __half* C;
+    __half C;
     int64_t ldc;
     long long int strideC;
     int64_t batchCount;
@@ -44666,7 +41528,7 @@ int handle_cublasHgemmStridedBatched_64(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const __half*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const __half)) < 0) ||
-        rpc_read(conn, &C, sizeof(__half*)) < 0 ||
+        rpc_read(conn, &C, sizeof(__half)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int64_t)) < 0 ||
@@ -44676,9 +41538,10 @@ int handle_cublasHgemmStridedBatched_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasHgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasHgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(__half)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -44706,7 +41569,7 @@ int handle_cublasSgemmStridedBatched(conn_t *conn)
     long long int strideB;
     float* beta_null_check;
     float beta;
-    float* C;
+    float C;
     int ldc;
     long long int strideC;
     int batchCount;
@@ -44729,7 +41592,7 @@ int handle_cublasSgemmStridedBatched(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
-        rpc_read(conn, &C, sizeof(float*)) < 0 ||
+        rpc_read(conn, &C, sizeof(float)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int)) < 0 ||
@@ -44739,9 +41602,10 @@ int handle_cublasSgemmStridedBatched(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasSgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(float)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -44769,7 +41633,7 @@ int handle_cublasSgemmStridedBatched_64(conn_t *conn)
     long long int strideB;
     float* beta_null_check;
     float beta;
-    float* C;
+    float C;
     int64_t ldc;
     long long int strideC;
     int64_t batchCount;
@@ -44792,7 +41656,7 @@ int handle_cublasSgemmStridedBatched_64(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
-        rpc_read(conn, &C, sizeof(float*)) < 0 ||
+        rpc_read(conn, &C, sizeof(float)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int64_t)) < 0 ||
@@ -44802,9 +41666,10 @@ int handle_cublasSgemmStridedBatched_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasSgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(float)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -44832,7 +41697,7 @@ int handle_cublasDgemmStridedBatched(conn_t *conn)
     long long int strideB;
     double* beta_null_check;
     double beta;
-    double* C;
+    double C;
     int ldc;
     long long int strideC;
     int batchCount;
@@ -44855,7 +41720,7 @@ int handle_cublasDgemmStridedBatched(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
-        rpc_read(conn, &C, sizeof(double*)) < 0 ||
+        rpc_read(conn, &C, sizeof(double)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int)) < 0 ||
@@ -44865,9 +41730,10 @@ int handle_cublasDgemmStridedBatched(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasDgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(double)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -44895,7 +41761,7 @@ int handle_cublasDgemmStridedBatched_64(conn_t *conn)
     long long int strideB;
     double* beta_null_check;
     double beta;
-    double* C;
+    double C;
     int64_t ldc;
     long long int strideC;
     int64_t batchCount;
@@ -44918,7 +41784,7 @@ int handle_cublasDgemmStridedBatched_64(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
-        rpc_read(conn, &C, sizeof(double*)) < 0 ||
+        rpc_read(conn, &C, sizeof(double)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int64_t)) < 0 ||
@@ -44928,9 +41794,10 @@ int handle_cublasDgemmStridedBatched_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasDgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(double)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -44958,7 +41825,7 @@ int handle_cublasCgemmStridedBatched(conn_t *conn)
     long long int strideB;
     cuComplex* beta_null_check;
     cuComplex beta;
-    cuComplex* C;
+    cuComplex C;
     int ldc;
     long long int strideC;
     int batchCount;
@@ -44981,7 +41848,7 @@ int handle_cublasCgemmStridedBatched(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int)) < 0 ||
@@ -44991,9 +41858,10 @@ int handle_cublasCgemmStridedBatched(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasCgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -45021,7 +41889,7 @@ int handle_cublasCgemmStridedBatched_64(conn_t *conn)
     long long int strideB;
     cuComplex* beta_null_check;
     cuComplex beta;
-    cuComplex* C;
+    cuComplex C;
     int64_t ldc;
     long long int strideC;
     int64_t batchCount;
@@ -45044,7 +41912,7 @@ int handle_cublasCgemmStridedBatched_64(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int64_t)) < 0 ||
@@ -45054,9 +41922,10 @@ int handle_cublasCgemmStridedBatched_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasCgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -45084,7 +41953,7 @@ int handle_cublasCgemm3mStridedBatched(conn_t *conn)
     long long int strideB;
     cuComplex* beta_null_check;
     cuComplex beta;
-    cuComplex* C;
+    cuComplex C;
     int ldc;
     long long int strideC;
     int batchCount;
@@ -45107,7 +41976,7 @@ int handle_cublasCgemm3mStridedBatched(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int)) < 0 ||
@@ -45117,9 +41986,10 @@ int handle_cublasCgemm3mStridedBatched(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemm3mStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasCgemm3mStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -45147,7 +42017,7 @@ int handle_cublasCgemm3mStridedBatched_64(conn_t *conn)
     long long int strideB;
     cuComplex* beta_null_check;
     cuComplex beta;
-    cuComplex* C;
+    cuComplex C;
     int64_t ldc;
     long long int strideC;
     int64_t batchCount;
@@ -45170,7 +42040,7 @@ int handle_cublasCgemm3mStridedBatched_64(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int64_t)) < 0 ||
@@ -45180,9 +42050,10 @@ int handle_cublasCgemm3mStridedBatched_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemm3mStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasCgemm3mStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -45210,7 +42081,7 @@ int handle_cublasZgemmStridedBatched(conn_t *conn)
     long long int strideB;
     cuDoubleComplex* beta_null_check;
     cuDoubleComplex beta;
-    cuDoubleComplex* C;
+    cuDoubleComplex C;
     int ldc;
     long long int strideC;
     int batchCount;
@@ -45233,7 +42104,7 @@ int handle_cublasZgemmStridedBatched(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int)) < 0 ||
@@ -45243,9 +42114,10 @@ int handle_cublasZgemmStridedBatched(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasZgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -45273,7 +42145,7 @@ int handle_cublasZgemmStridedBatched_64(conn_t *conn)
     long long int strideB;
     cuDoubleComplex* beta_null_check;
     cuDoubleComplex beta;
-    cuDoubleComplex* C;
+    cuDoubleComplex C;
     int64_t ldc;
     long long int strideC;
     int64_t batchCount;
@@ -45296,7 +42168,7 @@ int handle_cublasZgemmStridedBatched_64(conn_t *conn)
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
-        rpc_read(conn, &C, sizeof(cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
         rpc_read(conn, &batchCount, sizeof(int64_t)) < 0 ||
@@ -45306,9 +42178,10 @@ int handle_cublasZgemmStridedBatched_64(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasZgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
@@ -45318,59 +42191,53 @@ ERROR_0:
     return -1;
 }
 
-int handle_cublasGemmStridedBatchedEx(conn_t *conn)
+int handle_cublasGemmBatchedEx_64(conn_t *conn)
 {
+    int64_t batchCount;
     cublasHandle_t handle;
     cublasOperation_t transa;
     cublasOperation_t transb;
-    int m;
-    int n;
-    int k;
+    int64_t m;
+    int64_t n;
+    int64_t k;
     void* alpha_null_check;
     void* alpha;
-    void* A = (void*)malloc(sizeof(void*));
+    const void** Aarray = nullptr;
     cudaDataType Atype;
-    int lda;
-    long long int strideA;
-    void* B = (void*)malloc(sizeof(void*));
+    int64_t lda;
+    const void** Barray = nullptr;
     cudaDataType Btype;
-    int ldb;
-    long long int strideB;
+    int64_t ldb;
     void* beta_null_check;
     void* beta;
-    void* C = (void*)malloc(sizeof(void*));
+    void** Carray = nullptr;
     cudaDataType Ctype;
-    int ldc;
-    long long int strideC;
-    int batchCount;
+    int64_t ldc;
     cublasComputeType_t computeType;
     cublasGemmAlgo_t algo;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
+        rpc_read(conn, &batchCount, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
-        rpc_read(conn, &m, sizeof(int)) < 0 ||
-        rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &k, sizeof(int)) < 0 ||
+        rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &alpha_null_check, sizeof(const void*)) < 0 ||
         (alpha_null_check && rpc_read(conn, &alpha, sizeof(const void*)) < 0) ||
-        rpc_read(conn, &A, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &Aarray, sizeof(const void* const*)) < 0 ||
         rpc_read(conn, &Atype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &B, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
+        rpc_read(conn, &Barray, sizeof(const void* const*)) < 0 ||
         rpc_read(conn, &Btype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
+        rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &beta_null_check, sizeof(const void*)) < 0 ||
         (beta_null_check && rpc_read(conn, &beta, sizeof(const void*)) < 0) ||
-        rpc_read(conn, &C, sizeof(void*)) < 0 ||
+        rpc_read(conn, &Carray, sizeof(void* const*)) < 0 ||
         rpc_read(conn, &Ctype, sizeof(cudaDataType)) < 0 ||
-        rpc_read(conn, &ldc, sizeof(int)) < 0 ||
-        rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &batchCount, sizeof(int)) < 0 ||
+        rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
         rpc_read(conn, &algo, sizeof(cublasGemmAlgo_t)) < 0 ||
         false)
@@ -45379,7 +42246,7 @@ int handle_cublasGemmStridedBatchedEx(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasGemmStridedBatchedEx(handle, transa, transb, m, n, k, &alpha, A, Atype, lda, strideA, B, Btype, ldb, strideB, &beta, C, Ctype, ldc, strideC, batchCount, computeType, algo);
+    scuda_intercept_result = cublasGemmBatchedEx_64(handle, transa, transb, m, n, k, &alpha, Aarray, Atype, lda, Barray, Btype, ldb, &beta, Carray, Ctype, ldc, batchCount, computeType, algo);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
@@ -48298,7 +45165,7 @@ int handle_cudnnBackendSetAttribute(conn_t *conn)
     cudnnBackendAttributeName_t attributeName;
     cudnnBackendAttributeType_t attributeType;
     int64_t elementCount;
-    void* arrayOfElements = (void*)malloc(sizeof(void*));
+    const void* arrayOfElements;
     int request_id;
     cudnnStatus_t scuda_intercept_result;
     if (
@@ -49475,11 +46342,11 @@ int handle_cudnnActivationForward(conn_t *conn)
     void* alpha_null_check;
     void* alpha;
     cudnnTensorDescriptor_t xDesc;
-    void* x = (void*)malloc(sizeof(void*));
+    const void* x;
     void* beta_null_check;
     void* beta;
     cudnnTensorDescriptor_t yDesc;
-    void* y = (void*)malloc(sizeof(void*));
+    void* y;
     int request_id;
     cudnnStatus_t scuda_intercept_result;
     if (
@@ -50401,6 +47268,31 @@ ERROR_0:
     return -1;
 }
 
+int handle_cublasLtDisableCpuInstructionsSetMask(conn_t *conn)
+{
+    unsigned mask;
+    int request_id;
+    unsigned scuda_intercept_result;
+    if (
+        rpc_read(conn, &mask, sizeof(unsigned)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasLtDisableCpuInstructionsSetMask(mask);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(unsigned)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cublasLtMatrixLayoutInit_internal(conn_t *conn)
 {
     cublasLtMatrixLayout_t matLayout;
@@ -50479,6 +47371,7 @@ int handle_cublasLtMatrixLayoutCreate(conn_t *conn)
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
+        rpc_read(conn, &matLayout, sizeof(cublasLtMatrixLayout_t)) < 0 ||
         rpc_read(conn, &type, sizeof(cudaDataType)) < 0 ||
         rpc_read(conn, &rows, sizeof(uint64_t)) < 0 ||
         rpc_read(conn, &cols, sizeof(uint64_t)) < 0 ||
@@ -50531,7 +47424,7 @@ int handle_cublasLtMatrixLayoutSetAttribute(conn_t *conn)
 {
     cublasLtMatrixLayout_t matLayout;
     cublasLtMatrixLayoutAttribute_t attr;
-    void* buf = (void*)malloc(sizeof(void*));
+    const void* buf;
     size_t sizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -50626,6 +47519,7 @@ int handle_cublasLtMatmulDescCreate(conn_t *conn)
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
+        rpc_read(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
         rpc_read(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
         rpc_read(conn, &scaleType, sizeof(cudaDataType_t)) < 0 ||
         false)
@@ -50661,6 +47555,37 @@ int handle_cublasLtMatmulDescDestroy(conn_t *conn)
     if (request_id < 0)
         goto ERROR_0;
     scuda_intercept_result = cublasLtMatmulDescDestroy(matmulDesc);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cublasLtMatmulDescSetAttribute(conn_t *conn)
+{
+    cublasLtMatmulDesc_t matmulDesc;
+    cublasLtMatmulDescAttributes_t attr;
+    const void* buf;
+    size_t sizeInBytes;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &matmulDesc, sizeof(cublasLtMatmulDesc_t)) < 0 ||
+        rpc_read(conn, &attr, sizeof(cublasLtMatmulDescAttributes_t)) < 0 ||
+        rpc_read(conn, &buf, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasLtMatmulDescSetAttribute(matmulDesc, attr, buf, sizeInBytes);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
@@ -50785,7 +47710,7 @@ int handle_cublasLtMatrixTransformDescSetAttribute(conn_t *conn)
 {
     cublasLtMatrixTransformDesc_t transformDesc;
     cublasLtMatrixTransformDescAttributes_t attr;
-    void* buf = (void*)malloc(sizeof(void*));
+    const void* buf;
     size_t sizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -50915,6 +47840,37 @@ ERROR_0:
     return -1;
 }
 
+int handle_cublasLtMatmulPreferenceSetAttribute(conn_t *conn)
+{
+    cublasLtMatmulPreference_t pref;
+    cublasLtMatmulPreferenceAttributes_t attr;
+    const void* buf;
+    size_t sizeInBytes;
+    int request_id;
+    cublasStatus_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &pref, sizeof(cublasLtMatmulPreference_t)) < 0 ||
+        rpc_read(conn, &attr, sizeof(cublasLtMatmulPreferenceAttributes_t)) < 0 ||
+        rpc_read(conn, &buf, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &sizeInBytes, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cublasLtMatmulPreferenceSetAttribute(pref, attr, buf, sizeInBytes);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cublasLtMatmulAlgoInit(conn_t *conn)
 {
     cublasLtHandle_t lightHandle;
@@ -51001,7 +47957,7 @@ int handle_cublasLtMatmulAlgoConfigSetAttribute(conn_t *conn)
 {
     cublasLtMatmulAlgo_t algo;
     cublasLtMatmulAlgoConfigAttributes_t attr;
-    void* buf = (void*)malloc(sizeof(void*));
+    const void* buf;
     size_t sizeInBytes;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -51194,8 +48150,6 @@ static RequestHandler opHandlers[] = {
     handle_nvmlSystemGetCudaDriverVersion,
     handle_nvmlSystemGetCudaDriverVersion_v2,
     handle_nvmlSystemGetProcessName,
-    handle_nvmlSystemGetHicVersion,
-    handle_nvmlSystemGetTopologyGpuSet,
     handle_nvmlUnitGetCount,
     handle_nvmlUnitGetHandleByIndex,
     handle_nvmlUnitGetUnitInfo,
@@ -51204,6 +48158,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlUnitGetTemperature,
     handle_nvmlUnitGetFanSpeedInfo,
     handle_nvmlUnitGetDevices,
+    handle_nvmlSystemGetHicVersion,
     handle_nvmlDeviceGetCount_v2,
     handle_nvmlDeviceGetAttributes_v2,
     handle_nvmlDeviceGetHandleByIndex_v2,
@@ -51214,32 +48169,28 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetBrand,
     handle_nvmlDeviceGetIndex,
     handle_nvmlDeviceGetSerial,
-    handle_nvmlDeviceGetModuleId,
-    handle_nvmlDeviceGetC2cModeInfoV,
     handle_nvmlDeviceGetMemoryAffinity,
     handle_nvmlDeviceGetCpuAffinityWithinScope,
     handle_nvmlDeviceGetCpuAffinity,
     handle_nvmlDeviceSetCpuAffinity,
     handle_nvmlDeviceClearCpuAffinity,
-    handle_nvmlDeviceGetNumaNodeId,
     handle_nvmlDeviceGetTopologyCommonAncestor,
     handle_nvmlDeviceGetTopologyNearestGpus,
+    handle_nvmlSystemGetTopologyGpuSet,
     handle_nvmlDeviceGetP2PStatus,
     handle_nvmlDeviceGetUUID,
+    handle_nvmlVgpuInstanceGetMdevUUID,
     handle_nvmlDeviceGetMinorNumber,
     handle_nvmlDeviceGetBoardPartNumber,
     handle_nvmlDeviceGetInforomVersion,
     handle_nvmlDeviceGetInforomImageVersion,
     handle_nvmlDeviceGetInforomConfigurationChecksum,
     handle_nvmlDeviceValidateInforom,
-    handle_nvmlDeviceGetLastBBXFlushTime,
     handle_nvmlDeviceGetDisplayMode,
     handle_nvmlDeviceGetDisplayActive,
     handle_nvmlDeviceGetPersistenceMode,
-    handle_nvmlDeviceGetPciInfoExt,
     handle_nvmlDeviceGetPciInfo_v3,
     handle_nvmlDeviceGetMaxPcieLinkGeneration,
-    handle_nvmlDeviceGetGpuMaxPcieLinkGeneration,
     handle_nvmlDeviceGetMaxPcieLinkWidth,
     handle_nvmlDeviceGetCurrPcieLinkGeneration,
     handle_nvmlDeviceGetCurrPcieLinkWidth,
@@ -51247,35 +48198,25 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetPcieReplayCounter,
     handle_nvmlDeviceGetClockInfo,
     handle_nvmlDeviceGetMaxClockInfo,
-    handle_nvmlDeviceGetGpcClkVfOffset,
     handle_nvmlDeviceGetApplicationsClock,
     handle_nvmlDeviceGetDefaultApplicationsClock,
+    handle_nvmlDeviceResetApplicationsClocks,
     handle_nvmlDeviceGetClock,
     handle_nvmlDeviceGetMaxCustomerBoostClock,
     handle_nvmlDeviceGetSupportedMemoryClocks,
     handle_nvmlDeviceGetSupportedGraphicsClocks,
     handle_nvmlDeviceGetAutoBoostedClocksEnabled,
+    handle_nvmlDeviceSetAutoBoostedClocksEnabled,
+    handle_nvmlDeviceSetDefaultAutoBoostedClocksEnabled,
     handle_nvmlDeviceGetFanSpeed,
     handle_nvmlDeviceGetFanSpeed_v2,
-    handle_nvmlDeviceGetTargetFanSpeed,
-    handle_nvmlDeviceGetMinMaxFanSpeed,
-    handle_nvmlDeviceGetFanControlPolicy_v2,
-    handle_nvmlDeviceGetNumFans,
     handle_nvmlDeviceGetTemperature,
     handle_nvmlDeviceGetTemperatureThreshold,
-    handle_nvmlDeviceGetThermalSettings,
+    handle_nvmlDeviceSetTemperatureThreshold,
     handle_nvmlDeviceGetPerformanceState,
-    handle_nvmlDeviceGetCurrentClocksEventReasons,
     handle_nvmlDeviceGetCurrentClocksThrottleReasons,
-    handle_nvmlDeviceGetSupportedClocksEventReasons,
     handle_nvmlDeviceGetSupportedClocksThrottleReasons,
     handle_nvmlDeviceGetPowerState,
-    handle_nvmlDeviceGetDynamicPstatesInfo,
-    handle_nvmlDeviceGetMemClkVfOffset,
-    handle_nvmlDeviceGetMinMaxClockOfPState,
-    handle_nvmlDeviceGetSupportedPerformanceStates,
-    handle_nvmlDeviceGetGpcClkMinMaxVfOffset,
-    handle_nvmlDeviceGetMemClkMinMaxVfOffset,
     handle_nvmlDeviceGetPowerManagementMode,
     handle_nvmlDeviceGetPowerManagementLimit,
     handle_nvmlDeviceGetPowerManagementLimitConstraints,
@@ -51285,11 +48226,9 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetEnforcedPowerLimit,
     handle_nvmlDeviceGetGpuOperationMode,
     handle_nvmlDeviceGetMemoryInfo,
-    handle_nvmlDeviceGetMemoryInfo_v2,
     handle_nvmlDeviceGetComputeMode,
     handle_nvmlDeviceGetCudaComputeCapability,
     handle_nvmlDeviceGetEccMode,
-    handle_nvmlDeviceGetDefaultEccMode,
     handle_nvmlDeviceGetBoardId,
     handle_nvmlDeviceGetMultiGpuBoard,
     handle_nvmlDeviceGetTotalEccErrors,
@@ -51301,43 +48240,20 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetEncoderStats,
     handle_nvmlDeviceGetEncoderSessions,
     handle_nvmlDeviceGetDecoderUtilization,
-    handle_nvmlDeviceGetJpgUtilization,
-    handle_nvmlDeviceGetOfaUtilization,
     handle_nvmlDeviceGetFBCStats,
     handle_nvmlDeviceGetFBCSessions,
     handle_nvmlDeviceGetDriverModel,
     handle_nvmlDeviceGetVbiosVersion,
     handle_nvmlDeviceGetBridgeChipInfo,
-    handle_nvmlDeviceGetComputeRunningProcesses_v3,
-    handle_nvmlDeviceGetGraphicsRunningProcesses_v3,
-    handle_nvmlDeviceGetMPSComputeRunningProcesses_v3,
-    handle_nvmlDeviceGetRunningProcessDetailList,
+    handle_nvmlDeviceGetComputeRunningProcesses_v2,
+    handle_nvmlDeviceGetGraphicsRunningProcesses_v2,
+    handle_nvmlDeviceGetMPSComputeRunningProcesses_v2,
     handle_nvmlDeviceOnSameBoard,
     handle_nvmlDeviceGetAPIRestriction,
     handle_nvmlDeviceGetSamples,
     handle_nvmlDeviceGetBAR1MemoryInfo,
     handle_nvmlDeviceGetViolationStatus,
     handle_nvmlDeviceGetIrqNum,
-    handle_nvmlDeviceGetNumGpuCores,
-    handle_nvmlDeviceGetPowerSource,
-    handle_nvmlDeviceGetMemoryBusWidth,
-    handle_nvmlDeviceGetPcieLinkMaxSpeed,
-    handle_nvmlDeviceGetPcieSpeed,
-    handle_nvmlDeviceGetAdaptiveClockInfoStatus,
-    handle_nvmlDeviceGetBusType,
-    handle_nvmlDeviceGetGpuFabricInfo,
-    handle_nvmlDeviceGetGpuFabricInfoV,
-    handle_nvmlSystemGetConfComputeCapabilities,
-    handle_nvmlSystemGetConfComputeState,
-    handle_nvmlDeviceGetConfComputeMemSizeInfo,
-    handle_nvmlSystemGetConfComputeGpusReadyState,
-    handle_nvmlDeviceGetConfComputeProtectedMemoryUsage,
-    handle_nvmlDeviceGetConfComputeGpuCertificate,
-    handle_nvmlDeviceGetConfComputeGpuAttestationReport,
-    handle_nvmlSystemGetConfComputeKeyRotationThresholdInfo,
-    handle_nvmlSystemGetConfComputeSettings,
-    handle_nvmlDeviceGetGspFirmwareVersion,
-    handle_nvmlDeviceGetGspFirmwareMode,
     handle_nvmlDeviceGetAccountingMode,
     handle_nvmlDeviceGetAccountingStats,
     handle_nvmlDeviceGetAccountingPids,
@@ -51348,9 +48264,6 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetRemappedRows,
     handle_nvmlDeviceGetRowRemapperHistogram,
     handle_nvmlDeviceGetArchitecture,
-    handle_nvmlDeviceGetClkMonStatus,
-    handle_nvmlDeviceGetProcessUtilization,
-    handle_nvmlDeviceGetProcessesUtilizationInfo,
     handle_nvmlUnitSetLedState,
     handle_nvmlDeviceSetPersistenceMode,
     handle_nvmlDeviceSetComputeMode,
@@ -51362,21 +48275,10 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceSetMemoryLockedClocks,
     handle_nvmlDeviceResetMemoryLockedClocks,
     handle_nvmlDeviceSetApplicationsClocks,
-    handle_nvmlDeviceResetApplicationsClocks,
-    handle_nvmlDeviceSetAutoBoostedClocksEnabled,
-    handle_nvmlDeviceSetDefaultAutoBoostedClocksEnabled,
-    handle_nvmlDeviceSetDefaultFanSpeed_v2,
-    handle_nvmlDeviceSetFanControlPolicy,
-    handle_nvmlDeviceSetTemperatureThreshold,
+    handle_nvmlDeviceGetClkMonStatus,
     handle_nvmlDeviceSetPowerManagementLimit,
     handle_nvmlDeviceSetGpuOperationMode,
     handle_nvmlDeviceSetAPIRestriction,
-    handle_nvmlDeviceSetFanSpeed_v2,
-    handle_nvmlDeviceSetGpcClkVfOffset,
-    handle_nvmlDeviceSetMemClkVfOffset,
-    handle_nvmlDeviceSetConfComputeUnprotectedMemSize,
-    handle_nvmlSystemSetConfComputeGpusReadyState,
-    handle_nvmlSystemSetConfComputeKeyRotationThresholdInfo,
     handle_nvmlDeviceSetAccountingMode,
     handle_nvmlDeviceClearAccountingPids,
     handle_nvmlDeviceGetNvLinkState,
@@ -51401,21 +48303,11 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceRemoveGpu_v2,
     handle_nvmlDeviceDiscoverGpus,
     handle_nvmlDeviceGetFieldValues,
-    handle_nvmlDeviceClearFieldValues,
     handle_nvmlDeviceGetVirtualizationMode,
     handle_nvmlDeviceGetHostVgpuMode,
     handle_nvmlDeviceSetVirtualizationMode,
-    handle_nvmlDeviceGetVgpuHeterogeneousMode,
-    handle_nvmlDeviceSetVgpuHeterogeneousMode,
-    handle_nvmlVgpuInstanceGetPlacementId,
-    handle_nvmlDeviceGetVgpuTypeSupportedPlacements,
-    handle_nvmlDeviceGetVgpuTypeCreatablePlacements,
-    handle_nvmlVgpuTypeGetGspHeapSize,
-    handle_nvmlVgpuTypeGetFbReservation,
-    handle_nvmlDeviceSetVgpuCapabilities,
     handle_nvmlDeviceGetGridLicensableFeatures_v4,
-    handle_nvmlGetVgpuDriverCapabilities,
-    handle_nvmlDeviceGetVgpuCapabilities,
+    handle_nvmlDeviceGetProcessUtilization,
     handle_nvmlDeviceGetSupportedVgpus,
     handle_nvmlDeviceGetCreatableVgpus,
     handle_nvmlVgpuTypeGetClass,
@@ -51445,34 +48337,23 @@ static RequestHandler opHandlers[] = {
     handle_nvmlVgpuInstanceGetFBCStats,
     handle_nvmlVgpuInstanceGetFBCSessions,
     handle_nvmlVgpuInstanceGetGpuInstanceId,
-    handle_nvmlVgpuInstanceGetGpuPciId,
-    handle_nvmlVgpuTypeGetCapabilities,
-    handle_nvmlVgpuInstanceGetMdevUUID,
     handle_nvmlVgpuInstanceGetMetadata,
     handle_nvmlDeviceGetVgpuMetadata,
     handle_nvmlGetVgpuCompatibility,
     handle_nvmlDeviceGetPgpuMetadataString,
-    handle_nvmlDeviceGetVgpuSchedulerLog,
-    handle_nvmlDeviceGetVgpuSchedulerState,
-    handle_nvmlDeviceGetVgpuSchedulerCapabilities,
-    handle_nvmlDeviceSetVgpuSchedulerState,
     handle_nvmlGetVgpuVersion,
     handle_nvmlSetVgpuVersion,
     handle_nvmlDeviceGetVgpuUtilization,
-    handle_nvmlDeviceGetVgpuInstancesUtilizationInfo,
     handle_nvmlDeviceGetVgpuProcessUtilization,
-    handle_nvmlDeviceGetVgpuProcessesUtilizationInfo,
     handle_nvmlVgpuInstanceGetAccountingMode,
     handle_nvmlVgpuInstanceGetAccountingPids,
     handle_nvmlVgpuInstanceGetAccountingStats,
     handle_nvmlVgpuInstanceClearAccountingPids,
-    handle_nvmlVgpuInstanceGetLicenseInfo_v2,
     handle_nvmlGetExcludedDeviceCount,
     handle_nvmlGetExcludedDeviceInfoByIndex,
     handle_nvmlDeviceSetMigMode,
     handle_nvmlDeviceGetMigMode,
     handle_nvmlDeviceGetGpuInstanceProfileInfo,
-    handle_nvmlDeviceGetGpuInstanceProfileInfoV,
     handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2,
     handle_nvmlDeviceGetGpuInstanceRemainingCapacity,
     handle_nvmlDeviceCreateGpuInstance,
@@ -51482,11 +48363,8 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetGpuInstanceById,
     handle_nvmlGpuInstanceGetInfo,
     handle_nvmlGpuInstanceGetComputeInstanceProfileInfo,
-    handle_nvmlGpuInstanceGetComputeInstanceProfileInfoV,
     handle_nvmlGpuInstanceGetComputeInstanceRemainingCapacity,
-    handle_nvmlGpuInstanceGetComputeInstancePossiblePlacements,
     handle_nvmlGpuInstanceCreateComputeInstance,
-    nullptr,
     handle_nvmlComputeInstanceDestroy,
     handle_nvmlGpuInstanceGetComputeInstances,
     handle_nvmlGpuInstanceGetComputeInstanceById,
@@ -51497,19 +48375,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetMaxMigDeviceCount,
     handle_nvmlDeviceGetMigDeviceHandleByIndex,
     handle_nvmlDeviceGetDeviceHandleFromMigDeviceHandle,
-    handle_nvmlGpmMetricsGet,
-    handle_nvmlGpmSampleFree,
-    handle_nvmlGpmSampleAlloc,
-    handle_nvmlGpmSampleGet,
-    handle_nvmlGpmMigSampleGet,
-    handle_nvmlGpmQueryDeviceSupport,
-    handle_nvmlGpmQueryIfStreamingEnabled,
-    handle_nvmlGpmSetStreamingEnabled,
-    handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold,
-    handle_nvmlSystemSetNvlinkBwMode,
-    handle_nvmlSystemGetNvlinkBwMode,
-    handle_nvmlDeviceSetPowerManagementLimit_v2,
-    handle_nvmlDeviceGetSramEccErrorStatus,
+    handle_nvmlDeviceGetBusType,
     nullptr,
     nullptr,
     handle_cuInit,
@@ -52015,7 +48881,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaFreeHost,
     handle_cudaFreeArray,
     handle_cudaFreeMipmappedArray,
-    nullptr,
+    handle_cudaHostAlloc,
     handle_cudaMalloc3D,
     handle_cudaMalloc3DArray,
     handle_cudaMallocMipmappedArray,
@@ -52165,10 +49031,10 @@ static RequestHandler opHandlers[] = {
     handle_cudaUserObjectRelease,
     handle_cudaGraphRetainUserObject,
     handle_cudaGraphReleaseUserObject,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    handle_cudaGraphAddNode,
+    handle_cudaGraphAddNode_v2,
+    handle_cudaGraphNodeSetParams,
+    handle_cudaGraphExecNodeSetParams,
     handle_cudaGraphConditionalHandleCreate,
     handle_cudaGetDriverEntryPoint,
     handle_cudaGetExportTable,
@@ -52179,7 +49045,6 @@ static RequestHandler opHandlers[] = {
     handle_cublasGetVersion_v2,
     handle_cublasGetProperty,
     nullptr,
-    handle_cublasSetWorkspace_v2,
     handle_cublasSetStream_v2,
     handle_cublasGetStream_v2,
     handle_cublasGetPointerMode_v2,
@@ -52195,19 +49060,6 @@ static RequestHandler opHandlers[] = {
     handle_cublasLoggerConfigure,
     handle_cublasSetLoggerCallback,
     handle_cublasGetLoggerCallback,
-    handle_cublasSetVector,
-    handle_cublasSetVector_64,
-    handle_cublasGetVector,
-    handle_cublasGetVector_64,
-    handle_cublasSetMatrix,
-    handle_cublasSetMatrix_64,
-    handle_cublasGetMatrix,
-    handle_cublasGetMatrix_64,
-    handle_cublasSetVectorAsync,
-    handle_cublasSetVectorAsync_64,
-    handle_cublasGetVectorAsync,
-    handle_cublasGetVectorAsync_64,
-    handle_cublasSetMatrixAsync,
     nullptr,
     handle_cublasSnrm2_v2,
     handle_cublasSnrm2_v2_64,
@@ -52491,8 +49343,6 @@ static RequestHandler opHandlers[] = {
     handle_cublasZgemm3m_64,
     handle_cublasHgemm,
     handle_cublasHgemm_64,
-    handle_cublasGemmEx,
-    handle_cublasGemmEx_64,
     handle_cublasSsyrk_v2,
     handle_cublasSsyrk_v2_64,
     handle_cublasDsyrk_v2,
@@ -52581,9 +49431,8 @@ static RequestHandler opHandlers[] = {
     handle_cublasCgemm3mStridedBatched_64,
     handle_cublasZgemmStridedBatched,
     handle_cublasZgemmStridedBatched_64,
-    handle_cublasGemmBatchedEx,
+    nullptr,
     handle_cublasGemmBatchedEx_64,
-    handle_cublasGemmStridedBatchedEx,
     handle_cublasSgeam,
     handle_cublasSgeam_64,
     handle_cublasDgeam,
@@ -52725,8 +49574,7 @@ static RequestHandler opHandlers[] = {
     handle_cublasLtGetProperty,
     handle_cublasLtHeuristicsCacheGetCapacity,
     handle_cublasLtHeuristicsCacheSetCapacity,
-    nullptr,
-    handle_cublasLtMatmul,
+    handle_cublasLtDisableCpuInstructionsSetMask,
     handle_cublasLtMatrixLayoutInit_internal,
     handle_cublasLtMatrixLayoutInit,
     handle_cublasLtMatrixLayoutCreate,
@@ -52737,7 +49585,6 @@ static RequestHandler opHandlers[] = {
     handle_cublasLtMatmulDescCreate,
     handle_cublasLtMatmulDescDestroy,
     handle_cublasLtMatmulDescSetAttribute,
-    handle_cublasLtMatmulDescGetAttribute,
     handle_cublasLtMatrixTransformDescInit_internal,
     handle_cublasLtMatrixTransformDescInit,
     handle_cublasLtMatrixTransformDescCreate,
@@ -52748,7 +49595,6 @@ static RequestHandler opHandlers[] = {
     handle_cublasLtMatmulPreferenceCreate,
     handle_cublasLtMatmulPreferenceDestroy,
     handle_cublasLtMatmulPreferenceSetAttribute,
-    handle_cublasLtMatmulAlgoGetHeuristic,
     handle_cublasLtMatmulAlgoInit,
     handle_cublasLtMatmulAlgoCheck,
     handle_cublasLtMatmulAlgoConfigSetAttribute,
